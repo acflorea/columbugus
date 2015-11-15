@@ -1,6 +1,4 @@
-import org.apache.spark.SparkContext
-import org.apache.spark.SparkContext._
-import org.apache.spark.SparkConf
+import org.apache.spark.{SparkConf, SparkContext}
 
 /**
   * Created by aflorea on 15.11.2015.
