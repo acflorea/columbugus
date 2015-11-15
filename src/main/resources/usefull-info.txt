@@ -1,0 +1,23 @@
+Eclipse
+
+- Bug database dump taken from http://2011.msrconf.org/msr-challenge.html
+(http://2011.msrconf.org/msrc2011/eclipsebugs.sql.gz)
+
+Problems
+- Only the userIds are present in the export, no other informations about the users can be found in the export
+(Use requests like:
+https://bugs.eclipse.org/bugs/buglist.cgi?
+columnlist=product%2Ccomponent%2Cassigned_to%2Cassigned_to_realname%2Cbug_status%2Cresolution%2Cshort_desc%2Cchangeddate&
+f1=bug_id&f2=bug_id&limit=0&list_id=13182555&o1=greaterthan&o2=lessthaneq&query_format=advanced
+&v1=0&v2=10000&ctype=csv&human=1
+...
+https://bugs.eclipse.org/bugs/buglist.cgi?
+columnlist=product%2Ccomponent%2Cassigned_to%2Cassigned_to_realname%2Cbug_status%2Cresolution%2Cshort_desc%2Cchangeddate&
+f1=bug_id&f2=bug_id&limit=0&list_id=13182555&o1=greaterthan&o2=lessthaneq&query_format=advanced
+&v1=10000&v2=20000&ctype=csv&human=1
+...
+https://bugs.eclipse.org/bugs/buglist.cgi?
+columnlist=product%2Ccomponent%2Cassigned_to%2Cassigned_to_realname%2Cbug_status%2Cresolution%2Cshort_desc%2Cchangeddate&
+f1=bug_id&f2=bug_id&limit=0&list_id=13182555&o1=greaterthan&o2=lessthaneq&query_format=advanced
+&v1=20000&v2=30000&ctype=csv&human=1
+)

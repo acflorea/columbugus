@@ -1,0 +1,505 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                      "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <title>Changes made to bug 212539</title>
+
+
+<link rel="Top" href="https://bugzilla.mozilla.org/">
+
+  
+
+  
+
+
+  
+    <link rel="Show" title="Dependency Tree"
+          href="showdependencytree.cgi?id=212539&amp;hide_resolved=1">
+      <link rel="Show" title="Dependency Graph"
+            href="showdependencygraph.cgi?id=212539">
+
+      <link rel="Show" title="Votes (7)"
+            href="votes.cgi?action=show_bug&amp;bug_id=212539">
+
+      <link rel="Show" title="Bug Activity"
+            href="show_activity.cgi?id=212539">
+      <link rel="Show" title="Printer-Friendly Version"
+            href="show_bug.cgi?format=multiple&amp;id=212539">
+
+
+    
+
+    
+      <link href="skins/standard/global.css"
+            rel="stylesheet"
+            type="text/css">
+    <!--[if lte IE 7]>
+      
+      <link href="skins/standard/IE-fixes.css"
+            rel="stylesheet"
+            type="text/css">
+    <![endif]-->
+
+    
+        <link href="skins/standard/global.css"
+              rel="stylesheet"
+              title="Classic"
+              type="text/css">
+      <!--[if lte IE 7]>
+      
+        <link href="skins/standard/IE-fixes.css"
+              rel="stylesheet"
+              title="Classic"
+              type="text/css">
+      <![endif]-->
+
+    
+        
+            <link href="skins/contrib/BMO/global.css"
+                  rel="alternate stylesheet"
+                  title="BMO"
+                  type="text/css">
+        <!--[if lte IE 7]>
+          
+          <link href="skins/contrib/BMO/IE-fixes.css"
+                rel="alternate stylesheet"
+                title="BMO"
+                type="text/css">
+        <![endif]-->
+        
+            <link href="skins/contrib/Dusk/global.css"
+                  rel="alternate stylesheet"
+                  title="Dusk"
+                  type="text/css">
+        <!--[if lte IE 7]>
+          
+          <link href="skins/contrib/Dusk/IE-fixes.css"
+                rel="alternate stylesheet"
+                title="Dusk"
+                type="text/css">
+        <![endif]-->
+
+    
+
+    
+        <link href="skins/custom/global.css" rel="stylesheet" type="text/css">
+    <!--[if lte IE 7]>
+      
+      <link href="skins/custom/IE-fixes.css"
+            rel="stylesheet"
+            type="text/css">
+    <![endif]-->
+
+    <script src="js/yui/yahoo-dom-event.js" type="text/javascript"></script>
+    <script src="js/global.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    <!--
+        YAHOO.namespace('bugzilla');
+        if (YAHOO.env.ua.gecko) {
+            YAHOO.util.Event._simpleRemove(window, "unload", 
+                                           YAHOO.util.Event._unload);
+        }
+        
+        var BUGZILLA = {
+            param: {
+                cookiepath: '\/'
+            }
+        };
+    // -->
+    </script>
+
+
+    
+
+
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+                       title="Bugzilla@Mozilla" href="./search_plugin.cgi">
+    <link rel="shortcut icon" href="skins/custom/images/bugzilla.png" >
+  </head>
+
+
+
+  <body onload=""
+        class="bugzilla-mozilla-org">
+
+
+
+<div id="header">
+<div id="banner">
+  </div>
+
+<table border="0" cellspacing="0" cellpadding="0" id="titles">
+<tr>
+    <td id="title">
+      <p>Bugzilla@Mozilla &ndash; Activity log for bug 212539: Customize Toolbar dialog too small to fit contents</p>
+    </td>
+
+
+</tr>
+</table>
+<ul class="links">
+  <li><a href="./">Home</a></li>
+  <li><span class="separator">| </span><a href="enter_bug.cgi">New</a></li>
+  <li><span class="separator">| </span><a href="query.cgi">Search</a></li>
+
+  <li class="form">
+    <span class="separator">| </span>
+    <form action="buglist.cgi" method="get"
+        onsubmit="if (this.quicksearch.value == '')
+                  { alert('Please enter one or more search terms first.');
+                    return false; } return true;">
+    <input class="txt" type="text" id="quicksearch_top" name="quicksearch">
+    <input class="btn" type="submit" value="Find" id="find_top"></form></li>
+
+  <li><span class="separator">| </span><a href="report.cgi">Reports</a></li>
+
+  <li>
+      <span class="separator">| </span>
+        <a href="request.cgi">Requests</a></li>
+
+
+  
+    
+      <li id="new_account_container_top">
+        <span class="separator">| </span>
+        <a href="createaccount.cgi">New&nbsp;Account</a>
+      </li>
+
+    <li id="mini_login_container_top">
+  <span class="separator">| </span>
+  <a id="login_link_top" href="?GoAheadAndLogIn=1"
+     onclick="return show_mini_login_form('_top')">Log In</a>
+  <form action="https://bugzilla.mozilla.org/show_activity.cgi?id=212539" method="POST" 
+        class="mini_login bz_default_hidden"
+        id="mini_login_top"
+        onsubmit="return check_mini_login_fields( '_top' );"
+  >
+    <input id="Bugzilla_login_top" 
+           class="bz_login"
+           name="Bugzilla_login"
+           onfocus="mini_login_on_focus('_top')"
+    >
+    <input class="bz_password" 
+           id="Bugzilla_password_top" 
+           name="Bugzilla_password"
+           type="password"
+    >
+    <input class="bz_password bz_default_hidden bz_mini_login_help" type="text" 
+           id="Bugzilla_password_dummy_top" value="password"
+           onfocus="mini_login_on_focus('_top')"
+    >
+      <input type="checkbox" id="Bugzilla_remember_top" 
+             name="Bugzilla_remember" value="on" class="bz_remember"
+                 checked>
+      <label for="Bugzilla_remember_top">Remember</label>
+    <input type="submit" name="GoAheadAndLogIn" value="Log in" 
+            id="log_in_top">
+    <script type="text/javascript">
+      mini_login_constants = {
+          "login" : "e-mail address",
+          "warning" : "You must set the e-mail address and password before logging in."
+      };
+      
+      if (YAHOO.env.ua.gecko || YAHOO.env.ua.ie || YAHOO.env.ua.opera) {
+          YAHOO.util.Event.onDOMReady(function() {
+              init_mini_login_form('_top');
+          });
+      }
+      else {
+          YAHOO.util.Event.on(window, 'load', function () {
+              window.setTimeout(function() {
+                  init_mini_login_form('_top');
+              }, 200);
+          });
+    }
+    </script>
+    <a href="#" onclick="return hide_mini_login_form('_top')">[x]</a>
+  </form>
+</li>
+<li id="forgot_container_top">
+  <span class="separator">| </span>
+  <a id="forgot_link_top" href="?GoAheadAndLogIn=1#forgot"
+     onclick="return show_forgot_form('_top')">Forgot Password</a>
+  <form action="token.cgi" method="post" id="forgot_form_top"
+        class="mini_forgot bz_default_hidden">
+    <label>Login: <input type="text" name="loginname" size="20"></label>
+    <input id="forgot_button_top" value="Reset Password" 
+           type="submit">
+    <input type="hidden" name="a" value="reqpw">
+    <a href="#" onclick="return hide_forgot_form('_top')">[x]</a>
+  </form>
+</li>
+</ul>
+
+</div>
+
+<div id="bugzilla-body">
+<!--
+<div style="border: 2px dotted green;">
+<p style="padding: 5px; margin: 0px; color: green; text-align: center;">Nothing to see here.</p>
+</div>
+<br>
+-->
+
+<p><a href="show_bug.cgi?id=212539" title="NEW - Customize Toolbar dialog too small to fit contents">Back to bug 212539</a>
+</p>
+<table border cellpadding="4">
+    <tr>
+      <th>Who</th>
+      <th>When</th>
+      <th>What</th>
+      <th>Removed</th>
+      <th>Added</th>
+    </tr>
+
+      <tr>
+        <td rowspan="1" valign="top">bzbarsky
+        </td>
+        <td rowspan="1" valign="top">2003-07-12 15:58:19 PDT
+        </td>
+            <td>
+              Depends on
+            </td><td>
+  </td><td><a href="show_bug.cgi?id=171454" title="NEW - [cust] Customize toolbar windows is incorrectly sized when using larger fonts">171454</a>
+  </td>
+      </tr>
+      <tr>
+        <td rowspan="1" valign="top">holyspirit
+        </td>
+        <td rowspan="1" valign="top">2003-07-13 01:35:53 PDT
+        </td>
+            <td>
+              CC
+            </td><td>
+  </td><td>holyspirit
+  </td>
+      </tr>
+      <tr>
+        <td rowspan="1" valign="top">bugzilla
+        </td>
+        <td rowspan="1" valign="top">2003-07-26 10:00:53 PDT
+        </td>
+            <td>
+              CC
+            </td><td>
+  </td><td>08.6422421
+  </td>
+      </tr>
+      <tr>
+        <td rowspan="1" valign="top">bugzilla
+        </td>
+        <td rowspan="1" valign="top">2003-07-28 05:23:01 PDT
+        </td>
+            <td>
+              QA Contact
+            </td><td>asa
+  </td><td>bugzilla
+  </td>
+      </tr>
+      <tr>
+        <td rowspan="1" valign="top">matti
+        </td>
+        <td rowspan="1" valign="top">2003-09-07 22:43:57 PDT
+        </td>
+            <td>
+              OS
+            </td><td>Linux
+  </td><td>All
+  </td>
+      </tr>
+      <tr>
+        <td rowspan="1" valign="top">berkut.bugzilla
+        </td>
+        <td rowspan="1" valign="top">2003-10-16 22:43:57 PDT
+        </td>
+            <td>
+              CC
+            </td><td>
+  </td><td>berkut1337
+  </td>
+      </tr>
+      <tr>
+        <td rowspan="1" valign="top">twalker
+        </td>
+        <td rowspan="1" valign="top">2004-10-28 15:04:05 PDT
+        </td>
+            <td>
+              CC
+            </td><td>
+  </td><td>jbn
+  </td>
+      </tr>
+      <tr>
+        <td rowspan="1" valign="top">bzbarsky
+        </td>
+        <td rowspan="1" valign="top">2004-10-28 15:14:56 PDT
+        </td>
+            <td>
+              Assignee
+            </td><td>hyatt
+  </td><td>bugs
+  </td>
+      </tr>
+      <tr>
+        <td rowspan="2" valign="top">bugzilla
+        </td>
+        <td rowspan="2" valign="top">2005-08-20 03:45:35 PDT
+        </td>
+            <td>
+              Assignee
+            </td><td>bugs
+  </td><td>nobody
+  </td></tr><tr>
+            <td>
+              QA Contact
+            </td><td>bugzilla
+  </td><td>toolbars
+  </td>
+      </tr>
+      <tr>
+        <td rowspan="1" valign="top">gavin.sharp
+        </td>
+        <td rowspan="1" valign="top">2006-05-07 20:17:16 PDT
+        </td>
+            <td>
+              CC
+            </td><td>
+  </td><td>gavin.sharp
+  </td>
+      </tr>
+      <tr>
+        <td rowspan="1" valign="top">carlos_alen
+        </td>
+        <td rowspan="1" valign="top">2010-05-12 01:50:24 PDT
+        </td>
+            <td>
+              CC
+            </td><td>
+  </td><td>carlos_alen
+  </td>
+      </tr>
+  </table>
+
+  <p><a href="show_bug.cgi?id=212539" title="NEW - Customize Toolbar dialog too small to fit contents">Back to bug 212539</a>
+  </p>
+</div>
+
+
+
+<div id="footer">
+  <div class="intro"></div>
+
+
+
+
+<ul id="useful-links">
+  <li id="links-actions"><ul class="links">
+  <li><a href="./">Home</a></li>
+  <li><span class="separator">| </span><a href="enter_bug.cgi">New</a></li>
+  <li><span class="separator">| </span><a href="query.cgi">Search</a></li>
+
+  <li class="form">
+    <span class="separator">| </span>
+    <form action="buglist.cgi" method="get"
+        onsubmit="if (this.quicksearch.value == '')
+                  { alert('Please enter one or more search terms first.');
+                    return false; } return true;">
+    <input class="txt" type="text" id="quicksearch_bottom" name="quicksearch">
+    <input class="btn" type="submit" value="Find" id="find_bottom"></form></li>
+
+  <li><span class="separator">| </span><a href="report.cgi">Reports</a></li>
+
+  <li>
+      <span class="separator">| </span>
+        <a href="request.cgi">Requests</a></li>
+
+
+  
+    
+      <li id="new_account_container_bottom">
+        <span class="separator">| </span>
+        <a href="createaccount.cgi">New&nbsp;Account</a>
+      </li>
+
+    <li id="mini_login_container_bottom">
+  <span class="separator">| </span>
+  <a id="login_link_bottom" href="?GoAheadAndLogIn=1"
+     onclick="return show_mini_login_form('_bottom')">Log In</a>
+  <form action="https://bugzilla.mozilla.org/show_activity.cgi?id=212539" method="POST" 
+        class="mini_login bz_default_hidden"
+        id="mini_login_bottom"
+        onsubmit="return check_mini_login_fields( '_bottom' );"
+  >
+    <input id="Bugzilla_login_bottom" 
+           class="bz_login"
+           name="Bugzilla_login"
+           onfocus="mini_login_on_focus('_bottom')"
+    >
+    <input class="bz_password" 
+           id="Bugzilla_password_bottom" 
+           name="Bugzilla_password"
+           type="password"
+    >
+    <input class="bz_password bz_default_hidden bz_mini_login_help" type="text" 
+           id="Bugzilla_password_dummy_bottom" value="password"
+           onfocus="mini_login_on_focus('_bottom')"
+    >
+      <input type="checkbox" id="Bugzilla_remember_bottom" 
+             name="Bugzilla_remember" value="on" class="bz_remember"
+                 checked>
+      <label for="Bugzilla_remember_bottom">Remember</label>
+    <input type="submit" name="GoAheadAndLogIn" value="Log in" 
+            id="log_in_bottom">
+    <script type="text/javascript">
+      mini_login_constants = {
+          "login" : "e-mail address",
+          "warning" : "You must set the e-mail address and password before logging in."
+      };
+      
+      if (YAHOO.env.ua.gecko || YAHOO.env.ua.ie || YAHOO.env.ua.opera) {
+          YAHOO.util.Event.onDOMReady(function() {
+              init_mini_login_form('_bottom');
+          });
+      }
+      else {
+          YAHOO.util.Event.on(window, 'load', function () {
+              window.setTimeout(function() {
+                  init_mini_login_form('_bottom');
+              }, 200);
+          });
+    }
+    </script>
+    <a href="#" onclick="return hide_mini_login_form('_bottom')">[x]</a>
+  </form>
+</li>
+<li id="forgot_container_bottom">
+  <span class="separator">| </span>
+  <a id="forgot_link_bottom" href="?GoAheadAndLogIn=1#forgot"
+     onclick="return show_forgot_form('_bottom')">Forgot Password</a>
+  <form action="token.cgi" method="post" id="forgot_form_bottom"
+        class="mini_forgot bz_default_hidden">
+    <label>Login: <input type="text" name="loginname" size="20"></label>
+    <input id="forgot_button_bottom" value="Reset Password" 
+           type="submit">
+    <input type="hidden" name="a" value="reqpw">
+    <a href="#" onclick="return hide_forgot_form('_bottom')">[x]</a>
+  </form>
+</li>
+</ul>
+  </li>
+
+  
+    
+
+  
+
+
+  
+</ul>
+
+  <div class="outro"></div>
+</div>
+
+</body>
+</html>

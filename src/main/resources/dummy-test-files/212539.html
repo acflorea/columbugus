@@ -1,0 +1,1781 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                      "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <title>Bug 212539 &ndash; Customize Toolbar dialog too small to fit contents</title>
+
+
+<link rel="Top" href="https://bugzilla.mozilla.org/">
+
+  
+
+  
+
+
+  
+    <link rel="Show" title="Dependency Tree"
+          href="showdependencytree.cgi?id=212539&amp;hide_resolved=1">
+      <link rel="Show" title="Dependency Graph"
+            href="showdependencygraph.cgi?id=212539">
+
+      <link rel="Show" title="Votes (7)"
+            href="votes.cgi?action=show_bug&amp;bug_id=212539">
+
+      <link rel="Show" title="Bug Activity"
+            href="show_activity.cgi?id=212539">
+      <link rel="Show" title="Printer-Friendly Version"
+            href="show_bug.cgi?format=multiple&amp;id=212539">
+
+
+    
+
+    
+      <link href="skins/standard/global.css"
+            rel="stylesheet"
+            type="text/css">
+      <link href="skins/standard/yui/calendar.css"
+            rel="stylesheet"
+            type="text/css">
+      <link href="skins/standard/show_bug.css"
+            rel="stylesheet"
+            type="text/css">
+      <link href="skins/standard/yui/autocomplete.css"
+            rel="stylesheet"
+            type="text/css">
+    <!--[if lte IE 7]>
+      
+      <link href="skins/standard/IE-fixes.css"
+            rel="stylesheet"
+            type="text/css">
+    <![endif]-->
+
+    
+        <link href="skins/standard/global.css"
+              rel="stylesheet"
+              title="Classic"
+              type="text/css">
+        <link href="skins/standard/yui/calendar.css"
+              rel="stylesheet"
+              title="Classic"
+              type="text/css">
+        <link href="skins/standard/show_bug.css"
+              rel="stylesheet"
+              title="Classic"
+              type="text/css">
+        <link href="skins/standard/yui/autocomplete.css"
+              rel="stylesheet"
+              title="Classic"
+              type="text/css">
+      <!--[if lte IE 7]>
+      
+        <link href="skins/standard/IE-fixes.css"
+              rel="stylesheet"
+              title="Classic"
+              type="text/css">
+      <![endif]-->
+
+    
+        
+            <link href="skins/contrib/BMO/global.css"
+                  rel="alternate stylesheet"
+                  title="BMO"
+                  type="text/css">
+            <link href="skins/contrib/BMO/yui/calendar.css"
+                  rel="alternate stylesheet"
+                  title="BMO"
+                  type="text/css">
+            <link href="skins/contrib/BMO/show_bug.css"
+                  rel="alternate stylesheet"
+                  title="BMO"
+                  type="text/css">
+            <link href="skins/contrib/BMO/yui/autocomplete.css"
+                  rel="alternate stylesheet"
+                  title="BMO"
+                  type="text/css">
+        <!--[if lte IE 7]>
+          
+          <link href="skins/contrib/BMO/IE-fixes.css"
+                rel="alternate stylesheet"
+                title="BMO"
+                type="text/css">
+        <![endif]-->
+        
+            <link href="skins/contrib/Dusk/global.css"
+                  rel="alternate stylesheet"
+                  title="Dusk"
+                  type="text/css">
+            <link href="skins/contrib/Dusk/yui/calendar.css"
+                  rel="alternate stylesheet"
+                  title="Dusk"
+                  type="text/css">
+            <link href="skins/contrib/Dusk/show_bug.css"
+                  rel="alternate stylesheet"
+                  title="Dusk"
+                  type="text/css">
+            <link href="skins/contrib/Dusk/yui/autocomplete.css"
+                  rel="alternate stylesheet"
+                  title="Dusk"
+                  type="text/css">
+        <!--[if lte IE 7]>
+          
+          <link href="skins/contrib/Dusk/IE-fixes.css"
+                rel="alternate stylesheet"
+                title="Dusk"
+                type="text/css">
+        <![endif]-->
+
+    
+
+    
+        <link href="skins/custom/global.css" rel="stylesheet" type="text/css">
+        <link href="skins/custom/yui/calendar.css" rel="stylesheet" type="text/css">
+        <link href="skins/custom/show_bug.css" rel="stylesheet" type="text/css">
+        <link href="skins/custom/yui/autocomplete.css" rel="stylesheet" type="text/css">
+    <!--[if lte IE 7]>
+      
+      <link href="skins/custom/IE-fixes.css"
+            rel="stylesheet"
+            type="text/css">
+    <![endif]-->
+
+    <script src="js/yui/yahoo-dom-event.js" type="text/javascript"></script>
+    <script src="js/global.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    <!--
+        YAHOO.namespace('bugzilla');
+        if (YAHOO.env.ua.gecko) {
+            YAHOO.util.Event._simpleRemove(window, "unload", 
+                                           YAHOO.util.Event._unload);
+        }
+        
+        var BUGZILLA = {
+            param: {
+                cookiepath: '\/'
+            }
+        };
+    // -->
+    </script>
+
+        <script src="js/util.js" type="text/javascript"></script>
+        <script src="js/keyword-chooser.js" type="text/javascript"></script>
+        <script src="js/field.js" type="text/javascript"></script>
+        <script src="js/yui/yahoo-dom-event.js" type="text/javascript"></script>
+        <script src="js/yui/calendar.js" type="text/javascript"></script>
+        <script src="js/yui/autocomplete-min.js" type="text/javascript"></script>
+
+    
+
+
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+                       title="Bugzilla@Mozilla" href="./search_plugin.cgi">
+    <link rel="shortcut icon" href="skins/custom/images/bugzilla.png" >
+  </head>
+
+
+
+  <body onload=""
+        class="bugzilla-mozilla-org bz_bug bz_status_NEW bz_product_Firefox bz_component_Toolbars bz_bug_212539">
+
+
+
+<div id="header">
+<div id="banner">
+  </div>
+
+<table border="0" cellspacing="0" cellpadding="0" id="titles">
+<tr>
+    <td id="title">
+      <p>Bugzilla@Mozilla &ndash; Bug&nbsp;212539</p>
+    </td>
+
+    <td id="subtitle">
+      <p class="subheader">Customize Toolbar dialog too small to fit contents</p>
+    </td>
+
+    <td id="information">
+      <p class="header_addl_info">Last modified: 2010-05-12 01:50:24 PDT</p>
+    </td>
+</tr>
+</table>
+<ul class="links">
+  <li><a href="./">Home</a></li>
+  <li><span class="separator">| </span><a href="enter_bug.cgi">New</a></li>
+  <li><span class="separator">| </span><a href="query.cgi">Search</a></li>
+
+  <li class="form">
+    <span class="separator">| </span>
+    <form action="buglist.cgi" method="get"
+        onsubmit="if (this.quicksearch.value == '')
+                  { alert('Please enter one or more search terms first.');
+                    return false; } return true;">
+    <input class="txt" type="text" id="quicksearch_top" name="quicksearch">
+    <input class="btn" type="submit" value="Find" id="find_top"></form></li>
+
+  <li><span class="separator">| </span><a href="report.cgi">Reports</a></li>
+
+  <li>
+      <span class="separator">| </span>
+        <a href="request.cgi">Requests</a></li>
+
+
+  <li>
+        <span class="separator">| </span>
+        <a href="http://www.bugzilla.org/docs/3.4/en/html/bug_page.html" target="_blank">Help</a>
+      </li>
+    
+      <li id="new_account_container_top">
+        <span class="separator">| </span>
+        <a href="createaccount.cgi">New&nbsp;Account</a>
+      </li>
+
+    <li id="mini_login_container_top">
+  <span class="separator">| </span>
+  <a id="login_link_top" href="?GoAheadAndLogIn=1"
+     onclick="return show_mini_login_form('_top')">Log In</a>
+  <form action="https://bugzilla.mozilla.org/show_bug.cgi?id=212539" method="POST" 
+        class="mini_login bz_default_hidden"
+        id="mini_login_top"
+        onsubmit="return check_mini_login_fields( '_top' );"
+  >
+    <input id="Bugzilla_login_top" 
+           class="bz_login"
+           name="Bugzilla_login"
+           onfocus="mini_login_on_focus('_top')"
+    >
+    <input class="bz_password" 
+           id="Bugzilla_password_top" 
+           name="Bugzilla_password"
+           type="password"
+    >
+    <input class="bz_password bz_default_hidden bz_mini_login_help" type="text" 
+           id="Bugzilla_password_dummy_top" value="password"
+           onfocus="mini_login_on_focus('_top')"
+    >
+      <input type="checkbox" id="Bugzilla_remember_top" 
+             name="Bugzilla_remember" value="on" class="bz_remember"
+                 checked>
+      <label for="Bugzilla_remember_top">Remember</label>
+    <input type="submit" name="GoAheadAndLogIn" value="Log in" 
+            id="log_in_top">
+    <script type="text/javascript">
+      mini_login_constants = {
+          "login" : "e-mail address",
+          "warning" : "You must set the e-mail address and password before logging in."
+      };
+      
+      if (YAHOO.env.ua.gecko || YAHOO.env.ua.ie || YAHOO.env.ua.opera) {
+          YAHOO.util.Event.onDOMReady(function() {
+              init_mini_login_form('_top');
+          });
+      }
+      else {
+          YAHOO.util.Event.on(window, 'load', function () {
+              window.setTimeout(function() {
+                  init_mini_login_form('_top');
+              }, 200);
+          });
+    }
+    </script>
+    <a href="#" onclick="return hide_mini_login_form('_top')">[x]</a>
+  </form>
+</li>
+<li id="forgot_container_top">
+  <span class="separator">| </span>
+  <a id="forgot_link_top" href="?GoAheadAndLogIn=1#forgot"
+     onclick="return show_forgot_form('_top')">Forgot Password</a>
+  <form action="token.cgi" method="post" id="forgot_form_top"
+        class="mini_forgot bz_default_hidden">
+    <label>Login: <input type="text" name="loginname" size="20"></label>
+    <input id="forgot_button_top" value="Reset Password" 
+           type="submit">
+    <input type="hidden" name="a" value="reqpw">
+    <a href="#" onclick="return hide_forgot_form('_top')">[x]</a>
+  </form>
+</li>
+</ul>
+
+</div>
+
+<div id="bugzilla-body">
+<!--
+<div style="border: 2px dotted green;">
+<p style="padding: 5px; margin: 0px; color: green; text-align: center;">Nothing to see here.</p>
+</div>
+<br>
+-->
+
+<div class="navigation">
+  
+  
+  <i><font color="#777777">First</font></i>
+  <i><font color="#777777">Last</font></i>
+  <i><font color="#777777">Prev</font></i>
+  <i><font color="#777777">Next</font></i>
+  &nbsp;&nbsp;
+  <i><font color="#777777">No search results available</font></i>
+</div>
+<script type="text/javascript">
+  <!--
+  
+  /* Outputs a link to call replyToComment(); used to reduce HTML output */
+  function addReplyLink(id, real_id) {
+      /* XXX this should really be updated to use the DOM Core's
+       * createElement, but finding a container isn't trivial.
+       */
+        document.write('[<a href="#add_comment" onclick="replyToComment(' + 
+                       id + ',' + real_id + '); return false;">reply<' + '/a>]');
+  }
+
+  /* Adds the reply text to the `comment' textarea */
+  function replyToComment(id, real_id) {
+      var prefix = "(In reply to comment #" + id + ")\n";
+      var replytext = "";
+        /* pre id="comment_name_N" */
+        var text_elem = document.getElementById('comment_text_'+id);
+        var text = getText(text_elem);
+
+        /* make sure we split on all newlines -- IE or Moz use \r and \n
+         * respectively.
+         */
+        text = text.split(/\r|\n/);
+
+        for (var i=0; i < text.length; i++) {
+            replytext += "> " + text[i] + "\n"; 
+        }
+
+        replytext = prefix + replytext + "\n";
+
+
+      /* <textarea id="comment"> */
+      var textarea = document.getElementById('comment');
+      textarea.value += replytext;
+
+      textarea.focus();
+  }
+
+  if (typeof Node == 'undefined') {
+      /* MSIE doesn't define Node, so provide a compatibility object */
+      window.Node = {
+          TEXT_NODE: 3,
+          ENTITY_REFERENCE_NODE: 5
+      };
+  }
+
+  /* Concatenates all text from element's childNodes. This is used
+   * instead of innerHTML because we want the actual text (and
+   * innerText is non-standard).
+   */
+  function getText(element) {
+      var child, text = "";
+      for (var i=0; i < element.childNodes.length; i++) {
+          child = element.childNodes[i];
+          var type = child.nodeType;
+          if (type == Node.TEXT_NODE || type == Node.ENTITY_REFERENCE_NODE) {
+              text += child.nodeValue;
+          } else {
+              /* recurse into nodes of other types */
+              text += getText(child);
+          }
+      }
+      return text;
+  }
+
+
+  //-->
+  </script>
+
+<form name="changeform" method="post" action="process_bug.cgi">
+
+  <input type="hidden" name="delta_ts" value="2010-05-12 01:50:24">
+  <input type="hidden" name="longdesclength" value="12">
+  <input type="hidden" name="id" value="212539">
+  <input type="hidden" name="token" value="1277505963-e5a15d8ca28e59ada8ec029eda9530ee">
+<div class="bz_alias_short_desc_container edit_form">
+    <span class="last_comment_link">
+      <a href="#c11" 
+         accesskey="l"><b>L</b>ast Comment</a>
+    </span>
+     <a href="show_bug.cgi?id=212539"><b>Bug&nbsp;212539</b></a> -<span id="summary_alias_container" class="bz_default_hidden"> 
+      <span id="short_desc_nonedit_display">Customize Toolbar dialog too small to fit contents</span>
+     </span>
+  
+       
+    <div id="summary_alias_input">
+      <table id="summary"> 
+          <tr>
+            <td colspan="2">
+          </td>
+        </tr> 
+        
+        <tr>
+          <td>
+            <label accesskey="s" for="short_desc"><u>S</u>ummary</label>:
+          </td>
+          <td>Customize Toolbar dialog too small to fit contents
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <script type="text/javascript">
+    hideAliasAndSummary('Customize Toolbar dialog too small to fit contents', '');
+  </script>
+  <table class="edit_form">
+    <tr>
+      
+      <td id="bz_show_bug_column_1" class="bz_show_bug_column">     
+        <table class="bz_show_bug_column_table">
+          <tr>
+    <td class="field_label">
+      <b><a href="page.cgi?id=fields.html#status">Status</a></b>:
+    </td>
+    <td id="bz_field_status">
+      <span id="static_bug_status">NEW
+      </span>
+    </td>
+  </tr>
+    <tr>
+      <td class="field_label">
+        <label for="status_whiteboard" accesskey="w"><b><u>W</u>hiteboard</b></label>:
+      </td><td colspan="2">  
+  </td>
+    </tr>
+  
+    <tr>
+      <td class="field_label">
+        <label for="keywords" accesskey="k">
+          <b><a href="describekeywords.cgi"><u>K</u>eywords</a></b></label>:
+      </td><td colspan="2" class="yui-skin-sam">  
+  </td>
+    </tr>
+          <tr>
+    <td colspan="2" class="bz_section_spacer"></td>
+  </tr>
+          <tr>
+<th class="field_label "
+      id="field_label_product">
+        <a href="describecomponents.cgi">Product:</a>
+  </th>
+
+<td class="field_value "
+    id="field_container_product" >Firefox</td>
+    </tr>
+        
+    
+    
+    <tr>
+      <td class="field_label">
+        <label for="component" accesskey="m">
+          <b><a href="describecomponents.cgi?product=Firefox">
+            Co<u>m</u>ponent</a>:
+          </b>
+        </label>
+      </td><td>Toolbars
+  </td>
+    </tr>
+    <tr>
+      <td class="field_label">
+        <label for="version"><b>Version</b></label>:
+      </td>
+<td>unspecified
+  </td>
+    </tr>
+        
+    
+        
+    <tr>
+      <td class="field_label">
+        <label for="rep_platform" accesskey="h"><b>Platform</b></label>:
+      </td>
+      <td class="field_value">x86
+       All
+       <script type="text/javascript">
+         assignToDefaultOnChange(['product', 'component']);
+       </script>
+      </td>
+    </tr>
+          <tr>
+    <td colspan="2" class="bz_section_spacer"></td>
+  </tr>
+          
+          <tr>
+      <td class="field_label">
+        <label for="priority" accesskey="i">
+          <b><a href="page.cgi?id=fields.html#importance"><u>I</u>mportance</a></b></label>:
+      </td>
+      <td>--
+       normal
+          <span id="votes_container"> 
+            with 
+            <a href="votes.cgi?action=show_bug&amp;bug_id=212539">7 
+                votes</a>     
+          (<a href="votes.cgi?action=show_user&amp;bug_id=212539#vote_212539">vote</a>)
+          </span>  
+      </td>
+    </tr>
+
+      <tr>
+        <td class="field_label">
+          <label for="target_milestone"><b>
+              <a href="http://www.mozilla.org/projects/firefox/roadmap.html">
+            Target&nbsp;Milestone</a></b></label>:
+        </td><td>---
+  </td>
+      </tr>            
+          
+          <tr>
+      <td class="field_label">
+        <b><a href="page.cgi?id=fields.html#assigned_to">Assigned To</a></b>:
+      </td>
+      <td><span class="vcard"><span class="fn">Nobody; OK to take it and work on it</span>
+</span>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="field_label">
+        <label for="qa_contact" accesskey="q"><b><u>Q</u>A Contact</b></label>:
+      </td>
+      <td><span class="vcard">toolbars
+</span>
+      </td>
+    </tr>
+          <tr>
+    <td colspan="2" class="bz_section_spacer"></td>
+  </tr>
+          <tr>
+    <td class="field_label">
+      <label for="bug_file_loc" accesskey="u"><b>
+          <u>U</u>RL</b></label>:
+    </td>
+    <td>
+      <span id="bz_url_input_area">
+          <a href=""></a>
+      </span>
+    </td>
+  </tr>
+          <tr>
+    <td colspan="2" class="bz_section_spacer"></td>
+  </tr>
+          
+          <tr><th class="field_label">
+    <label for="dependson">Depends&nbsp;on</label>:
+  </th>
+  <td>    
+    <span id="dependson_input_area">
+    </span>
+    <a href="show_bug.cgi?id=171454" title="NEW - [cust] Customize toolbar windows is incorrectly sized when using larger fonts">171454</a> 
+  </td>
+  </tr>
+  
+  <tr><th class="field_label">
+    <label for="blocked" accesskey="b"><u>B</u>locks</label>:
+  </th>
+  <td>    
+    <span id="blocked_input_area">
+    </span>
+    
+  </td>
+  
+  <tr>
+    <th>&nbsp;</th>
+  
+    <td colspan="2" align="left" id="show_dependency_tree_or_graph">
+      Show dependency <a href="showdependencytree.cgi?id=212539&amp;hide_resolved=1">tree</a>
+  
+        /&nbsp;<a href="showdependencygraph.cgi?id=212539">graph</a>
+    </td>
+  </tr>
+
+        </table>
+      </td>
+      <td>
+        <div class="bz_column_spacer">&nbsp;</div>
+      </td>
+      
+      <td id="bz_show_bug_column_2" class="bz_show_bug_column">
+        <table cellpadding="3" cellspacing="1" class="bz_show_bug_column_table">
+        <tr>
+    <td class="field_label">
+      <b>Reported</b>:
+    </td>
+    <td>2003-07-12 15:44 PDT by <span class="vcard"><span class="fn">Boris Zbarsky (:bz)</span>
+</span>
+    </td>
+  </tr>
+  
+  <tr>
+    <td class="field_label">
+      <b> Modified</b>:
+    </td>
+    <td>2010-05-12 01:50 PDT 
+      (<a href="show_activity.cgi?id=212539">History</a>)
+    </td>
+  
+  </tr>
+         <tr>
+      <td class="field_label">
+        <label for="newcc" accesskey="a"><b>CC List</b>:</label>
+      </td>
+      <td>7 
+          users
+        <span id="cc_edit_area_showhide_container" class="bz_default_hidden">
+          (<a href="#" id="cc_edit_area_showhide">show</a>)
+        </span>
+        <div id="cc_edit_area">
+          <br>
+            <select id="cc" name="cc" multiple="multiple" size="5">
+                <option value="berkut.bugzilla">berkut.bugzilla</option>
+                <option value="bugzilla">bugzilla</option>
+                <option value="carlos_alen">carlos_alen</option>
+                <option value="gavin.sharp">gavin.sharp</option>
+                <option value="holyspirit">holyspirit</option>
+                <option value="jbn">jbn</option>
+                <option value="timwatt">timwatt</option>
+            </select>
+        </div>
+        <script type="text/javascript">
+          hideEditableField( 'cc_edit_area_showhide_container', 
+                             'cc_edit_area', 
+                             'cc_edit_area_showhide', 
+                             '', 
+                             '');  
+        </script>
+      </td>
+    </tr>
+         <tr>
+    <td colspan="2" class="bz_section_spacer"></td>
+  </tr>
+
+<tr><th class="field_label "
+      id="field_label_see_also">
+        <a href="page.cgi?id=fields.html#see_also">See Also:</a>
+  </th>
+
+<td class="field_value "
+    id="field_container_see_also" ></td>
+    </tr> 
+         <tr>
+    <td colspan="2" class="bz_section_spacer"></td>
+  </tr>
+<tr><th class="field_label "
+      id="field_label_cf_blocking_193">blocking1.9.3:
+  </th>
+
+<td class="field_value "
+    id="field_container_cf_blocking_193"  colspan="2">---</td>
+    </tr>
+    <tr><th class="field_label "
+      id="field_label_cf_status_193">status1.9.3:
+  </th>
+
+<td class="field_value "
+    id="field_container_cf_status_193"  colspan="2">---</td>
+    </tr>
+    <tr><th class="field_label "
+      id="field_label_cf_blocking_192">blocking1.9.2:
+  </th>
+
+<td class="field_value "
+    id="field_container_cf_blocking_192"  colspan="2">---</td>
+    </tr>
+    <tr><th class="field_label "
+      id="field_label_cf_status_192">status1.9.2:
+  </th>
+
+<td class="field_value "
+    id="field_container_cf_status_192"  colspan="2">---</td>
+    </tr>
+    <tr><th class="field_label "
+      id="field_label_cf_blocking_191">blocking1.9.1:
+  </th>
+
+<td class="field_value "
+    id="field_container_cf_blocking_191"  colspan="2">---</td>
+    </tr>
+    <tr><th class="field_label "
+      id="field_label_cf_status_191">status1.9.1:
+  </th>
+
+<td class="field_value "
+    id="field_container_cf_status_191"  colspan="2">---</td>
+    </tr>
+         
+
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3">
+          <hr id="bz_top_half_spacer">
+      </td>
+    </tr>
+  </table>
+
+  
+  
+
+
+<script type="text/javascript">
+<!--
+function toggle_display(link) {
+    var table = document.getElementById("attachment_table");
+    // Store current height for scrolling later
+    var originalHeight = table.offsetHeight;
+    var rows = YAHOO.util.Dom.getElementsByClassName(
+        'bz_tr_obsolete', 'tr', table);
+
+    for (var i = 0; i < rows.length; i++) {
+        bz_toggleClass(rows[i], 'bz_default_hidden');
+    }
+
+    if (YAHOO.util.Dom.hasClass(rows[0], 'bz_default_hidden')) {
+        link.innerHTML = "Show Obsolete";
+    }
+    else {
+        link.innerHTML = "Hide Obsolete";
+    }
+
+    var newHeight = table.offsetHeight;
+    // This scrolling makes the window appear to not move at all.
+    window.scrollBy(0, newHeight - originalHeight);
+
+    return false;
+}
+//-->
+</script>
+
+<br>
+<table id="attachment_table" cellspacing="0" cellpadding="4">
+  <tr>
+    <th colspan="3" align="left">
+      <a name="a0" id="a0">Attachments</a>
+    </th>
+  </tr>
+
+
+      <tr class="bz_contenttype_image&#X2F;png">
+        <td valign="top">
+            <a name="a1" href="attachment.cgi?id=127637"
+               title="View the content of the attachment">
+          <b>Full-desktop screenshot of the problem</b></a>
+
+          <span class="bz_attach_extra_info">
+              (69.39 KB,
+                image/png)
+
+            <br>
+            <a href="#attach_127637"
+               title="Go to the comment associated with the attachment">2003-07-12 15:46 PDT</a>,
+<span class="vcard"><span class="fn">Boris Zbarsky (:bz)</span>
+</span>
+          </span>
+        </td>
+
+          <td class="bz_attach_flags" valign="top">
+              <i>no flags</i>
+          </td>
+
+        <td valign="top">
+          <a href="attachment.cgi?id=127637&amp;action=edit">Details</a>
+        </td>
+      </tr>
+
+  <tr class="bz_attach_footer">
+    <td colspan="3">
+        <span class="bz_attach_view_hide">
+            <a href="attachment.cgi?bugid=212539&amp;action=viewall">View All</a>
+        </span>
+      <a href="attachment.cgi?bugid=212539&amp;action=enter">Add an attachment</a>
+      (proposed patch, testcase, etc.)
+    </td>
+  </tr>
+</table>
+<br>
+
+
+
+
+  <br>
+  <table cellpadding="1" cellspacing="1">
+    <tr>
+      <td id="comment_status_commit">
+        
+        <div id="comments"><script type="text/javascript">
+  <!--
+  function updateCommentPrivacy(checkbox, id) {
+    var comment_elem = document.getElementById('comment_text_'+id).parentNode;
+    if (checkbox.checked) {
+      if (!comment_elem.className.match('bz_private')) {
+        comment_elem.className = comment_elem.className.concat(' bz_private');
+      }
+    }
+    else {
+      comment_elem.className =
+        comment_elem.className.replace(/(\s*|^)bz_private(\s*|$)/, '$2');
+    }
+  }
+
+  /* The functions below expand and collapse comments  */
+
+  function toggle_comment_display(link, comment_id) {
+    var comment = document.getElementById('comment_text_' + comment_id);
+    var re = new RegExp(/\bcollapsed\b/);
+    if (comment.className.match(re))
+        expand_comment(link, comment);
+    else
+        collapse_comment(link, comment);
+  }
+
+  function toggle_all_comments(action) {
+    var num_comments = 12;
+
+    // If for some given ID the comment doesn't exist, this doesn't mean
+    // there are no more comments, but that the comment is private and
+    // the user is not allowed to view it.
+
+    for (var id = 0; id < num_comments; id++) {
+        var comment = document.getElementById('comment_text_' + id);
+        if (!comment)
+            continue;
+
+        var link = document.getElementById('comment_link_' + id);
+        if (action == 'collapse')
+            collapse_comment(link, comment);
+        else
+            expand_comment(link, comment);
+    }
+  }
+
+  function collapse_comment(link, comment) {
+    link.innerHTML = "[+]";
+    link.title = "Expand the comment.";
+    YAHOO.util.Dom.addClass(comment, 'collapsed');
+  }
+
+  function expand_comment(link, comment) {
+    link.innerHTML = "[-]";
+    link.title = "Collapse the comment";
+    YAHOO.util.Dom.removeClass(comment, 'collapsed');
+  }
+
+  /* This way, we are sure that browsers which do not support JS
+   * won't display this link  */
+
+  function addCollapseLink(count) {
+    document.write(' <a href="#" class="bz_collapse_comment"' +
+                   ' id="comment_link_' + count +
+                   '" onclick="toggle_comment_display(this, ' +  count +
+                   '); return false;" title="Collapse the comment.">[-]<\/a> ');
+  }
+  //-->
+  </script>
+
+
+
+
+
+
+
+
+
+
+<div class="bz_comment bz_first_comment">
+
+      <div class="bz_first_comment_head">
+
+
+
+        <span class="bz_comment_number">
+          <a name="c0" 
+             href="show_bug.cgi?id=212539#c0">Description</a>
+        </span>
+
+        <span class="bz_comment_user"><span class="vcard"><span class="fn">Boris Zbarsky (:bz)</span>
+</span>
+        </span>
+
+        <span class="bz_comment_user_images">
+        </span>
+
+        <span class="bz_comment_time">
+          2003-07-12 15:44:27 PDT
+        </span>
+      </div>
+
+
+
+<pre class="bz_comment_text" >BUILD: Mozilla Firebird 0.6 and Mozila Firebird July 10 Linux nightly.
+
+STEPS TO REPRODUCE:
+1)  Start browser with a clean install and clean profile
+2)  Open &quot;View&quot; menu
+3)  Select Toolbars &gt; Customize
+
+EXPECTED RESULTS: Able to see entire dialog, including button to dismiss the dialog
+
+ACTUAL RESULTS: Dialog is too small; content cut off
+
+POSSIBLY RELEVANT INFORMATION:
+1152x864 resolution, 100dpi (with 100dpi fonts default)
+No userChrome.css (clean profile)
+No GTK themes
+No changes made to default browser settings (default font sizes, theme, etc).
+XFree86-4.2.0-72 (RedHat 8)
+AfterStep 1.8.8 Window manager
+sirLurxalot saw this as well; he probably has somewhat different
+   resolution/fonts/X/WM</pre>
+    </div>
+  <div class="bz_comment">
+
+      <div class="bz_comment_head">
+
+
+
+        <span class="bz_comment_number">
+          <a name="c1" 
+             href="show_bug.cgi?id=212539#c1">Comment 1</a>
+        </span>
+
+        <span class="bz_comment_user"><span class="vcard"><span class="fn">Boris Zbarsky (:bz)</span>
+</span>
+        </span>
+
+        <span class="bz_comment_user_images">
+        </span>
+
+        <span class="bz_comment_time">
+          2003-07-12 15:46:30 PDT
+        </span>
+      </div>
+
+
+
+<pre class="bz_comment_text" ><span class=""><a href="attachment.cgi?id=127637" name="attach_127637" title="Full-desktop screenshot of the problem">Created an attachment (id=127637)</a> <a href="attachment.cgi?id=127637&amp;action=edit" title="Full-desktop screenshot of the problem">[details]</a></span>
+Full-desktop screenshot of the problem</pre>
+    </div>
+  <div class="bz_comment">
+
+      <div class="bz_comment_head">
+
+
+
+        <span class="bz_comment_number">
+          <a name="c2" 
+             href="show_bug.cgi?id=212539#c2">Comment 2</a>
+        </span>
+
+        <span class="bz_comment_user"><span class="vcard"><span class="fn">Boris Zbarsky (:bz)</span>
+</span>
+        </span>
+
+        <span class="bz_comment_user_images">
+        </span>
+
+        <span class="bz_comment_time">
+          2003-07-12 15:48:25 PDT
+        </span>
+      </div>
+
+
+
+<pre class="bz_comment_text" >One more note... in that screenshot it looks like the dialog is just sizing to
+the size of the browser window, but that's not the case.  Making the browser
+window reasonably-sized does not affect the size of that dialog.</pre>
+    </div>
+  <div class="bz_comment">
+
+      <div class="bz_comment_head">
+
+
+
+        <span class="bz_comment_number">
+          <a name="c3" 
+             href="show_bug.cgi?id=212539#c3">Comment 3</a>
+        </span>
+
+        <span class="bz_comment_user"><span class="vcard"><span class="fn">Boris Zbarsky (:bz)</span>
+</span>
+        </span>
+
+        <span class="bz_comment_user_images">
+        </span>
+
+        <span class="bz_comment_time">
+          2003-07-12 15:58:19 PDT
+        </span>
+      </div>
+
+
+
+<pre class="bz_comment_text" >This probably depends on <a href="show_bug.cgi?id=171454" title="NEW - [cust] Customize toolbar windows is incorrectly sized when using larger fonts">bug 171454</a>, though I'm not using large fonts by any
+means (so depending on how <a href="show_bug.cgi?id=171454" title="NEW - [cust] Customize toolbar windows is incorrectly sized when using larger fonts">bug 171454</a> is fixed it may or may not fix this bug).</pre>
+    </div>
+  <div class="bz_comment">
+
+      <div class="bz_comment_head">
+
+
+
+        <span class="bz_comment_number">
+          <a name="c4" 
+             href="show_bug.cgi?id=212539#c4">Comment 4</a>
+        </span>
+
+        <span class="bz_comment_user"><span class="vcard"><span class="fn">André Dahlqvist</span>
+</span>
+        </span>
+
+        <span class="bz_comment_user_images">
+        </span>
+
+        <span class="bz_comment_time">
+          2003-07-12 16:15:29 PDT
+        </span>
+      </div>
+
+
+
+<pre class="bz_comment_text" >Boris, I believe it's a dupe of 171454. My fonts aren't large either.</pre>
+    </div>
+  <div class="bz_comment">
+
+      <div class="bz_comment_head">
+
+
+
+        <span class="bz_comment_number">
+          <a name="c5" 
+             href="show_bug.cgi?id=212539#c5">Comment 5</a>
+        </span>
+
+        <span class="bz_comment_user"><span class="vcard"><span class="fn">Chu Alan &quot;sprite&quot;</span>
+</span>
+        </span>
+
+        <span class="bz_comment_user_images">
+        </span>
+
+        <span class="bz_comment_time">
+          2003-07-13 01:34:40 PDT
+        </span>
+      </div>
+
+
+
+<pre class="bz_comment_text" >brois, 
+my understanding to the problem is that when the row of button/checbox/selectbox
+is too long to fit in the window, it will push the content of the dialog beyond
+the border. In this sense, the problem arises when the font of a particular
+system makes that button/checkbox/selectbox bar too long to fit in the window,
+no matter it is default or customize font size or not (of course it is a much
+more serious problem when the bug is visible when user is using standard/default
+font size, but the underlying problem is still the same :))</pre>
+    </div>
+  <div class="bz_comment">
+
+      <div class="bz_comment_head">
+
+
+
+        <span class="bz_comment_number">
+          <a name="c6" 
+             href="show_bug.cgi?id=212539#c6">Comment 6</a>
+        </span>
+
+        <span class="bz_comment_user"><span class="vcard"><span class="fn">Boris Zbarsky (:bz)</span>
+</span>
+        </span>
+
+        <span class="bz_comment_user_images">
+        </span>
+
+        <span class="bz_comment_time">
+          2003-07-13 01:42:06 PDT
+        </span>
+      </div>
+
+
+
+<pre class="bz_comment_text" >Yes, I am quite aware of what is causing the problems, thank you. 
+Nevertheless,
+there are two main ways of fixing <a href="show_bug.cgi?id=171454" title="NEW - [cust] Customize toolbar windows is incorrectly sized when using larger fonts">bug 171454</a>:
+
+1)  Address the real problem (the fact that the dialog is sized in one set of
+    units and its contents in another).
+2)  Change the size of the fonts used in the dialog (eg by using style rules).
+
+Depending on which course of action is taken, this bug may or may not get
+fixed.
+
+In any case, I think further comments on this bug are superfluous till either
+<a href="show_bug.cgi?id=171454" title="NEW - [cust] Customize toolbar windows is incorrectly sized when using larger fonts">bug 171454</a> is fixed or this bug is marked duplicate of it.</pre>
+    </div>
+  <div class="bz_comment">
+
+      <div class="bz_comment_head">
+
+
+
+        <span class="bz_comment_number">
+          <a name="c7" 
+             href="show_bug.cgi?id=212539#c7">Comment 7</a>
+        </span>
+
+        <span class="bz_comment_user"><span class="vcard"><span class="fn">Simon Paquet [:sipaq]</span>
+</span>
+        </span>
+
+        <span class="bz_comment_user_images">
+            <img src="https://bugzilla.mozilla.org/skins/custom/images/groups/calendar-drivers.png"
+                 alt="calendar-drivers"
+                 title="calendar-drivers - Calendar drivers">
+        </span>
+
+        <span class="bz_comment_time">
+          2003-07-28 05:23:01 PDT
+        </span>
+      </div>
+
+
+
+<pre class="bz_comment_text" >Taking QA Contact</pre>
+    </div>
+  <div class="bz_comment">
+
+      <div class="bz_comment_head">
+
+
+
+        <span class="bz_comment_number">
+          <a name="c8" 
+             href="show_bug.cgi?id=212539#c8">Comment 8</a>
+        </span>
+
+        <span class="bz_comment_user"><span class="vcard"><span class="fn">Adam Roben</span>
+</span>
+        </span>
+
+        <span class="bz_comment_user_images">
+        </span>
+
+        <span class="bz_comment_time">
+          2003-08-04 14:18:14 PDT
+        </span>
+      </div>
+
+
+
+<pre class="bz_comment_text" >Confirming bug still present on Mozilla/5.0 (X11; U; Linux i686; en-US;
+rv:1.5b)
+Gecko/20030804 Mozilla Firebird/0.6.1</pre>
+    </div>
+  <div class="bz_comment">
+
+      <div class="bz_comment_head">
+
+
+
+        <span class="bz_comment_number">
+          <a name="c9" 
+             href="show_bug.cgi?id=212539#c9">Comment 9</a>
+        </span>
+
+        <span class="bz_comment_user"><span class="vcard"><span class="fn">Tracy Walker</span>
+</span>
+        </span>
+
+        <span class="bz_comment_user_images">
+        </span>
+
+        <span class="bz_comment_time">
+          2004-10-28 15:04:11 PDT
+        </span>
+      </div>
+
+
+
+<pre class="bz_comment_text" >*** <span class="bz_closed"><a href="show_bug.cgi?id=266400" title="RESOLVED DUPLICATE - Toolbar customization needlessly broken-looking.">Bug 266400</a></span> has been marked as a duplicate of this bug. ***</pre>
+    </div>
+  <div class="bz_comment">
+
+      <div class="bz_comment_head">
+
+
+
+        <span class="bz_comment_number">
+          <a name="c10" 
+             href="show_bug.cgi?id=212539#c10">Comment 10</a>
+        </span>
+
+        <span class="bz_comment_user"><span class="vcard"><span class="fn">Boris Zbarsky (:bz)</span>
+</span>
+        </span>
+
+        <span class="bz_comment_user_images">
+        </span>
+
+        <span class="bz_comment_time">
+          2004-10-28 15:14:56 PDT
+        </span>
+      </div>
+
+
+
+<pre class="bz_comment_text" >I'm going to go out on a branch here and reassign to someone who may
+conceivably
+care... ;)</pre>
+    </div>
+  <div class="bz_comment">
+
+      <div class="bz_comment_head">
+
+
+
+        <span class="bz_comment_number">
+          <a name="c11" 
+             href="show_bug.cgi?id=212539#c11">Comment 11</a>
+        </span>
+
+        <span class="bz_comment_user"><span class="vcard"><span class="fn">Carlos Alén Silva</span>
+</span>
+        </span>
+
+        <span class="bz_comment_user_images">
+        </span>
+
+        <span class="bz_comment_time">
+          2010-05-12 01:50:24 PDT
+        </span>
+      </div>
+
+
+
+<pre class="bz_comment_text" >I think this is fixed.</pre>
+    </div>
+        </div>
+          <hr><a name="add_comment"></a>
+          <fieldset>
+            <legend>Note</legend>
+            <p>
+              You need to
+              <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=212539&amp;GoAheadAndLogIn=1">log in</a>
+              before you can comment on or make changes to this bug.
+            </p>
+          </fieldset>
+      </td>
+    </tr>
+  </table>
+</form>
+<script type="text/javascript">
+  function initKeywords() {
+    if( ! document.getElementById('keywords')){
+      return false;
+    }
+  
+    var validKeywords = new YAHOO.widget.DS_JSArray( [ "",
+        [ "4xp", "Navigator 4.x Parity bugs. A bug is a Navigator 4.x Parity bug if it occurs on Mozilla  builds, but does not occur using the latest release of Netscape Communicator 4.x."],
+        [ "64bit", "Porting issues specific to 64-bit platforms."],
+        [ "access", "Bugs and enhancement requests related to making Mozilla accessible to users with disabilities and special needs."],
+        [ "APIchange", "For flagging changes in APIs."],
+        [ "arch", "Mozilla architecture issues: API cleanup, module restructuring and redesign, platform coherency."],
+        [ "assertion", "A bug that triggers an assertion."],
+        [ "autotest-issue", "A bug whose presence materially impedes development or deployment of automated tests, or a capability whose addition would materially improve such.  A bug marked with this keyword should Block at least one bug describing a relevant test affected by this bug."],
+        [ "aviary-landing", "Bugs or regressions caused by the landing of the AVIARY_1_0_20040515_BRANCH"],
+        [ "calendar-integration", "Used for Thunderbird bugs that would have benefit for calendar (i.e., adding ids, great features that would improve user experience)"],
+        [ "checkin-needed", "Keyword to use to get a patch checked in, if you can\'t check it in yourself. The default assumption should be trunk; if something different is needed, special checkin instructions should go in the status whiteboard."],
+        [ "classic", "For bugs which happen only with the SeaMonkey Classic theme."],
+        [ "common-issue+", "For issues that are commonly seen in support and we will\r\ndecide if more QA is needed or documentation is needed or if the developers should be alerted."],
+        [ "common-issue-", "For issues that we aren\'t seeing frequently in our regular\r\nsupport channels."],
+        [ "common-issue?", "This is used for bugs that are frequently duped on bugzilla to get the support team attention or for things coming down the pipeline."],
+        [ "compat", "Not a bug, but something so commonly misused on the internet that we should provide a work-around for it. i.e., we do it right, but older browsers get it wrong."],
+        [ "conversion", "Use this keyword to identify bugs which prevent you from successfully converting your friends and family to using Mozilla Firefox."],
+        [ "coverity", "For bugs discovered using the Coverity tools."],
+        [ "crash", "A Critical Severity bug which causes a crash."],
+        [ "crashreportid", "This keyword is added to bugs that have a crash report ID (\x3ca href=\"http:\/\/talkback-public.mozilla.org\/\">Talkback\x3c\/a> or \x3ca href=\"http:\/\/crash-stats.mozilla.com\/\">Socorro\x3c\/a>) reported and which need that stack trace recovered and added to the bug."],
+        [ "css-moz", "Bug in Mozilla CSS extensions (or missing but required feature). Mozilla also implements a few extensions to CSS which we have needed for our themes."],
+        [ "css1", "Bug in support for CSS1 properties (or missing but required feature), i.e. CSS properties that were first introduced as part of the Cascading Style Sheets, level 1 specification. (Note that CSS2 changed the specification for a few of these properties, so where there are differences, Mozilla will support the CSS2 interpretation of CSS1.)\r\n\r\nSee: \x3cA HREF=\"http:\/\/www.w3.org\/TR\/REC-CSS1\">http:\/\/www.w3.org\/TR\/REC-CSS1\x3c\/A>"],
+        [ "css2", "Bug in support for CSS2 properties (or missing but required feature), i.e. CSS properties that were first introduced as part of the Cascading Style Sheets, level 2 specification. (Includes CSS positioning properties.) See: \x3cA HREF=\"http:\/\/www.w3.org\/TR\/REC-CSS2\/\">http:\/\/www.w3.org\/TR\/REC-CSS2\/\x3c\/A>"],
+        [ "css3", "Bug in support for CSS3 properties , i.e. CSS properties that were first introduced as part of the Cascading Style Sheets, level 3 specifications. CSS3 is currently under development (i.e. experimental). Current updates at: \x3cA HREF=\"http:\/\/www.w3.org\/Style\/CSS\/current-work\">http:\/\/www.w3.org\/Style\/CSS\/current-work\x3c\/A>\x3cBR>\x3cBR>\r\nNote that these specifications are still at the DRAFT stage."],
+        [ "dataloss", "For bugs that do not crash, but do cause critical data loss."],
+        [ "dev-doc-complete", "Developer documentation has been created for this bug."],
+        [ "dev-doc-needed", "Developer documentation is required for the changes in this bug."],
+        [ "dogfood", "The keyword is used to mark a bug which prevents use of the product by Mozilla developers (breaks bugzilla, for example, or crashes on reading bugmail).  If you are not a Mozilla developer, you should not set this keyword.  If you don\'t know whether or not you\'re a Mozilla developer, you should not set this keyword."],
+        [ "dom0", "Bug in our DOM Level 0 support. Bugs with this keyword should generally be in the DOM Level 0 component. There is no official DOM0 specification."],
+        [ "dom1", "RFE for or bug in a feature of the DOM that was introduced in DOM Level 1. See: \x3ca href=\"http:\/\/www.w3.org\/TR\/DOM-Level-1\/\">http:\/\/www.w3.org\/TR\/DOM-Level-1\/\x3c\/a>"],
+        [ "dom2", "RFE for or bug in a feature of the DOM that was introduced in DOM Level 2.\x3cbr>See:\x3cbr>\r\n\x3ca href=\"http:\/\/www.w3.org\/TR\/DOM-Level-2-Core\/\">http:\/\/www.w3.org\/TR\/DOM-Level-2-Core\/\x3c\/a> \x3cbr> \r\n\x3ca href=\"http:\/\/www.w3.org\/TR\/DOM-Level-2-Views\/\">http:\/\/www.w3.org\/TR\/DOM-Level-2-Views\/\x3c\/a> \x3cbr>\r\n\x3ca href=\"http:\/\/www.w3.org\/TR\/DOM-Level-2-Events\/\">http:\/\/www.w3.org\/TR\/DOM-Level-2-Events\/\x3c\/a> \x3cbr>\r\n\x3ca href=\"http:\/\/www.w3.org\/TR\/DOM-Level-2-Style\/\">http:\/\/www.w3.org\/TR\/DOM-Level-2-Style\x3c\/a> \x3cbr>\r\n\x3ca href=\"http:\/\/www.w3.org\/TR\/DOM-Level-2-Traversal-Range\/\">http:\/\/www.w3.org\/TR\/DOM-Level-2-Traversal-Range\/\x3c\/a>"],
+        [ "drupal-admin-fixable", "For Drupal-powered websites where fixes can be made with the web administrative UI instead of via code fixes to SVN."],
+        [ "drupal-module", "Module-related problem with a Drupal-powered website"],
+        [ "drupal-theme", "Theme-related problem with a Drupal-powered website"],
+        [ "drupal-upgrade", "Bugs relating to the upgrade of a Drupal module or theme"],
+        [ "ecommerce", "Use this keyword to track and increase the priority on the technical and evangelism work that is needed to get Mozilla working well with financial and commerce sites."],
+        [ "embed", "For bugs which are blockers for embedding developmental work."],
+        [ "fixed-aviary1.0", "use this keyword to flag a bug as having been fixed on the Aviary 1.0 branch."],
+        [ "fixed-aviary1.0.1", "this bug has been fixed for the firefox and thunderbird 1.0.1 release."],
+        [ "fixed-aviary1.0.2", "This bug was fixed for the aviary 1.0.2 releases"],
+        [ "fixed-aviary1.0.3", "fixed for 1.0.3"],
+        [ "fixed-aviary1.0.4", "for tagging bugs fixed for Firefox or Thunderbird 1.0.4"],
+        [ "fixed-aviary1.0.5", "for bugs fixed on the aviary branch for 1.0.5"],
+        [ "fixed-aviary1.0.6", "for bugs fixed on the aviary branch for 1.0.6"],
+        [ "fixed-aviary1.0.7", "for bugs fixed in 1.0.7"],
+        [ "fixed-aviary1.0.8", "for bugs fixed in fixed-aviary1.0.8"],
+        [ "fixed-aviary1.0.9", "for bugs fixed in aviary1.0.9"],
+        [ "fixed-seamonkey1.0", "For bugs fixed in the 1.0 release of SeaMonkey off the MOZILLA_1_8_0_BRANCH."],
+        [ "fixed-seamonkey1.0.1", "For bugs fixed in the 1.0.1 release of SeaMonkey off the MOZILLA_1_8_0_BRANCH."],
+        [ "fixed-seamonkey1.0.10", "For bugs fixed in the 1.0.10 release of SeaMonkey off the MOZILLA_1_8_0_BRANCH."],
+        [ "fixed-seamonkey1.0.2", "For bugs fixed in the 1.0.2 release of SeaMonkey off the MOZILLA_1_8_0_BRANCH."],
+        [ "fixed-seamonkey1.0.3", "For bugs fixed in the 1.0.3 release of SeaMonkey off the MOZILLA_1_8_0_BRANCH"],
+        [ "fixed-seamonkey1.0.5", "For bugs fixed in the 1.0.5 release of SeaMonkey off the MOZILLA_1_8_0_BRANCH."],
+        [ "fixed-seamonkey1.0.6", "For bugs fixed in the 1.0.6 release of SeaMonkey off the MOZILLA_1_8_0_BRANCH."],
+        [ "fixed-seamonkey1.0.7", "For bugs fixed in the 1.0.7 release of SeaMonkey off the MOZILLA_1_8_0_BRANCH."],
+        [ "fixed-seamonkey1.0.8", "For bugs fixed in the 1.0.8 release of SeaMonkey off the MOZILLA_1_8_0_BRANCH."],
+        [ "fixed-seamonkey1.0.9", "For bugs fixed in the 1.0.9 release of SeaMonkey off the MOZILLA_1_8_0_BRANCH."],
+        [ "fixed-seamonkey1.1", "For bugs fixed in the 1.1 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.1", "For bugs fixed in the 1.1.1 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.10", "For bugs fixed in the 1.1.10 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.11", "For bugs fixed in the 1.1.11 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.12", "For bugs fixed in the 1.1.12 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.13", "For bugs fixed in the 1.1.13 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.14", "For bugs fixed in the 1.1.14 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.15", "For bugs fixed in the 1.1.15 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.16", "For bugs fixed in the 1.1.16 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.17", "For bugs fixed in the 1.1.17 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.18", "For bugs fixed in the 1.1.18 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.19", "For bugs fixed in the 1.1.19 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.2", "For bugs fixed in the 1.1.2 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.3", "For bugs fixed in the 1.1.3 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.4", "For bugs fixed in the 1.1.4 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.5", "For bugs fixed in the 1.1.5 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.6", "For bugs fixed in the 1.1.6 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.7", "For bugs fixed in the 1.1.7 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.8", "For bugs fixed in the 1.1.8 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1.9", "For bugs fixed in the 1.1.9 release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1a", "For bugs fixed in the 1.1a release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey1.1b", "For bugs fixed in the 1.1b release of SeaMonkey off the MOZILLA_1_8_BRANCH."],
+        [ "fixed-seamonkey2.0", "For bugs fixed in the 2.0 release of SeaMonkey off the MOZILLA_1_9_BRANCH."],
+        [ "fixed-seamonkey2.0.1", "For bugs fixed in the 2.0.1 release of SeaMonkey off the MOZILLA_1_9_BRANCH."],
+        [ "fixed-seamonkey2.0.2", "For bugs fixed in the 2.0.2 release of SeaMonkey off the MOZILLA_1_9_BRANCH."],
+        [ "fixed-seamonkey2.0.3", "For bugs fixed in the 2.0.3 release of SeaMonkey off the MOZILLA_1_9_BRANCH."],
+        [ "fixed-seamonkey2.0.4", "For bugs fixed in the 2.0.4 release of SeaMonkey off the MOZILLA_1_9_BRANCH."],
+        [ "fixed-seamonkey2.0.5", "For bugs fixed in the 2.0.5 release of SeaMonkey off the MOZILLA_1_9_BRANCH."],
+        [ "fixed-seamonkey2.0.6", "For bugs fixed in the 2.0.6 release of SeaMonkey off the MOZILLA_1_9_BRANCH."],
+        [ "fixed1.4", "Use this keyword when you check in a fix to the 1.4 branch for the 1.4 release. QA will do branch verification of bugs with this keyword by testing the 1.4 branch and adding the \'verified1.4\' keyword."],
+        [ "fixed1.4.1", "Use this keyword when you check in a fix to the 1.4 branch for the 1.4.1 release. QA will do branch verification of bugs with this keyword by testing the 1.4 branch and adding the \'verified1.4\' keyword."],
+        [ "fixed1.4.2", "Use this keyword when you check in a fix to the 1.4 branch for the 1.4.2 release. QA will do branch verification of bugs with this keyword by testing the 1.4 branch and adding the \'verified1.4.2\' keyword."],
+        [ "fixed1.4.3", "Use this keyword when you check in a fix to the 1.4 branch for the 1.4.3 release. QA will do branch verification of bugs with this keyword by testing the 1.4 branch and adding the \'verified1.4.3\' keyword."],
+        [ "fixed1.4.4", "Use this keyword when you check in a fix to the 1.4 branch for the 1.4.4 release. QA will do branch verification of bugs with this keyword by testing the 1.4 branch and adding the \'verified1.4.4\' keyword."],
+        [ "fixed1.4.5", "Use this keyword when you check in a fix to the 1.4 branch for the 1.4.5 release. QA will do branch verification of bugs with this keyword by testing the 1.4 branch and adding the \'verified1.4.5\' keyword."],
+        [ "fixed1.5", "Use this keyword when you check in a fix to the 1.5 branch for the 1.5 release. QA will do branch verification of bugs with this keyword by testing the 1.5 branch and adding the \'verified1.5\' keyword."],
+        [ "fixed1.6", "Use this keyword when you check in a fix to the 1.6 branch for the 1.6 release. QA will do branch verification of bugs with this keyword by testing the 1.6 branch and adding the \'verified1.6\' keyword."],
+        [ "fixed1.7", "This keyword is used to flag a bug as having been fixed for the 1.7 release."],
+        [ "fixed1.7.10", "for bugs fixed in 1.7.10"],
+        [ "fixed1.7.11", "for bugs fixed in 1.7.11"],
+        [ "fixed1.7.12", "for bugs fixed in 1.7.12"],
+        [ "fixed1.7.13", "for bugs fixed in 1.7.13"],
+        [ "fixed1.7.14", "for bugs fixed in 1.7.14"],
+        [ "fixed1.7.2", "This keyword is used to note that the bug has been fixed on the mini branch for 1.7.2."],
+        [ "fixed1.7.3", "This keyword is used to note that the bug has been fixed on the mini branch for 1.7.3."],
+        [ "fixed1.7.5", "This keyword is used to flag a bug as having been fixed for the 1.7 branch for 1.7.5."],
+        [ "fixed1.7.6", "This keyword is used to flag a bug as having been fixed for the 1.7 branch for 1.7.6."],
+        [ "fixed1.7.7", "This keyword is used to flag a bug as having been fixed for the 1.7 branch for 1.7.7."],
+        [ "fixed1.7.8", "for tagging bugs that have been fixed for 1.7.8"],
+        [ "fixed1.7.9", "for bugs fixed in 1.7.9"],
+        [ "fixed1.8", "This keyword is used to flag a bug as having been fixed for the 1.8 release."],
+        [ "fixed1.8.0.1", "for resolving bugs as fixed for the 1.8.0.1 release"],
+        [ "fixed1.8.0.10", "for resolving bugs as fixed for the 1.8.0.10 release"],
+        [ "fixed1.8.0.11", "for resolving bugs as fixed for the 1.8.0.11 release"],
+        [ "fixed1.8.0.12", "for resolving bugs as fixed for the 1.8.0.12 release"],
+        [ "fixed1.8.0.13", "for resolving bugs as fixed for the 1.8.0.13 release"],
+        [ "fixed1.8.0.14", "for resolving bugs as fixed for the 1.8.0.14"],
+        [ "fixed1.8.0.15", "for resolving bugs as fixed for the 1.8.0.15 release"],
+        [ "fixed1.8.0.2", "for resolving bugs as fixed for the 1.8.0.2 release"],
+        [ "fixed1.8.0.3", "for resolving bugs as fixed for the 1.8.0.3 release"],
+        [ "fixed1.8.0.4", "for resolving bugs as fixed for the 1.8.0.4 release"],
+        [ "fixed1.8.0.5", "for resolving bugs as fixed for the 1.8.0.5 release"],
+        [ "fixed1.8.0.6", "for resolving bugs as fixed for the 1.8.0.6 release"],
+        [ "fixed1.8.0.7", "for resolving bugs as fixed for the 1.8.0.7 release"],
+        [ "fixed1.8.0.8", "for resolving bugs as fixed for the 1.8.0.8 release"],
+        [ "fixed1.8.0.9", "for resolving bugs as fixed for the 1.8.0.9 release"],
+        [ "fixed1.8.1", "This keyword is used to flag a bug as having been fixed for the 1.8.1 release."],
+        [ "fixed1.8.1.1", "This keyword is used to flag a bug as having been fixed for the 1.8.1.1 release."],
+        [ "fixed1.8.1.10", "This keyword is used to flag a bug as having been fixed for the 1.8.1.10 release."],
+        [ "fixed1.8.1.11", "This keyword is used to flag a bug as having been fixed for the 1.8.1.11 release."],
+        [ "fixed1.8.1.12", "This keyword is used to flag a bug as having been fixed for the 1.8.1.12 release."],
+        [ "fixed1.8.1.13", "This keyword is used to flag a bug as having been fixed for the 1.8.1.13 release."],
+        [ "fixed1.8.1.14", "This keyword marks a bug as resolved FIXED for the 1.8.1.14 release."],
+        [ "fixed1.8.1.15", "This keyword marks a bug as resolved FIXED for the 1.8.1.15 release."],
+        [ "fixed1.8.1.16", "This keyword marks a bug as resolved FIXED for the 1.8.1.16 release."],
+        [ "fixed1.8.1.17", "This keyword marks a bug as resolved FIXED for the 1.8.1.17 release."],
+        [ "fixed1.8.1.18", "This keyword marks a bug as resolved FIXED for the 1.8.1.18 release."],
+        [ "fixed1.8.1.19", "This keyword marks a bug as resolved FIXED for the 1.8.1.19 release."],
+        [ "fixed1.8.1.2", "This keyword is used to flag a bug as having been fixed for the 1.8.1.2 release."],
+        [ "fixed1.8.1.20", "This keyword marks a bug as resolved FIXED for the 1.8.1.20 milestone."],
+        [ "fixed1.8.1.21", "This keyword marks a bug as resolved FIXED for the 1.8.1.21 milestone."],
+        [ "fixed1.8.1.22", "This keyword marks a bug as resolved FIXED for the 1.8.1.22 milestone."],
+        [ "fixed1.8.1.23", "This keyword marks a bug as resolved FIXED for the 1.8.1.23 milestone."],
+        [ "fixed1.8.1.24", "This keyword marks a bug as resolved FIXED for the 1.8.1.24 milestone."],
+        [ "fixed1.8.1.3", "This keyword is used to flag a bug as having been fixed for the 1.8.1.3 release."],
+        [ "fixed1.8.1.4", "This keyword is used to flag a bug as having been fixed for the 1.8.1.4 release."],
+        [ "fixed1.8.1.5", "This keyword is used to flag a bug as having been fixed for the 1.8.1.5 release."],
+        [ "fixed1.8.1.6", "This keyword is used to flag a bug as having been fixed for the 1.8.1.6 release."],
+        [ "fixed1.8.1.7", "This keyword is used to flag a bug as having been fixed for the 1.8.1.7 release."],
+        [ "fixed1.8.1.8", "This keyword is used to flag a bug as having been fixed for the 1.8.1.8 release."],
+        [ "fixed1.8.1.9", "This keyword is used to flag a bug as having been fixed for the 1.8.1.9 release."],
+        [ "fixed1.9.0", "This keyword is used to flag a bug as having been fixed for the 1.9.0 release. This keyword is required to simplify branch-management queries."],
+        [ "fixed1.9.0.1", "This keyword is used to flag a bug as having been fixed for the 1.9.0.1 release."],
+        [ "fixed1.9.0.10", "This keyword is used to flag a bug as having been fixed for the 1.9.0.10 release."],
+        [ "fixed1.9.0.11", "This keyword is used to flag a bug as having been fixed for the 1.9.0.11 release."],
+        [ "fixed1.9.0.12", "This keyword is used to flag a bug as having been fixed for the 1.9.0.12 release."],
+        [ "fixed1.9.0.13", "This keyword is used to flag a bug as having been fixed for the 1.9.0.13 release."],
+        [ "fixed1.9.0.14", "This keyword is used to flag a bug as having been fixed for the 1.9.0.14 release."],
+        [ "fixed1.9.0.15", "This keyword is used to flag a bug as having been fixed for the 1.9.0.15 release."],
+        [ "fixed1.9.0.16", "This keyword is used to flag a bug as having been fixed for the 1.9.0.16 release."],
+        [ "fixed1.9.0.17", "This keyword is used to flag a bug as having been fixed for the 1.9.0.17 release."],
+        [ "fixed1.9.0.18", "This keyword is used to flag a bug as having been fixed for the 1.9.0.18 release."],
+        [ "fixed1.9.0.19", "This keyword is used to flag a bug as having been fixed for the 1.9.0.19 release."],
+        [ "fixed1.9.0.2", "This keyword is used to flag a bug as having been fixed for the 1.9.0.2 release."],
+        [ "fixed1.9.0.20", "This keyword is used to flag a bug as having been fixed for the 1.9.0.20 release."],
+        [ "fixed1.9.0.3", "This keyword is used to flag a bug as having been fixed for the 1.9.0.3 release."],
+        [ "fixed1.9.0.4", "This keyword is used to flag a bug as having been fixed for the 1.9.0.4 release."],
+        [ "fixed1.9.0.5", "This keyword is used to flag a bug as having been fixed for the 1.9.0.5 release."],
+        [ "fixed1.9.0.6", "This keyword is used to flag a bug as having been fixed for the 1.9.0.6 release."],
+        [ "fixed1.9.0.7", "This keyword is used to flag a bug as having been fixed for the 1.9.0.7 release."],
+        [ "fixed1.9.0.8", "This keyword is used to flag a bug as having been fixed for the 1.9.0.8 release."],
+        [ "fixed1.9.0.9", "This keyword is used to flag a bug as having been fixed for the 1.9.0.9 release."],
+        [ "fixed1.9.1", "This keyword is used to flag a bug as having been fixed for the 1.9.1 release."],
+        [ "fixed1.9.1.1", "This keyword is used to flag a bug as having been fixed for the 1.9.1.1 release."],
+        [ "fixedOEM", "Use this keyword when you check in a fix to the oem branch (to be named later). QA will verify bugs with this keyword by replacing it with \'verifiedOEM\' keyword."],
+        [ "flashplayer", "For bugs affecting flashplayer"],
+        [ "fonts", "Bugs that are related to font styling, for instance text\r\nbeing drawn too large, not bold enough, a problem with the \x3cfont> element in HTML or a problem with the \'font\' properties in CSS."],
+        [ "footprint", "A bug that affects memory use, usually through excessive memory allocation or code size.  (For leaks, use the \"mlk\" keyword instead.)"],
+        [ "hang", "Use this keyword for bugs which causes a Mozilla or system freeze (hang). Usually, this is a result of infinite loops. This is different than an application crash where a crash report from \x3ca href=\"http:\/\/talkback-public.mozilla.org\/\">Talkback\x3c\/a> or \x3ca href=\"http:\/\/crash-stats.mozilla.com\/\">Socorro\x3c\/a> is generated to help us isolate the bug."],
+        [ "helpwanted", "Bugs or features which require coding assistance to fix or implement."],
+        [ "highrisk", "Bugs whose fixes have a high level of risk associated with them, typically due to some major architectural changes being required (see the \'arch\' keyword). Typically these are bugs that were deferred from the previous release cycle due to the high level of risk involved, and should therefore be fixed as soon as possible in the next cycle. Examples: \"need to rewrite handling of HTTP headers\" or \"need to redesign the content sinks\"."],
+        [ "html4", "Bug in support for HTML 4.0 only elements (whether required for compliance or not), i.e. HTML elements or attributes that were first introduced as part of the HTML 4.0 Specification, and not included in HTML 3.2"],
+        [ "html5", "Bugs that affect compliance with W3C HTML5."],
+        [ "icon", "Use this keyword to flag bugs which are ready for image production and visual design of icon or other artwork. Do not spam every feature request with this keyword. Thanks."],
+        [ "imap-interop", "Interoperability bugs with various IMAP mail servers"],
+        [ "inputmethod", "Bugs that are related to IM (Input Method) which is complex text\r\ninputting system. IM is also known as IME (Input Method Editor), FEP (Front End Processor) or TIP (Text Input Processor). The bugs can be in any modules, e.g., widget, content, editor, layout and toolkit."],
+        [ "intl", "Use this keyword for any bug related to international issues. The keyword should be used when designating any international bugs other than the localizability bugs, marked by \'l12y\'. The component name \"internationalization\" is used for i18n engineering bugs only and so it will constitute a sub-category of \'intl\'. The \'intl\' may also include those bugs that are not assigned to \'internationalization\", e.g. layout, UI, browser, and other components, but have substantial international implication so that they can be monitored easily by those concerned about international issues."],
+        [ "jp-critical", "Bugs that are deemed critical to Japanese users."],
+        [ "js1.5", "JavaScript 1.5 blocking bugs."],
+        [ "js1.6", "JavaScript 1.6 blocking bugs."],
+        [ "js1.7", "JavaScript 1.7 blocking bugs."],
+        [ "klocwork", "For bugs discovered using the Klocwork tools."],
+        [ "l12y", "Use this keyword for any bug related to localizability issues like hardcoded strings, sizing information, hardcoded fonts..."],
+        [ "late-compat", "Used to indicate bugs which may affect compatibility of extensions or external code developed earlier in a cycle."],
+        [ "late-l10n", "This keyword is to be added to bugs which have patches that landed after the localization freeze (typically \"after beta\") and which impact localizable strings. Localizers can query bugzilla for bugs with this keyword and the approval1.x+ flag to find l10n-impact changes that happened after the 1.x l10n freeze."],
+        [ "mail-integration", "Used for Calendar bugs that would have benefit for Thunderbird (i.e., adding ids, great features that would improve user experience)"],
+        [ "meta", "A placeholder bug for tracking the progress of other bugs. Meta bugs are made dependent on other bugs so that interested parties can be kept up-to-date with status via one bug, without having to receive all the mails related to all the bugs related to the development of a particular area."],
+        [ "mlk", "A memory leak bug: memory is never released or is released only during shutdown.  The bug report should include information that indicates which objects leak, such as a log from one of Mozilla\'s \x3ca\r\nhref=\"http:\/\/wiki.mozilla.org\/Performance:Leak_Tools\">leak-detection tools\x3c\/a>."],
+        [ "mobile", "For bugs which are important to mobile developmental work."],
+        [ "modern", "For bugs which occur with only the Modern theme included in Mozilla builds."],
+        [ "narcissus", "Bugs affecting development, use, or testing of the \"Narcissus\" self-hosted JavaScript implementation."],
+        [ "perf", "A bug that affects speed or responsiveness.  (For memory use issues, use \"footprint\" or \"mlk\" instead.)"],
+        [ "platform", "For marking bugs that affect our Mozilla-as-platform story."],
+        [ "polish", "Bugs which require only a small change for a noticable\r\nimprovement in the user interface"],
+        [ "pp", "Platform Parity bugs. A bug is a Platform Parity bug if it only occurs on one particular platform or two platforms, but not all three - Win, Mac and Linux.\r\n\r\nFor example, if you find a bug on Linux, but it does not occur using the same day\'s Win32 or Mac OS build."],
+        [ "privacy", "Bugs relating to user privacy which do not belong in the Security: General component."],
+        [ "productization", "For localizations and Mozilla business development initiatives that require external verification and team consensus regarding the inclusion of third party services in Mozilla software.  Productization services include search providers in the browser, links to third parties hosted on Mozilla web properties, third party protocol handlers (mailto:, webcal:, irc:, etc.), RSS feeds, and any other items further describing localization and business development of Mozilla software."],
+        [ "push-needed", "For website\/webtool (but usually just AMO) bugs that have been checked in but not yet pushed to production servers."],
+        [ "qablocker", "Use this keyword for bugs that are blocking testing (manual or automated testing of an area) and need to be fixed by the next Beta or RC milestone."],
+        [ "qawanted", "Use this keyword for bugs which need more info, or it needs\r\nreproducing, or testcasing, or it\'s a dupe but you can\'t find what it\'s a dupe of. Note what QA work is wanted in the whiteboard. Please remove this keyword when the wanted QA work has been completed."],
+        [ "realplayer", "For bugs specific to incompatibilities with mozilla products and  the RealNetworks\' RealPlayer plugin\r\n\r\n."],
+        [ "regression", "The problem was fixed, but then it came back (regressed) and this new bug was filed to track the regression.\r\nAlso, for problems outside those identified in precheckin and smoke tests that were found in current builds that were known to be working in previous builds. Tracking these bugs will help us to identify areas that are fragile, prone to bustage and are good candidates for adding to smoke and pre-checkin tests."],
+        [ "regressionwindow-wanted", "This bug is a regression, and would strongly benefit from someone narrowing down the time period where it happened, ideally to a specific checkin."],
+        [ "relnote", "This bug need to be put on release notes for next milestone announcement."],
+        [ "rtl", "A bug tied to or exposed by languages with a right-to-left (RTL) writing system."],
+        [ "sec508", "This is used for bugs which keep us from being Section 508 accessibility regulation compliant (a requirement for Mozilla to be legally used by US Federal government agencies).  See the \x3ca href=\"http:\/\/www.va.gov\/accessible\/va508eval\/119421.html\">requirements\x3c\/a> that apply to software."],
+        [ "selenium", "A Selenium test has been created to reproduce\/test this"],
+        [ "shockwave", "For bugs specific to incompatibilities with mozilla products and  the MacroMedia Shockwave plug-in."],
+        [ "smoketest", "Means that this bug prevents the \x3ca href=\"http:\/\/www.mozilla.org\/quality\/smoketests\/\">smoketests\x3c\/a> from passing."],
+        [ "stackwanted", "For crashing bugs which need \x3ca href=\"https:\/\/developer.mozilla.org\/En\/How_to_get_a_stacktrace_for_a_bug_report\">stacktrace\x3c\/a> information to be added to description field to help out engineers debug the problem."],
+        [ "student-project", "Bugs and enhancement requests that would be appropriate for students looking to work on a Mozilla project as part of a course. These should have someone or a group willing to mentor, offer help, and do reviews. See \x3ca href=\"https:\/\/wiki.mozilla.org\/Education\/Projects\/MozillaGuidelines\">guidelines\x3c\/a> on using this keyword."],
+        [ "sun-orion3", "NSPR\/NSS\/JSS bugs relevant to Sun JES servers, release 3."],
+        [ "sun-orion4", "NSPR\/NSS\/JSS bugs relevant to Sun JES servers, release 4."],
+        [ "technote", "For technotes at devmo"],
+        [ "testcase", "Indicates that a simplified test case is done and included in bug report. This keyword is used for the BugAThon: \x3cA HREF=\"http:\/\/www.mozilla.org\/newlayout\/bugathon.html\">http:\/\/www.mozilla.org\/newlayout\/bugathon.html\x3c\/A>"],
+        [ "testcase-wanted", "This bug would strongly benefit from a testcase or from additional testcases in order to be fixed. This keyword may indicate that any existing testcases are too complex and need to be reduced to much simpler tests in order to find or debug the source of the problem. Check the comments of the bug to discover exactly what is wanted."],
+        [ "testtracker", "Use this keyword to flag a bug which contains information that should become a test added to the test tracker tool. The tool currently hosts application smoketest and Firefox functional test."],
+        [ "top100", "Bug with a top 100 site based on Alexa top 100"],
+        [ "top50", "Please use this keyword to flag any bugs for websites identified in the top 50 of Firefox\'s \"Report a Broken Web Site\" list."],
+        [ "top500", "bugs with top 500 sites based on Alexa top 500."],
+        [ "topcrash", "Bugs created from highly visible crashes per the crash report data."],
+        [ "topcrash+", "This is an active \x3cb>topcrash\x3c\/b> bug, highly reproducible, a blocker for the average users, must be fixed before the release of the current Milestone. This keyword is administered by the topcrash team."],
+        [ "topcrash-", "This is a \x3cb>topcrash\x3c\/b> bug that is either no longer highly visible to users, not reproducible, not in our code, or otherwise not critical to the release of the current Milestone. This keyword is administered by the topcrash team."],
+        [ "topembed", "Use this keyword for bugs which are critical to \x3ca  href=\"http:\/\/www.mozilla.org\/projects\/embedding\/\r\n\">embedding\x3c\/a>."],
+        [ "topembed+", "The Netscape embedding evaluation team will add this keyword to bugs which have been accepted for the next Netscape embedding release."],
+        [ "topembed-", "This keyword will be added to bugs which the Netscape embedding evaluation team has rejected for the next Netscape embedding release."],
+        [ "topmlk", "A high-profile memory leak bug. (These bugs should also have the \"mlk\" keyword.)"],
+        [ "topperf", "A high-profile speed or responsiveness issue. (These bugs should also have the \"perf\" keyword.)"],
+        [ "ue", "For bugs with a specific detailed suggestion for improvement of the user experience. The problem describes a confusing or unhelpful aspect of the user interface."],
+        [ "uiwanted", "For bugs that require UI design support, either for a requested feature enhancement, some new function which needs some UI, or a fix to existing UI."],
+        [ "useless-UI", "Use this keyword when the UI exposes a feature that is either unusably broken or not implemented.  The purpose of this keyword is to make these UI shortfalls very visible when deciding whether or not the product is ready to ship. Example: \"View|Headers|All does nothing so menuitem should be removed\/hidden.\""],
+        [ "user-doc-complete", "User documentation has been created for this bug."],
+        [ "user-doc-needed", "User documentation is required for the changes in this bug."],
+        [ "ux-affordance", "User experience principle: controls should visually express how the user should interact with them."],
+        [ "ux-consistency", "User experience principle: in general software should be internally consistent with itself, and externally consistent with similar interfaces to leverage the user\'s existing knowledge."],
+        [ "ux-control", "User experience principle: users should always feel like they are in control of their software. (This principle is often the nemesis of ux-interruption, especially in cases where developers assume users want more control than they actually want)."],
+        [ "ux-discovery", "User experience principle: users should be able to discover functionality and information by visually exploring the interface, they should not be forced to recall information from memory. (This is often the nemesis of ux-minimalism since additional visible items diminish the relative visibility of other items being displayed)."],
+        [ "ux-efficiency", "User experience principle: interfaces should be as efficient as possible, minimizing the complexity of actions and the overall time to complete a task."],
+        [ "ux-error-prevention", "User experience principle: interfaces should proactively try to prevent errors from happening."],
+        [ "ux-error-recovery", "User experience principle: interfaces should proactively help users recover from both user errors and technology errors. (A preferable case is to address through ux-error-prevention so that the error does not occur)."],
+        [ "ux-feedback", "User experience principle: interfaces should provide feedback about their current status. Users should never wonder what state the system is in."],
+        [ "ux-implementation-level", "User experience principle: interfaces should not be organized around the underlying implementation and technology in ways that are illogical, or require the user to have access to additional information that is not found in the interface itself."],
+        [ "ux-interruption", "User experience principle: interfaces should not interrupt the user. Interfaces should never ask the user a question that they are not prepared to answer simply for a false sense of ux-control. In general software should only speak when spoken to."],
+        [ "ux-jargon", "User experience principle: users should not be required to understand any form of implementation level terminology. (This principle is a special case of ux-implementation-level)."],
+        [ "ux-minimalism", "User experience principle: interfaces should be as simple as possible, both visually and interactively. Interfaces should avoid redundancy. (This principle is often the nemesis of ux-discovery since removing or hiding items deep into the interface forces the user to rely more on memory than recognition)."],
+        [ "ux-mode-error", "User experience principle: users should not encounter errors because the interface is in a different state than they expected it to be. (This principle is a special case of ux-error-prevention)."],
+        [ "ux-natural-mapping", "User experience principle: controls should be placed in the correct location relative to the effect that they will have."],
+        [ "ux-tone", "User experience principle: interfaces should not blame the user, or communicate in a way that is overly negative or dramatic."],
+        [ "ux-undo", "User experience principle: actions should support undo so that users remain in control. (This principle is a special case of ux-control)."],
+        [ "ux-visual-hierarchy", "User experience principle: controls that are more important or more commonly used should leverage visual variables such as size and contrast so that they have more dominance and weight relative to other controls. (This principle is an adaption of ux-discovery)."],
+        [ "valgrind", "For bugs discovered using the valgrind tool."],
+        [ "verified-aviary1.0.8", "Verified 1.0.8 bugs"],
+        [ "verified-aviary1.0.9", "verified aviary1.0.9 bugs"],
+        [ "verified-production", "For website\/webtool bugs that have been verified on the production servers."],
+        [ "verified-thunderbird3.0", "This keyword is used to flag a bug as having been verified for a Thunderbird 3.0.x stabilty and security release."],
+        [ "verified1.7", "Use this keyword to indicate that a fix has been verified on the 1.7 branch for the 1.7 release."],
+        [ "verified1.7.13", "verified 1.7.13 bugs"],
+        [ "verified1.7.6", "Use this keyword to indicate that a fix has been verified on the 1.7 branch for the 1.7.6 release."],
+        [ "verified1.7.7", "Use this keyword to indicate that a fix has been verified on the 1.7 branch for the 1.7.7 release."],
+        [ "verified1.8", "Use this keyword to indicate that a fix has been verified on the 1.8 branch for the 1.8 release."],
+        [ "verified1.8.0.1", "for verifying that bugs are fixed for the 1.8.0.1 release"],
+        [ "verified1.8.0.10", "for verifying that bugs are fixed for the 1.8.0.10 release"],
+        [ "verified1.8.0.11", "for verifying that bugs are fixed for the 1.8.0.11 release"],
+        [ "verified1.8.0.12", "for verifying that bugs are fixed for the 1.8.0.12 release"],
+        [ "verified1.8.0.13", "for verifying that bugs are fixed for the 1.8.0.13 release"],
+        [ "verified1.8.0.14", "for verifying that bugs are fixed for the 1.8.0.14 release"],
+        [ "verified1.8.0.15", "for verifying that bugs are fixed for the 1.8.0.15 release"],
+        [ "verified1.8.0.2", "for verifying that bugs are fixed for the 1.8.0.2 release"],
+        [ "verified1.8.0.3", "for verifying that bugs are fixed for the 1.8.0.3 release"],
+        [ "verified1.8.0.4", "for verifying that bugs are fixed for the 1.8.0.4 release"],
+        [ "verified1.8.0.5", "for verifying that bugs are fixed for the 1.8.0.5 release"],
+        [ "verified1.8.0.6", "for verifying that bugs are fixed for the 1.8.0.6 release"],
+        [ "verified1.8.0.7", "for verifying that bugs are fixed for the 1.8.0.7 release"],
+        [ "verified1.8.0.8", "for verifying that bugs are fixed for the 1.8.0.8 release"],
+        [ "verified1.8.0.9", "for verifying that bugs are fixed for the 1.8.0.9 release"],
+        [ "verified1.8.1", "This keyword is used to flag a bug as having been verified for the 1.8.1 release."],
+        [ "verified1.8.1.1", "This keyword is used to flag a bug as having been verified for the 1.8.1.1 release."],
+        [ "verified1.8.1.10", "This keyword is used to flag a bug as having been verified for the 1.8.1.10 release"],
+        [ "verified1.8.1.11", "This keyword is used to flag a bug as having been verified for the 1.8.1.11 release"],
+        [ "verified1.8.1.12", "This keyword is used to flag a bug as having been verified for the 1.8.1.12 release"],
+        [ "verified1.8.1.13", "This keyword is used to flag a bug as having been verified for the 1.8.1.13 release"],
+        [ "verified1.8.1.14", "This keyword is used to flag a bug as having been verified for the 1.8.1.14 release"],
+        [ "verified1.8.1.15", "This keyword is used to flag a bug as having been verified for the 1.8.1.15 release"],
+        [ "verified1.8.1.16", "This keyword is used to flag a bug as having been verified for the 1.8.1.16 release"],
+        [ "verified1.8.1.17", "This keyword is used to flag a bug as having been verified for the 1.8.1.17 release"],
+        [ "verified1.8.1.18", "This keyword is used to flag a bug as having been verified for the 1.8.1.18 release"],
+        [ "verified1.8.1.19", "This keyword is used to flag a bug as having been verified for the 1.8.1.19 release"],
+        [ "verified1.8.1.2", "This keyword is used to flag a bug as having been verified for the 1.8.1.2 release."],
+        [ "verified1.8.1.20", "This keyword is used to flag a bug as having been verified for the 1.8.1.20 milestone"],
+        [ "verified1.8.1.21", "This keyword is used to flag a bug as having been verified for the 1.8.1.21 milestone"],
+        [ "verified1.8.1.22", "This keyword is used to flag a bug as having been verified for the 1.8.1.22 milestone"],
+        [ "verified1.8.1.23", "This keyword is used to flag a bug as having been verified for the 1.8.1.23 milestone"],
+        [ "verified1.8.1.24", "This keyword is used to flag a bug as having been verified for the 1.8.1.24 milestone"],
+        [ "verified1.8.1.3", "This keyword is used to flag a bug as having been verified for the 1.8.1.3 release."],
+        [ "verified1.8.1.4", "This keyword is used to flag a bug as having been verified for the 1.8.1.4 release."],
+        [ "verified1.8.1.5", "This keyword is used to flag a bug as having been verified for the 1.8.1.5 release."],
+        [ "verified1.8.1.6", "This keyword is used to flag a bug as having been verified for the 1.8.1.6 release"],
+        [ "verified1.8.1.7", "This keyword is used to flag a bug as having been verified for the 1.8.1.7 release"],
+        [ "verified1.8.1.8", "This keyword is used to flag a bug as having been verified for the 1.8.1.8 release"],
+        [ "verified1.8.1.9", "This keyword is used to flag a bug as having been verified for the 1.8.1.9 release"],
+        [ "verified1.9.0", "This keyword is required to simplify branch-management queries."],
+        [ "verified1.9.0.1", "This keyword is used to flag a bug as having been verified for the 1.9.0.1 release."],
+        [ "verified1.9.0.10", "This keyword is used to flag a bug as having been verified for the 1.9.0.10 release."],
+        [ "verified1.9.0.11", "This keyword is used to flag a bug as having been verified for the 1.9.0.11 release."],
+        [ "verified1.9.0.12", "This keyword is used to flag a bug as having been verified for the 1.9.0.12 release."],
+        [ "verified1.9.0.13", "This keyword is used to flag a bug as having been verified for the 1.9.0.13 release."],
+        [ "verified1.9.0.14", "This keyword is used to flag a bug as having been verified for the 1.9.0.14 release."],
+        [ "verified1.9.0.15", "This keyword is used to flag a bug as having been verified for the 1.9.0.15 release."],
+        [ "verified1.9.0.16", "This keyword is used to flag a bug as having been verified for the 1.9.0.16 release."],
+        [ "verified1.9.0.17", "This keyword is used to flag a bug as having been verified for the 1.9.0.17 release."],
+        [ "verified1.9.0.18", "This keyword is used to flag a bug as having been verified for the 1.9.0.18 release."],
+        [ "verified1.9.0.19", "This keyword is used to flag a bug as having been verified for the 1.9.0.19 release."],
+        [ "verified1.9.0.2", "This keyword is used to flag a bug as having been verified for the 1.9.0.2 release."],
+        [ "verified1.9.0.20", "This keyword is used to flag a bug as having been verified for the 1.9.0.20 release."],
+        [ "verified1.9.0.3", "This keyword is used to flag a bug as having been verified for the 1.9.0.3 release."],
+        [ "verified1.9.0.4", "This keyword is used to flag a bug as having been verified for the 1.9.0.4 release."],
+        [ "verified1.9.0.5", "This keyword is used to flag a bug as having been verified for the 1.9.0.5 release."],
+        [ "verified1.9.0.6", "This keyword is used to flag a bug as having been verified for the 1.9.0.6 release."],
+        [ "verified1.9.0.7", "This keyword is used to flag a bug as having been verified for the 1.9.0.7 release."],
+        [ "verified1.9.0.8", "This keyword is used to flag a bug as having been verified for the 1.9.0.8 release."],
+        [ "verified1.9.0.9", "This keyword is used to flag a bug as having been verified for the 1.9.0.9 release."],
+        [ "verified1.9.1", "This keyword is used to flag a bug as having been verified for the 1.9.1 release."],
+        [ "verified1.9.1.1", "This keyword is used to flag a bug as having been verified for the 1.9.1.1 release."],
+        [ "verified1.9.2", "This keyword is used to flag a bug as having been verified for the 1.9.2 release."],
+        [ "verified1.9.3", "This keyword is used to flag a bug as having been verified for the 1.9.3 release."],
+        [ "verifyme", "This bug is ok to verify with latest mozilla build by someone other than the QA Contact indicated. The bug has specific machine config indicated to verify fix. Try to reproduce the failure and if you agree that the resolution of Fixed is correct, please mark the Status as Verified.  \x3cBR>\x3cBR>\r\n\r\nAlways indicate the build\/OS\/platform(s) used to verify in the comments of the bug before you change Status to Verified.  If the bug is reported on all three platforms and you only have one platform to verify the fix on, go ahead and do so and note it in the bug.  But, do not mark the bug verified.  All platforms must be checked before moving to a Verified Status. \x3cBR>\x3cBR>\r\n\r\nFinally, if other bugs have been marked as a duplicate of the bug you\'re verifying, be sure to check and mention those, as well. Often developers mark related, but not identical, bugs as duplicates, and these can fall through the cracks if not checked."],
+        [ "xhtml", "Bugs related to support for \x3cA HREF=\"http:\/\/www.w3.org\/TR\/xhtml1\/\">XHTML\x3c\/A>"],
+        [ "zt4newcrash", "Zero Tolerance New Crash due to regression introduced in the last 72 hours of check-ins. These crashes must be fixed within one day of discovery. If not, back out the check-in which caused it and only re-check-in after a solution for the crash has been found. This is monitored by the QA team using crash statistics."]
+    ]);
+    var keywordAutoComplete = new YAHOO.widget.AutoComplete("keywords" , 
+                                          "keywordsautocomplete" , validKeywords);
+    keywordAutoComplete.prehighlightClassName = "yui-ac-prehighlight";
+    //keywordAutoComplete.typeAhead = true;
+    keywordAutoComplete.useShadow = true;
+    keywordAutoComplete.minQueryLength = 0;
+    keywordAutoComplete.queryDelay = 0.05;
+    keywordAutoComplete.delimChar = [" "];
+    keywordAutoComplete.maxResultsDisplayed = 333;
+    keywordAutoComplete.useIFrame = true;
+    keywordAutoComplete.textboxFocusEvent.subscribe( function(){
+      var sInputValue = YAHOO.util.Dom.get('keywords').value;
+      if(sInputValue.length === 0) {
+          var oSelf = this;
+          setTimeout(function(){oSelf.sendQuery(sInputValue);},0);
+      }
+    });
+    keywordAutoComplete.formatResult = function(oResultItem, sQuery) { 
+        var sMarkup = "<span title='" +  oResultItem[1] + "'>" + oResultItem[0] + "<\/span> " ; 
+        return (sMarkup); 
+    }; 
+  };initKeywords();
+</script>
+
+<hr>
+<ul class="related_actions">
+    <li><a href="show_bug.cgi?format=multiple&amp;id=212539">Format For Printing</a></li>
+    <li>&nbsp;-&nbsp;<a href="show_bug.cgi?ctype=xml&amp;id=212539">XML</a></li>
+    <li>&nbsp;-&nbsp;<a href="enter_bug.cgi?cloned_bug_id=212539">Clone This Bug</a></li>
+    
+    <li>&nbsp;-&nbsp;<a href="#">Top of page </a></li>
+    </ul>        
+
+
+<div class="navigation">
+  
+  
+  <i><font color="#777777">First</font></i>
+  <i><font color="#777777">Last</font></i>
+  <i><font color="#777777">Prev</font></i>
+  <i><font color="#777777">Next</font></i>
+  &nbsp;&nbsp;
+  <i><font color="#777777">No search results available</font></i>
+</div>
+
+<br>
+</div>
+
+
+
+<div id="footer">
+  <div class="intro"></div>
+
+
+
+
+<ul id="useful-links">
+  <li id="links-actions"><ul class="links">
+  <li><a href="./">Home</a></li>
+  <li><span class="separator">| </span><a href="enter_bug.cgi">New</a></li>
+  <li><span class="separator">| </span><a href="query.cgi">Search</a></li>
+
+  <li class="form">
+    <span class="separator">| </span>
+    <form action="buglist.cgi" method="get"
+        onsubmit="if (this.quicksearch.value == '')
+                  { alert('Please enter one or more search terms first.');
+                    return false; } return true;">
+    <input class="txt" type="text" id="quicksearch_bottom" name="quicksearch">
+    <input class="btn" type="submit" value="Find" id="find_bottom"></form></li>
+
+  <li><span class="separator">| </span><a href="report.cgi">Reports</a></li>
+
+  <li>
+      <span class="separator">| </span>
+        <a href="request.cgi">Requests</a></li>
+
+
+  <li>
+        <span class="separator">| </span>
+        <a href="http://www.bugzilla.org/docs/3.4/en/html/bug_page.html" target="_blank">Help</a>
+      </li>
+    
+      <li id="new_account_container_bottom">
+        <span class="separator">| </span>
+        <a href="createaccount.cgi">New&nbsp;Account</a>
+      </li>
+
+    <li id="mini_login_container_bottom">
+  <span class="separator">| </span>
+  <a id="login_link_bottom" href="?GoAheadAndLogIn=1"
+     onclick="return show_mini_login_form('_bottom')">Log In</a>
+  <form action="https://bugzilla.mozilla.org/show_bug.cgi?id=212539" method="POST" 
+        class="mini_login bz_default_hidden"
+        id="mini_login_bottom"
+        onsubmit="return check_mini_login_fields( '_bottom' );"
+  >
+    <input id="Bugzilla_login_bottom" 
+           class="bz_login"
+           name="Bugzilla_login"
+           onfocus="mini_login_on_focus('_bottom')"
+    >
+    <input class="bz_password" 
+           id="Bugzilla_password_bottom" 
+           name="Bugzilla_password"
+           type="password"
+    >
+    <input class="bz_password bz_default_hidden bz_mini_login_help" type="text" 
+           id="Bugzilla_password_dummy_bottom" value="password"
+           onfocus="mini_login_on_focus('_bottom')"
+    >
+      <input type="checkbox" id="Bugzilla_remember_bottom" 
+             name="Bugzilla_remember" value="on" class="bz_remember"
+                 checked>
+      <label for="Bugzilla_remember_bottom">Remember</label>
+    <input type="submit" name="GoAheadAndLogIn" value="Log in" 
+            id="log_in_bottom">
+    <script type="text/javascript">
+      mini_login_constants = {
+          "login" : "e-mail address",
+          "warning" : "You must set the e-mail address and password before logging in."
+      };
+      
+      if (YAHOO.env.ua.gecko || YAHOO.env.ua.ie || YAHOO.env.ua.opera) {
+          YAHOO.util.Event.onDOMReady(function() {
+              init_mini_login_form('_bottom');
+          });
+      }
+      else {
+          YAHOO.util.Event.on(window, 'load', function () {
+              window.setTimeout(function() {
+                  init_mini_login_form('_bottom');
+              }, 200);
+          });
+    }
+    </script>
+    <a href="#" onclick="return hide_mini_login_form('_bottom')">[x]</a>
+  </form>
+</li>
+<li id="forgot_container_bottom">
+  <span class="separator">| </span>
+  <a id="forgot_link_bottom" href="?GoAheadAndLogIn=1#forgot"
+     onclick="return show_forgot_form('_bottom')">Forgot Password</a>
+  <form action="token.cgi" method="post" id="forgot_form_bottom"
+        class="mini_forgot bz_default_hidden">
+    <label>Login: <input type="text" name="loginname" size="20"></label>
+    <input id="forgot_button_bottom" value="Reset Password" 
+           type="submit">
+    <input type="hidden" name="a" value="reqpw">
+    <a href="#" onclick="return hide_forgot_form('_bottom')">[x]</a>
+  </form>
+</li>
+</ul>
+  </li>
+
+  
+    
+
+  
+
+
+  
+</ul>
+
+  <div class="outro"></div>
+</div>
+
+</body>
+</html>

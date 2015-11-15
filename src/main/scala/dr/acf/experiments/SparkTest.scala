@@ -1,3 +1,5 @@
+package dr.acf.experiments
+
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
