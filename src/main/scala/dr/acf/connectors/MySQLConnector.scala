@@ -1,7 +1,5 @@
 package dr.acf.connectors
 
-import java.sql.DriverManager
-
 import com.typesafe.config.ConfigFactory
 import dr.acf.spark.SparkOps
 import org.apache.spark.sql.DataFrame
@@ -13,16 +11,56 @@ trait MySQLConnector {
 
   this: SparkOps =>
 
-  def mySQLdf(query: String): DataFrame = {
-    // MySQL test
-    Class.forName("com.mysql.jdbc.Driver")
+  private lazy val url = {
     val conf = ConfigFactory.load()
     val url = conf.getString("mySQL.url")
     val username = conf.getString("mySQL.username")
     val password = conf.getString("mySQL.password")
+    url + "?user=" + username + "&password=" + password
+  }
+
+  /**
+    * Returns a Data Frame backed by query
+    * @param dbtable - the query behind the dataframe
+    * @return a DataFrame wrapper over the database rows
+    */
+  def mySQLDF(dbtable: String): DataFrame = {
+
     val jdbcDF = sqlContext.read.format("jdbc").options(
-      Map("url" -> (url + "?user=" + username + "&password=" + password),
-        "dbtable" -> query)
+      Map("url" -> url,
+        "dbtable" -> dbtable)
+    ).load()
+    jdbcDF
+  }
+
+
+  /**
+    * Returns a Data Frame backed by a query or table name
+    * @param dbtable - the query behind the dataframe
+    * @param partitionColumn - the column determining the partition
+    * @param lowerBound - the minimum value of the first placeholder
+    * @param upperBound - the maximum value of the second placeholder
+    *                   The lower and upper bounds are inclusive.
+    * @param numPartitions - the number of partitions.
+    *                      Given a lowerBound of 1, an upperBound of 20, and a numPartitions of 2,
+    *                      the query would be executed twice,
+    *                      once with (1, 10) and once with (11, 20)
+    * @return a DataFrame wrapper over the database rows
+    */
+  def mySQLDF(dbtable: String,
+              partitionColumn: String,
+              lowerBound: Int,
+              upperBound: Int,
+              numPartitions: Int): DataFrame = {
+
+    val jdbcDF = sqlContext.read.format("jdbc").options(
+      Map("url" -> url,
+        "dbtable" -> dbtable,
+        "partitionColumn" -> partitionColumn,
+        "lowerBound" -> lowerBound.toString,
+        "upperBound" -> upperBound.toString,
+        "numPartitions" -> numPartitions.toString
+      )
     ).load()
     jdbcDF
   }

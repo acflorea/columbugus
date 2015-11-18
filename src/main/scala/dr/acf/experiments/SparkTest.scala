@@ -16,7 +16,7 @@ object SparkTest extends SparkOps with MySQLConnector {
     println("Lines with a: %s, Lines with b: %s".format(numAs, numBs))
 
     // MySQL tests
-    val jdbcDF = mySQLdf("(select bug_id, assigned_to, bug_status from bugs) as bugslice")
+    val jdbcDF = mySQLDF("(select bug_id, assigned_to, bug_status from bugs) as bugslice")
     jdbcDF.collect() foreach println
 
   }
