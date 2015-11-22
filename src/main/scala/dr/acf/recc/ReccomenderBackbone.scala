@@ -2,7 +2,10 @@ package dr.acf.recc
 
 import dr.acf.connectors.MySQLConnector
 import dr.acf.spark.SparkOps
+import org.apache.spark.ml.feature.{RegexTokenizer, IDF, HashingTF, Tokenizer}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.Row
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 
 /**
   * The main algorithm behind the Reccomender System
@@ -14,9 +17,23 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
     // Step 1 - load data from DB
 
-    val bugInfoRDD: RDD[(Int, String)] = buildBugsRDD
+    val bugInfoRDD: RDD[Row] = buildBugsRDD
 
-    bugInfoRDD.take(1).foreach(println)
+    val schema =
+      StructType(
+        StructField("bug_id", IntegerType, false) ::
+          StructField("bug_data", StringType, false) :: Nil)
+    val bugInfoDF = sqlContext.createDataFrame(bugInfoRDD, schema)
+
+    val tokenizer = new RegexTokenizer("\\w+|\\$[\\d\\.]+|\\S+").
+      setMinTokenLength(3).setInputCol("bug_data").setOutputCol("words")
+    val wordsData = tokenizer.transform(bugInfoDF)
+    val hashingTF = new HashingTF().setInputCol("words").setOutputCol("rawFeatures").setNumFeatures(20)
+    val featurizedData = hashingTF.transform(wordsData)
+    val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
+    val idfModel = idf.fit(featurizedData)
+    val rescaledData = idfModel.transform(featurizedData)
+    rescaledData.select("features", "words", "bug_id").take(3).foreach(println)
 
     val stopHere = true
 
@@ -32,7 +49,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     * (the description and comments are included)
     * @return
     */
-  def buildBugsRDD: RDD[(Int, String)] = {
+  def buildBugsRDD: RDD[Row] = {
     // Main bug data
     val bugsDataFrame = mySQLDF(
       "(" +
@@ -73,13 +90,12 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       map(row => (row.getInt(0), s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}")).
       reduceByKey((c1, c2) => s"$c1\n$c2")
 
-
     idAndDescRDD.leftOuterJoin[String](bugsLongdescsRDD).
       map { row =>
         val key = row._1
         val desc = row._2._1
         val commentsOpt = row._2._2
-        (key, commentsOpt match {
+        Row(key, commentsOpt match {
           case Some(comments) => s"$desc\n$comments"
           case None => desc
         })
