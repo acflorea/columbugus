@@ -1,5 +1,6 @@
 package dr.acf.recc
 
+import com.typesafe.config.ConfigFactory
 import dr.acf.connectors.MySQLConnector
 import dr.acf.spark.SparkOps
 import org.apache.spark.ml.feature.{RegexTokenizer, IDF, HashingTF, Tokenizer}
@@ -43,6 +44,11 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
   }
 
+  private lazy val testMode: Boolean = {
+    val conf = ConfigFactory.load()
+    conf.getBoolean("global.testMode")
+  }
+
   /**
     * Returns an RDD containing (bug_id, bug_details) type of data
     * The details are in the form t<timestamp>:: info
@@ -50,6 +56,10 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     * @return
     */
   def buildBugsRDD: RDD[Row] = {
+
+    val extraFilter =
+      (column: String) => if (testMode) s"$column > 10000 and $column < 20000 " else "1 = 1 "
+
     // Main bug data
     val bugsDataFrame = mySQLDF(
       "(" +
@@ -62,6 +72,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         "join components c on b.component_id = c.id " +
         "join products p on c.product_id = p.id " +
         "join classifications cl on p.classification_id = cl.id " +
+        "where " + extraFilter("b.bug_id") +
         ") as bugslice"
     )
 
@@ -70,6 +81,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       "(" +
         "select d.dupe_of, d.dupe " +
         "from duplicates d " +
+        "where " + extraFilter("d.dupe_of") +
         ") as bugduplicates"
     )
 
@@ -78,6 +90,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       "(" +
         "select l.bug_id, l.bug_when, l.thetext " +
         "from longdescs l " +
+        "where " + extraFilter("l.bug_id") +
         ") as buglongdescsslice"
     )
 
