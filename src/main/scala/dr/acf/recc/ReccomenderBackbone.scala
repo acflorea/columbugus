@@ -18,13 +18,10 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
     // Step 1 - load data from DB
 
-    val bugInfoRDD: RDD[Row] = buildBugsRDD
+    val bugInfoRDD: RDD[BugData] = buildBugsRDD
 
-    val schema =
-      StructType(
-        StructField("bug_id", IntegerType, false) ::
-          StructField("bug_data", StringType, false) :: Nil)
-    val bugInfoDF = sqlContext.createDataFrame(bugInfoRDD, schema)
+    import sqlContext.implicits._
+    val bugInfoDF = bugInfoRDD.toDF()
 
     val tokenizer = new RegexTokenizer("\\w+|\\$[\\d\\.]+|\\S+").
       setMinTokenLength(3).setInputCol("bug_data").setOutputCol("words")
@@ -55,7 +52,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     * (the description and comments are included)
     * @return
     */
-  def buildBugsRDD: RDD[Row] = {
+  def buildBugsRDD: RDD[BugData] = {
 
     val extraFilter =
       (column: String) => if (testMode) s"$column > 10000 and $column < 20000 " else "1 = 1 "
@@ -63,8 +60,8 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     // Main bug data
     val bugsDataFrame = mySQLDF(
       "(" +
-        "select b.bug_id, b.creation_ts, b.assigned_to, " +
-        "b.bug_status, b.short_desc, b.component_id, " +
+        "select b.bug_id, b.creation_ts, b.short_desc," +
+        "b.bug_status, b.assigned_to, b.component_id, b.bug_severity, " +
         "c.name as component_name, c.product_id, " +
         "p.name as product_name, p.classification_id, " +
         "cl.name as classification_name " +
@@ -95,24 +92,50 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     )
 
     // ($bug_id,t$timestamp:: $short_desc)
-    val idAndDescRDD = bugsDataFrame.select("bug_id", "creation_ts", "short_desc").
-      map(row => (row.getInt(0), s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}"))
+    val idAndDescRDD = bugsDataFrame.select("bug_id", "creation_ts", "short_desc",
+      "bug_status", "assigned_to", "component_id", "bug_severity").
+      map(row => (row.getInt(0), Row(s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}",
+        row.getString(3), row.getInt(4), row.getInt(5), row.getString(6))))
 
     // ($bug_id,(t$timestamp:: $comment)...)
     val bugsLongdescsRDD = bugsLongdescsDataFrame.
       map(row => (row.getInt(0), s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}")).
-      reduceByKey((c1, c2) => s"$c1\n$c2")
+      reduceByKey((c1, c2) => s"$c1\n$c2").
+      map(row => (row._1, Row(row._2)))
 
-    idAndDescRDD.leftOuterJoin[String](bugsLongdescsRDD).
+    // join dataframes
+    val bugsRDD = idAndDescRDD.leftOuterJoin[Row](bugsLongdescsRDD).
       map { row =>
         val key = row._1
-        val desc = row._2._1
-        val commentsOpt = row._2._2
-        Row(key, commentsOpt match {
-          case Some(comments) => s"$desc\n$comments"
-          case None => desc
-        })
+        val r1 = row._2._1
+        val r2Opt = row._2._2
+        r2Opt match {
+          case Some(r2) =>
+            BugData(
+              key,
+              r1.getString(0) + r2.getString(0),
+              r1.getString(1),
+              r1.getInt(2),
+              r1.getInt(3),
+              r1.getString(4)
+            )
+          case None =>
+            BugData(
+              key,
+              r1.getString(0),
+              r1.getString(1),
+              r1.getInt(2),
+              r1.getInt(3),
+              r1.getString(4)
+            )
+        }
       }
 
+    bugsRDD
   }
 }
+
+case class BugData(bug_id: Integer, bug_data: String,
+                   bug_status: String, assigned_to: Integer,
+                   component_id: Integer, bug_severity: String)
+
