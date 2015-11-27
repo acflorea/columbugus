@@ -14,6 +14,9 @@ trait SparkOps {
     val appName = conf.getString("spark.appName")
 
     val sparkConf = new SparkConf().setMaster(master).setAppName(appName)
+
+    sparkConf.set("spark.driver.memory", conf.getString("spark.driver.memory"))
+
     new SparkContext(sparkConf)
   }
 
