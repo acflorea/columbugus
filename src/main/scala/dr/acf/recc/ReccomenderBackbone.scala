@@ -2,9 +2,8 @@ package dr.acf.recc
 
 import com.typesafe.config.ConfigFactory
 import dr.acf.connectors.MySQLConnector
-import dr.acf.spark.SparkOps
+import dr.acf.spark.{SVMWithSGDMulticlass, SparkOps}
 import org.apache.spark.ml.feature.{HashingTF, IDF, RegexTokenizer}
-import org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS
 import org.apache.spark.mllib.evaluation.MulticlassMetrics
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.regression.LabeledPoint
@@ -63,9 +62,11 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     //    val model = LogisticRegressionWithSGD.train(training, numIterations)
 
     //    // Run training algorithm to build the model
-    val model = new LogisticRegressionWithLBFGS()
-      .setNumClasses(50)
-      .run(training)
+    //    val model = new LogisticRegressionWithLBFGS()
+    //      .setNumClasses(assignments.size)
+    //      .run(training)
+
+    val model = new SVMWithSGDMulticlass().train(training, 150)
 
     // Compute raw scores on the test set.
     val predictionAndLabels = test.map { case LabeledPoint(label, features) =>
@@ -101,9 +102,12 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     }
   }
 
-  private lazy val testMode: Boolean = {
+  private lazy val (testMode, includeComments) = {
     val conf = ConfigFactory.load()
-    conf.getBoolean("global.testMode")
+    (
+      conf.getBoolean("global.testMode"),
+      conf.getBoolean("global.includeComments")
+      )
   }
 
   /**
@@ -114,14 +118,17 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     */
   def buildBugsRDD: (RDD[BugData], RDD[BugAssignmentData]) = {
 
-    val extraFilter =
+    val testFilter =
       (column: String) => if (testMode) s"$column > 10000 and $column < 20000 " else "1 = 1 "
+
+    val resolutionFilter = "resolution = 'FIXED'"
 
     // Main bug data
     val bugsDataFrame = mySQLDF(
       "(" +
         "select b.bug_id, b.creation_ts, b.short_desc," +
         "b.bug_status, b.assigned_to, b.component_id, b.bug_severity, " +
+        "b.resolution, " +
         "c.name as component_name, c.product_id, " +
         "p.name as product_name, p.classification_id, " +
         "cl.name as classification_name " +
@@ -129,16 +136,16 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         "join components c on b.component_id = c.id " +
         "join products p on c.product_id = p.id " +
         "join classifications cl on p.classification_id = cl.id " +
-        "where " + extraFilter("b.bug_id") +
+        "where " + testFilter("b.bug_id") +
         ") as bugslice"
-    )
+    ).filter(resolutionFilter)
 
     // Duplicates -- Which bugs are duplicates of which other bugs.
     val bugsDuplicatesDataFrame = mySQLDF(
       "(" +
         "select d.dupe_of, d.dupe " +
         "from duplicates d " +
-        "where " + extraFilter("d.dupe_of") +
+        "where " + testFilter("d.dupe_of") +
         ") as bugduplicates"
     )
 
@@ -147,7 +154,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       "(" +
         "select l.bug_id, l.bug_when, l.thetext " +
         "from longdescs l " +
-        "where " + extraFilter("l.bug_id") +
+        "where " + testFilter("l.bug_id") +
         ") as buglongdescsslice"
     )
 
@@ -156,7 +163,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       "(" +
         "select b.assigned_to, count(*) as bugs_assigned " +
         "from bugs b " +
-        "where " + extraFilter("b.bug_id") +
+        "where " + testFilter("b.bug_id") +
         "group by b.assigned_to order by bugs_assigned desc" +
         ") as bugslice"
     )
@@ -168,16 +175,19 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         row.getString(3), row.getInt(4), row.getInt(5), row.getString(6))))
 
     // ($bug_id,(t$timestamp:: $comment)...)
-    val bugsLongdescsAndCommentsRDD = bugsLongdescsDataFrame.
-      map(row => (row.getInt(0), s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}")).
-      reduceByKey((c1, c2) => s"$c1\n$c2").
-      map(row => (row._1, Row(row._2)))
-
-    // ($bug_id,(t$timestamp:: $comment))
-    val bugsLongdescsRDD = bugsLongdescsDataFrame.
-      map(row => (row.getInt(0), s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}")).
-      groupByKey().
-      map(row => (row._1, Row(row._2.head)))
+    val bugsLongdescsRDD =
+      if (includeComments) {
+        bugsLongdescsDataFrame.
+          map(row => (row.getInt(0), s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}")).
+          reduceByKey((c1, c2) => s"$c1\n$c2").
+          map(row => (row._1, Row(row._2)))
+      }
+      else {
+        bugsLongdescsDataFrame.
+          map(row => (row.getInt(0), s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}")).
+          groupByKey().
+          map(row => (row._1, Row(row._2.head)))
+      }
 
     val bugAssignmentData = bugAssignmentDataFrame.
       map(row => BugAssignmentData(row.getInt(0), row.getLong(1)))
