@@ -3,7 +3,7 @@ package dr.acf.recc
 import com.typesafe.config.ConfigFactory
 import dr.acf.connectors.MySQLConnector
 import dr.acf.spark.{SVMWithSGDMulticlass, SparkOps}
-import org.apache.spark.ml.feature.{HashingTF, IDF, RegexTokenizer}
+import org.apache.spark.ml.feature.{Tokenizer, HashingTF, IDF, RegexTokenizer}
 import org.apache.spark.mllib.evaluation.MulticlassMetrics
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.regression.LabeledPoint
@@ -20,6 +20,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
     // Step 1 - load data from DB
 
+
     val (bugInfoRDD: RDD[BugData], bugsAssignmentRDD: RDD[BugAssignmentData]) = buildBugsRDD
     import sqlContext.implicits._
     val bugInfoDF = bugInfoRDD.toDF()
@@ -28,13 +29,15 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       zipWithIndex.map(elem => elem._1.assigned_to -> elem._2).toMap
 
     // Step 2 - extract features
-    // val tokenizer = new Tokenizer().setInputCol("bug_data").setOutputCol("words")
+    val tokenizer = if (tokenizerType == 0)
+      new Tokenizer().setInputCol("bug_data").setOutputCol("words")
+    else
+      new RegexTokenizer("\\w+|\\$[\\d\\.]+|\\S+").
+        setMinTokenLength(minWordSize).setInputCol("bug_data").setOutputCol("words")
 
-    val tokenizer = new RegexTokenizer("\\w+|\\$[\\d\\.]+|\\S+").
-      setMinTokenLength(3).setInputCol("bug_data").setOutputCol("words")
     val wordsData = tokenizer.transform(bugInfoDF)
     val hashingTF = new HashingTF().setInputCol("words").setOutputCol("rawFeatures")
-    // .setNumFeatures(50)
+    //.setNumFeatures(20)
 
     val featurizedData = hashingTF.transform(wordsData)
     val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
@@ -66,7 +69,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     //      .setNumClasses(assignments.size)
     //      .run(training)
 
-    val model = new SVMWithSGDMulticlass().train(training, 150)
+    val model = new SVMWithSGDMulticlass().train(training, 250)
 
     // Compute raw scores on the test set.
     val predictionAndLabels = test.map { case LabeledPoint(label, features) =>
@@ -76,13 +79,18 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
     // Get evaluation metrics.
     val metrics = new MulticlassMetrics(predictionAndLabels)
-    val precision = metrics.precision
-    val recall = metrics.recall
-    val fMeasure = metrics.fMeasure
 
-    println("Precision = " + precision)
-    println("Recall = " + recall)
+    val fMeasure = metrics.fMeasure
+    val weightedPrecision = metrics.weightedPrecision
+    val weightedRecall = metrics.weightedRecall
+    val weightedFMeasure = metrics.weightedFMeasure
+
+
     println("fMeasure = " + fMeasure)
+    println("Weighted Precision = " + weightedPrecision)
+    println("Weighted Recall = " + weightedRecall)
+    println("Weighted fMeasure = " + weightedFMeasure)
+
 
     // Step 3...Infinity - TDB
 
@@ -102,11 +110,13 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     }
   }
 
-  private lazy val (testMode, includeComments) = {
+  private lazy val (testMode, includeComments, tokenizerType, minWordSize) = {
     val conf = ConfigFactory.load()
     (
       conf.getBoolean("global.testMode"),
-      conf.getBoolean("global.includeComments")
+      conf.getBoolean("global.includeComments"),
+      conf.getInt("global.tokenizerType"),
+      conf.getInt("global.minWordSize")
       )
   }
 
@@ -119,16 +129,18 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
   def buildBugsRDD: (RDD[BugData], RDD[BugAssignmentData]) = {
 
     val testFilter =
-      (column: String) => if (testMode) s"$column > 10000 and $column < 20000 " else "1 = 1 "
+      (column: String) => if (testMode) s"$column > 315000 " else "1 = 1 "
 
     val resolutionFilter = "resolution = 'FIXED'"
+
+    val dateFilter = "delta_ts = 'FIXED'"
 
     // Main bug data
     val bugsDataFrame = mySQLDF(
       "(" +
         "select b.bug_id, b.creation_ts, b.short_desc," +
         "b.bug_status, b.assigned_to, b.component_id, b.bug_severity, " +
-        "b.resolution, " +
+        "b.resolution, b.delta_ts, " +
         "c.name as component_name, c.product_id, " +
         "p.name as product_name, p.classification_id, " +
         "cl.name as classification_name " +

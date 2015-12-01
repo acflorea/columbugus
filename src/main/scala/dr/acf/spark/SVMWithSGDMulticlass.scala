@@ -1,5 +1,6 @@
 package dr.acf.spark
 
+import org.apache.spark.annotation.Since
 import org.apache.spark.mllib.classification.{ClassificationModel, SVMModel, SVMWithSGD}
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.regression.LabeledPoint
@@ -10,17 +11,28 @@ import org.apache.spark.rdd.RDD
   */
 class SVMWithSGDMulticlass {
 
+
   /**
     * Train k (one vs. all) SVM models given an RDD of (label, features) pairs. We run a fixed number
-    * of iterations of gradient descent using a step size of 1.0. We use the entire data set to
-    * update the gradient in each iteration.
-    * NOTE: Labels used in SVM should be {0, 1, 2 ... k-1}
+    * of iterations of gradient descent using the specified step size. Each iteration uses
+    * `miniBatchFraction` fraction of the data to calculate the gradient. The weights used in
+    * gradient descent are initialized using the initial weights provided.
+    *
+    * NOTE: Labels used in SVM should be {0, 1}.
     *
     * @param input RDD of (label, array of features) pairs.
     * @param numIterations Number of iterations of gradient descent to run.
-    * @return a SVMModel which has the weights and offset from training.
+    * @param stepSize Step size to be used for each iteration of gradient descent.
+    * @param regParam Regularization parameter.
+    * @param miniBatchFraction Fraction of data to be used per iteration.
     */
-  def train(input: RDD[LabeledPoint], numIterations: Int): SVMMultiModel = {
+  def train(
+             input: RDD[LabeledPoint],
+             numIterations: Int,
+             stepSize: Double,
+             regParam: Double,
+             miniBatchFraction: Double): SVMMultiModel = {
+
 
     // determine number of classes
     val numberOfClasses = input.map(point => point.label).max().toInt
@@ -43,6 +55,21 @@ class SVMWithSGDMulticlass {
     }.toArray
 
     new SVMMultiModel(binaryModels)
+
+  }
+
+  /**
+    * Train k (one vs. all) SVM models given an RDD of (label, features) pairs. We run a fixed number
+    * of iterations of gradient descent using a step size of 1.0. We use the entire data set to
+    * update the gradient in each iteration.
+    * NOTE: Labels used in SVM should be {0, 1, 2 ... k-1}
+    *
+    * @param input RDD of (label, array of features) pairs.
+    * @param numIterations Number of iterations of gradient descent to run.
+    * @return a SVMModel which has the weights and offset from training.
+    */
+  def train(input: RDD[LabeledPoint], numIterations: Int): SVMMultiModel = {
+    train(input, numIterations, 1.0, 0.01, 1.0)
   }
 
 }
@@ -53,7 +80,7 @@ object SVMWithSGDMulticlass {
 
 /**
   * A bag of one-vs-all models
-  * @param models
+  * @param models array of one vs. all models
   */
 class SVMMultiModel(models: Array[SVMModel]) extends ClassificationModel with Serializable {
 
