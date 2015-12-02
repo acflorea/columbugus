@@ -9,6 +9,7 @@ import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Row
+import org.slf4j.LoggerFactory
 
 /**
   * The main algorithm behind the Reccomender System
@@ -16,10 +17,13 @@ import org.apache.spark.sql.Row
   */
 object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
+  def logger = LoggerFactory.getLogger(getClass.getName)
+
   def main(args: Array[String]) {
 
     // Step 1 - load data from DB
 
+    logger.debug("Start!")
 
     val (bugInfoRDD: RDD[BugData], bugsAssignmentRDD: RDD[BugAssignmentData]) = buildBugsRDD
     import sqlContext.implicits._
@@ -69,7 +73,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     //      .setNumClasses(assignments.size)
     //      .run(training)
 
-    val model = new SVMWithSGDMulticlass().train(training, 250)
+    val model = new SVMWithSGDMulticlass().train(training, 250, 1, 0.01, 1)
 
     // Compute raw scores on the test set.
     val predictionAndLabels = test.map { case LabeledPoint(label, features) =>
@@ -129,7 +133,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
   def buildBugsRDD: (RDD[BugData], RDD[BugAssignmentData]) = {
 
     val testFilter =
-      (column: String) => if (testMode) s"$column > 315000 " else "1 = 1 "
+      (column: String) => if (testMode) s"$column > 318000 " else "1 = 1 "
 
     val resolutionFilter = "resolution = 'FIXED'"
 

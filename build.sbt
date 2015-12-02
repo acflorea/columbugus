@@ -14,4 +14,5 @@ libraryDependencies ++= Seq("org.apache.spark" %% "spark-core" % "1.5.2" % "prov
   , "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.6.1"
   , "com.typesafe" % "config" % "1.3.0"
   , "mysql" % "mysql-connector-java" % "5.1.37"
+  // , "ch.qos.logback" % "logback-classic" % "1.0.13"
 )

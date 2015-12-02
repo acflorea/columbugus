@@ -1,16 +1,17 @@
 package dr.acf.spark
 
-import org.apache.spark.annotation.Since
 import org.apache.spark.mllib.classification.{ClassificationModel, SVMModel, SVMWithSGD}
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
+import org.slf4j.LoggerFactory
 
 /**
   * Created by aflorea on 29.11.2015.
   */
 class SVMWithSGDMulticlass {
 
+  def logger = LoggerFactory.getLogger(getClass.getName)
 
   /**
     * Train k (one vs. all) SVM models given an RDD of (label, features) pairs. We run a fixed number
@@ -37,6 +38,8 @@ class SVMWithSGDMulticlass {
     // determine number of classes
     val numberOfClasses = input.map(point => point.label).max().toInt
 
+    logger.debug(s"Training SVMWithSGDMulticlass for $numberOfClasses distinct classes")
+
     val binaryModels = (0 until numberOfClasses).map { i =>
 
       // one vs all - map class labels
@@ -44,10 +47,14 @@ class SVMWithSGDMulticlass {
         case LabeledPoint(label, features) => LabeledPoint(if (label == i) 1.0 else 0.0, features)
       }
 
+      logger.debug(s"Train $i vs all - training started")
+
       // train each model
       inputProjection.cache()
-      val model = SVMWithSGD.train(inputProjection, numIterations)
+      val model = SVMWithSGD.train(inputProjection, numIterations, stepSize, regParam, miniBatchFraction)
       inputProjection.unpersist(false)
+
+      logger.debug(s"Train $i vs all - training complete")
 
       model.clearThreshold()
       model
