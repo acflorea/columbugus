@@ -133,9 +133,10 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
   def buildBugsRDD: (RDD[BugData], RDD[BugAssignmentData]) = {
 
     val testFilter =
-      (column: String) => if (testMode) s"$column > 318000 " else "1 = 1 "
+      (column: String) => if (testMode) s"$column > 315000 " else "1 = 1 "
 
-    val resolutionFilter = "resolution = 'FIXED'"
+    val resolutionFilter =
+      (prefix: String) => s"${prefix}resolution = 'FIXED'"
 
     val dateFilter = "delta_ts = 'FIXED'"
 
@@ -154,7 +155,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         "join classifications cl on p.classification_id = cl.id " +
         "where " + testFilter("b.bug_id") +
         ") as bugslice"
-    ).filter(resolutionFilter)
+    ).filter(resolutionFilter(""))
 
     // Duplicates -- Which bugs are duplicates of which other bugs.
     val bugsDuplicatesDataFrame = mySQLDF(
@@ -179,7 +180,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       "(" +
         "select b.assigned_to, count(*) as bugs_assigned " +
         "from bugs b " +
-        "where " + testFilter("b.bug_id") +
+        "where " + testFilter("b.bug_id") + " AND " + resolutionFilter("b.") + " " +
         "group by b.assigned_to order by bugs_assigned desc" +
         ") as bugslice"
     )
