@@ -6,6 +6,8 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
 import org.slf4j.LoggerFactory
 
+import scala.collection.parallel.ForkJoinTaskSupport
+
 /**
   * Created by aflorea on 29.11.2015.
   */
@@ -38,9 +40,14 @@ class SVMWithSGDMulticlass {
     // determine number of classes
     val numberOfClasses = input.map(point => point.label).max().toInt
 
-    logger.debug(s"Training SVMWithSGDMulticlass for $numberOfClasses distinct classes")
+    logger.debug(s"Training SVMWithSGDMulticlass for ${numberOfClasses+1} distinct classes")
 
-    val binaryModels = (0 until numberOfClasses).map { i =>
+    val binaryModelIds = (0 until numberOfClasses).par
+
+    binaryModelIds.tasksupport =
+      new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(10))
+
+    val binaryModels = binaryModelIds.map { i =>
 
       // one vs all - map class labels
       val inputProjection = input.map {

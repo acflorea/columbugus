@@ -1,5 +1,7 @@
 package dr.acf.recc
 
+import java.sql.Timestamp
+
 import com.typesafe.config.ConfigFactory
 import dr.acf.connectors.MySQLConnector
 import dr.acf.spark.{SVMWithSGDMulticlass, SparkOps}
@@ -17,20 +19,29 @@ import org.slf4j.LoggerFactory
   */
 object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
-  def logger = LoggerFactory.getLogger(getClass.getName)
+  // cofig stuff
+  val conf = ConfigFactory.load()
+
+  val logger = LoggerFactory.getLogger(getClass.getName)
 
   def main(args: Array[String]) {
+    import sqlContext.implicits._
+
+    // Charge configs
+    val tokenizerType = conf.getInt("global.tokenizerType")
+    val minWordSize = conf.getInt("global.minWordSize")
 
     // Step 1 - load data from DB
 
     logger.debug("Start!")
+    val currentTime = System.currentTimeMillis()
 
     val (bugInfoRDD: RDD[BugData], bugsAssignmentRDD: RDD[BugAssignmentData]) = buildBugsRDD
-    import sqlContext.implicits._
-    val bugInfoDF = bugInfoRDD.toDF()
-
     val assignments = bugsAssignmentRDD.collect.
       zipWithIndex.map(elem => elem._1.assigned_to -> elem._2).toMap
+
+    // We only care about the "valid" users (#validUsersFilter)
+    val bugInfoDF = bugInfoRDD.filter(bugData => assignments.contains(bugData.assigned_to)).toDF()
 
     // Step 2 - extract features
     val tokenizer = if (tokenizerType == 0)
@@ -52,6 +63,9 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     val labeledPoints = rescaledData.select("features", "assigned_to").
       map { point =>
         val features = point.getAs[Vector]("features")
+        // map bugs to list of assignments (valid users)
+        // dump all "invalid" entries to a dummy extra class
+        // usefull if #validUsersFilter is disabled
         val assigned_to = assignments.get(point.getAs[Integer]("assigned_to")) match {
           case Some(index) => index
           case None => assignments.size + 1
@@ -60,20 +74,15 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       }
 
     // Split data into training (60%) and test (40%).
-    val splits = labeledPoints.randomSplit(Array(0.6, 0.4), seed = 11L)
+    val splits = labeledPoints.randomSplit(Array(0.9, 0.1), seed = 123456789L)
     val training = splits(0).cache()
     val test = splits(1)
 
+    logger.debug(s"Training data size ${training.count()}")
+    logger.debug(s"Test data size ${test.count()}")
+
     // Run training algorithm to build the model
-    // val numIterations = 20
-    //    val model = LogisticRegressionWithSGD.train(training, numIterations)
-
-    //    // Run training algorithm to build the model
-    //    val model = new LogisticRegressionWithLBFGS()
-    //      .setNumClasses(assignments.size)
-    //      .run(training)
-
-    val model = new SVMWithSGDMulticlass().train(training, 250, 1, 0.01, 1)
+    val model = new SVMWithSGDMulticlass().train(training, 100, 1, 0.01, 1)
 
     // Compute raw scores on the test set.
     val predictionAndLabels = test.map { case LabeledPoint(label, features) =>
@@ -100,6 +109,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
     val stopHere = true
 
+    logger.debug(s"We're done in ${(System.currentTimeMillis() - currentTime) / 1000} seconds!")
   }
 
   def severityLevel(severity: String): Double = {
@@ -114,16 +124,6 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     }
   }
 
-  private lazy val (testMode, includeComments, tokenizerType, minWordSize) = {
-    val conf = ConfigFactory.load()
-    (
-      conf.getBoolean("global.testMode"),
-      conf.getBoolean("global.includeComments"),
-      conf.getInt("global.tokenizerType"),
-      conf.getInt("global.minWordSize")
-      )
-  }
-
   /**
     * Returns an RDD containing (bug_id, bug_details) type of data
     * The details are in the form t<timestamp>:: info
@@ -132,13 +132,41 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     */
   def buildBugsRDD: (RDD[BugData], RDD[BugAssignmentData]) = {
 
+    // Charge configs
+    val testMode = conf.getBoolean("global.testMode")
+    val includeComments = conf.getBoolean("global.includeComments")
+    val issuesThreshold = conf.getInt("global.issuesThreshold")
+    val timeThreshold = conf.getInt("global.timeThreshold")
+
     val testFilter =
-      (column: String) => if (testMode) s"$column > 315000 " else "1 = 1 "
+      (column: String) => if (testMode) s"$column > 300000 " else "1 = 1 "
 
     val resolutionFilter =
       (prefix: String) => s"${prefix}resolution = 'FIXED'"
 
-    val dateFilter = "delta_ts = 'FIXED'"
+    val minIssuesFilter =
+      (prefix: String) => s"${prefix}bugs_assigned > '$issuesThreshold'"
+
+    val mostRecentDateWithDelta = mySQLDF(s"(select DATE_SUB(max(delta_ts), INTERVAL $timeThreshold DAY) from bugs) as maxDate").
+      collect().head.getTimestamp(0)
+
+    val dateFilter =
+      (prefix: String) => s"${prefix}delta_ts > '$mostRecentDateWithDelta'"
+
+    // Assignment data - all users with more than "issuesThreshold" items fixed
+    // after "mostRecentDateWithDelta"
+    val bugAssignmentDataFrame = mySQLDF(
+      "(" +
+        "select b.assigned_to, count(*) as bugs_assigned " +
+        "from bugs b " +
+        "where " + testFilter("b.bug_id") +
+        " AND " + resolutionFilter("b.") + " " +
+        " AND " + dateFilter("b.") + " " +
+        "group by b.assigned_to " +
+        "having " + minIssuesFilter("") + " " +
+        "order by bugs_assigned desc" +
+        ") as bugslice"
+    )
 
     // Main bug data
     val bugsDataFrame = mySQLDF(
@@ -154,8 +182,9 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         "join products p on c.product_id = p.id " +
         "join classifications cl on p.classification_id = cl.id " +
         "where " + testFilter("b.bug_id") +
+        " AND " + resolutionFilter("b.") + " " +
         ") as bugslice"
-    ).filter(resolutionFilter(""))
+    )
 
     // Duplicates -- Which bugs are duplicates of which other bugs.
     val bugsDuplicatesDataFrame = mySQLDF(
@@ -173,16 +202,6 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         "from longdescs l " +
         "where " + testFilter("l.bug_id") +
         ") as buglongdescsslice"
-    )
-
-    // Assignment data
-    val bugAssignmentDataFrame = mySQLDF(
-      "(" +
-        "select b.assigned_to, count(*) as bugs_assigned " +
-        "from bugs b " +
-        "where " + testFilter("b.bug_id") + " AND " + resolutionFilter("b.") + " " +
-        "group by b.assigned_to order by bugs_assigned desc" +
-        ") as bugslice"
     )
 
     // ($bug_id,t$timestamp:: $short_desc)
