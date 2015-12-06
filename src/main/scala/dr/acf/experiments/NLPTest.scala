@@ -1,12 +1,9 @@
 package dr.acf.experiments
 
-import java.util
 import java.util.Properties
 
 import edu.stanford.nlp.ling.CoreAnnotations._
-import edu.stanford.nlp.ling.CoreLabel
 import edu.stanford.nlp.pipeline.{Annotation, StanfordCoreNLP}
-import edu.stanford.nlp.util.CoreMap
 
 import scala.collection.JavaConverters._
 

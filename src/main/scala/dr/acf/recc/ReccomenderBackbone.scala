@@ -4,7 +4,7 @@ import java.sql.Timestamp
 
 import com.typesafe.config.ConfigFactory
 import dr.acf.connectors.MySQLConnector
-import dr.acf.spark.{SVMWithSGDMulticlass, SparkOps}
+import dr.acf.spark.{NLPTokenizer, SVMWithSGDMulticlass, SparkOps}
 import org.apache.spark.ml.feature.{Tokenizer, HashingTF, IDF, RegexTokenizer}
 import org.apache.spark.mllib.evaluation.MulticlassMetrics
 import org.apache.spark.mllib.linalg.Vector
@@ -44,13 +44,15 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     val bugInfoDF = bugInfoRDD.filter(bugData => assignments.contains(bugData.assigned_to)).toDF()
 
     // Step 2 - extract features
-    val tokenizer = if (tokenizerType == 0)
-      new Tokenizer().setInputCol("bug_data").setOutputCol("words")
-    else
-      new RegexTokenizer("\\w+|\\$[\\d\\.]+|\\S+").
+    val tokenizer = tokenizerType match {
+      case 0 => new Tokenizer().setInputCol("bug_data").setOutputCol("words")
+      case 1 => new RegexTokenizer("\\w+|\\$[\\d\\.]+|\\S+").
         setMinTokenLength(minWordSize).setInputCol("bug_data").setOutputCol("words")
+      case _ => new NLPTokenizer().setInputCol("bug_data").setOutputCol("words")
+    }
 
     val wordsData = tokenizer.transform(bugInfoDF)
+
     val hashingTF = new HashingTF().setInputCol("words").setOutputCol("rawFeatures")
     //.setNumFeatures(20)
 
@@ -215,12 +217,14 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       if (includeComments) {
         bugsLongdescsDataFrame.
           map(row => (row.getInt(0), s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}")).
+          // map(row => (row.getInt(0), row.getString(2))).
           reduceByKey((c1, c2) => s"$c1\n$c2").
           map(row => (row._1, Row(row._2)))
       }
       else {
         bugsLongdescsDataFrame.
           map(row => (row.getInt(0), s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}")).
+          // map(row => (row.getInt(0), row.getString(2))).
           groupByKey().
           map(row => (row._1, Row(row._2.head)))
       }
