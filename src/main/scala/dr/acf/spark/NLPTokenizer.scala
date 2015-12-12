@@ -2,13 +2,14 @@ package dr.acf.spark
 
 import java.util.Properties
 
-import edu.stanford.nlp.ling.CoreAnnotations.{PartOfSpeechAnnotation, TextAnnotation, TokensAnnotation, SentencesAnnotation}
-import edu.stanford.nlp.pipeline.{Annotation, StanfordCoreNLP}
+import edu.stanford.nlp.ling.CoreAnnotations.{PartOfSpeechAnnotation, TextAnnotation, TokensAnnotation}
+import edu.stanford.nlp.pipeline.Annotation
 import org.apache.spark.ml.UnaryTransformer
-import org.apache.spark.ml.feature.Tokenizer
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.util.Identifiable
-import org.apache.spark.sql.types.{StringType, ArrayType, DataType}
+import org.apache.spark.sql.types.{ArrayType, DataType, StringType}
+import org.slf4j.LoggerFactory
+
 import scala.collection.JavaConverters._
 
 /**
@@ -22,10 +23,13 @@ class NLPTokenizer(override val uid: String)
   // creates a StanfordCoreNLP object, with POS tagging
   val props = new Properties()
   props.setProperty("annotators", "tokenize, ssplit, pos")
-  props.setProperty("tokenizerOptions", "untokenizable=noneDelete")
   val wrapper = new StanfordCoreNLPWrapper(props)
 
+  val logger = LoggerFactory.getLogger(getClass.getName)
+
   override protected def createTransformFunc: String => Seq[String] = { text =>
+
+    val currentTime = System.currentTimeMillis()
 
     val pipeline = wrapper.get
 
@@ -35,20 +39,14 @@ class NLPTokenizer(override val uid: String)
     // run all Annotators on this text
     pipeline.annotate(document)
 
-    // these are all the sentences in this document
-    val sentences = document.get(classOf[SentencesAnnotation]).asScala
-
-    sentences flatMap { sentence =>
-      // traversing the words in the current sentence
-      // a CoreLabel is a CoreMap with additional token-specific methods
-      sentence.get(classOf[TokensAnnotation]).asScala filter { token =>
-        // this is the POS tag of the token - ONLY NOUNS
-        token.get(classOf[PartOfSpeechAnnotation]).startsWith("NN")
-      } map { token =>
-        // this is the text of the token
+    val tokens = document.get(classOf[TokensAnnotation]).asScala collect {
+      case token if token.get(classOf[PartOfSpeechAnnotation]).startsWith("NN") =>
         token.get(classOf[TextAnnotation])
-      }
     }
+
+    logger.debug(s"${text.length} chars tokenized in ${System.currentTimeMillis() - currentTime}")
+
+    tokens
   }
 
   override protected def validateInputType(inputType: DataType): Unit = {

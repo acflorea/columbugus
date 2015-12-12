@@ -10,7 +10,7 @@ import org.apache.spark.mllib.evaluation.MulticlassMetrics
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.Row
+import org.apache.spark.sql.{Column, Row}
 import org.slf4j.LoggerFactory
 
 /**
@@ -67,7 +67,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         val features = point.getAs[Vector]("features")
         // map bugs to list of assignments (valid users)
         // dump all "invalid" entries to a dummy extra class
-        // usefull if #validUsersFilter is disabled
+        // useful if #validUsersFilter is disabled
         val assigned_to = assignments.get(point.getAs[Integer]("assigned_to")) match {
           case Some(index) => index
           case None => assignments.size + 1
@@ -242,7 +242,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
           case Some(r2) =>
             BugData(
               key,
-              r1.getString(0) + r2.getString(0),
+              s"${r1.getString(0)}\n${r2.getString(0)}",
               r1.getString(1),
               r1.getInt(2),
               r1.getInt(3),
