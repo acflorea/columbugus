@@ -38,7 +38,7 @@ class SVMWithSGDMulticlass {
 
 
     // determine number of classes
-    val numberOfClasses = input.map(point => point.label).max().toInt
+    val numberOfClasses = input.map(point => point.label).distinct().count().toInt
 
     logger.debug(s"Training SVMWithSGDMulticlass for ${numberOfClasses+1} distinct classes")
 
@@ -100,7 +100,7 @@ class SVMMultiModel(models: Array[SVMModel]) extends ClassificationModel with Se
 
   val indexedModels = models.zipWithIndex
 
-  override def predict(testData: RDD[Vector]): RDD[Double] = ???
+  override def predict(testData: RDD[Vector]): RDD[Double] = super.predict(testData)
 
   override def predict(testData: Vector): Double = {
     val binaryPredictions = indexedModels.map(im => (im._1.predict(testData), im._2))

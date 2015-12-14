@@ -1,5 +1,7 @@
 package dr.acf.connectors
 
+import java.util.Properties
+
 import com.typesafe.config.ConfigFactory
 import dr.acf.spark.SparkOps
 import org.apache.spark.sql.DataFrame
@@ -11,12 +13,27 @@ trait MySQLConnector {
 
   this: SparkOps =>
 
-  private lazy val url = {
+  private lazy val (fullURL, url, username, password) = {
     val conf = ConfigFactory.load()
     val url = conf.getString("mySQL.url")
     val username = conf.getString("mySQL.username")
     val password = conf.getString("mySQL.password")
-    url + "?user=" + username + "&password=" + password
+    (url + "?user=" + username + "&password=" + password,
+      url,
+      username,
+      password)
+  }
+
+  /**
+    * Writes a dataframe to a DB table
+    * @param dataframe data to write
+    * @param dbtable destination table name
+    */
+  def writeToTable(dataframe: DataFrame, dbtable: String) = {
+    val properties = new Properties()
+    properties.put("user", username)
+    properties.put("password", password)
+    dataframe.write.mode("append").jdbc(url, dbtable, properties)
   }
 
   /**
@@ -27,7 +44,7 @@ trait MySQLConnector {
   def mySQLDF(dbtable: String): DataFrame = {
 
     val jdbcDF = sqlContext.read.format("jdbc").options(
-      Map("url" -> url,
+      Map("url" -> fullURL,
         "dbtable" -> dbtable)
     ).load()
     jdbcDF
@@ -54,7 +71,7 @@ trait MySQLConnector {
               numPartitions: Int): DataFrame = {
 
     val jdbcDF = sqlContext.read.format("jdbc").options(
-      Map("url" -> url,
+      Map("url" -> fullURL,
         "dbtable" -> dbtable,
         "partitionColumn" -> partitionColumn,
         "lowerBound" -> lowerBound.toString,

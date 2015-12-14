@@ -1,16 +1,14 @@
 package dr.acf.recc
 
-import java.sql.Timestamp
-
 import com.typesafe.config.ConfigFactory
 import dr.acf.connectors.MySQLConnector
 import dr.acf.spark.{NLPTokenizer, SVMWithSGDMulticlass, SparkOps}
-import org.apache.spark.ml.feature.{Tokenizer, HashingTF, IDF, RegexTokenizer}
+import org.apache.spark.ml.feature.{HashingTF, IDF, RegexTokenizer, Tokenizer}
 import org.apache.spark.mllib.evaluation.MulticlassMetrics
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{Column, Row}
+import org.apache.spark.sql.Row
 import org.slf4j.LoggerFactory
 
 /**
@@ -27,67 +25,98 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
   def main(args: Array[String]) {
     import sqlContext.implicits._
 
+    logger.debug("Start!")
+    val startTime = System.currentTimeMillis()
+
+    // Execution parameters
+    val cleansing = conf.getBoolean("phases.cleansing")
+    val transform = conf.getBoolean("phases.transform")
+    val training = conf.getBoolean("phases.training")
+    val testing = conf.getBoolean("phases.testing")
+
     // Charge configs
     val tokenizerType = conf.getInt("global.tokenizerType")
     val minWordSize = conf.getInt("global.minWordSize")
 
     // Step 1 - load data from DB
 
-    logger.debug("Start!")
-    val currentTime = System.currentTimeMillis()
+    val wordsData = if (cleansing) {
+      logger.debug("CLEANSING :: Start!")
+      val currentTime = System.currentTimeMillis()
 
-    val (bugInfoRDD: RDD[BugData], bugsAssignmentRDD: RDD[BugAssignmentData]) = buildBugsRDD
-    val assignments = bugsAssignmentRDD.collect.
-      zipWithIndex.map(elem => elem._1.assigned_to -> elem._2).toMap
+      val (bugInfoRDD: RDD[BugData], bugsAssignmentRDD: RDD[BugAssignmentData]) = buildBugsRDD
 
-    // We only care about the "valid" users (#validUsersFilter)
-    val bugInfoDF = bugInfoRDD.filter(bugData => assignments.contains(bugData.assigned_to)).toDF()
+      val assignments = bugsAssignmentRDD.collect.
+        zipWithIndex.map(elem => elem._1.assigned_to -> elem._2).toMap
 
-    // Step 2 - extract features
-    val tokenizer = tokenizerType match {
-      case 0 => new Tokenizer().setInputCol("bug_data").setOutputCol("words")
-      case 1 => new RegexTokenizer("\\w+|\\$[\\d\\.]+|\\S+").
-        setMinTokenLength(minWordSize).setInputCol("bug_data").setOutputCol("words")
-      case _ => new NLPTokenizer().setInputCol("bug_data").setOutputCol("words")
+      // We only care about the "valid" users (#validUsersFilter)
+      val bugInfoDF = bugInfoRDD.filter(bugData => assignments.contains(bugData.assigned_to)).toDF()
+
+      // Step 2 - extract features
+      val tokenizer = tokenizerType match {
+        case 0 => new Tokenizer().setInputCol("bug_data").setOutputCol("words")
+        case 1 => new RegexTokenizer("\\w+|\\$[\\d\\.]+|\\S+").
+          setMinTokenLength(minWordSize).setInputCol("bug_data").setOutputCol("words")
+        case _ => new NLPTokenizer().setInputCol("bug_data").setOutputCol("words")
+      }
+
+      val _wordsData = tokenizer.transform(bugInfoDF)
+
+      // writeToTable(_wordsData, "acf_cleaned_data")
+      _wordsData.write.mode("overwrite").parquet("acf_cleaned_data")
+      logger.debug(s"CLEANSING :: " +
+        s"Done in ${(System.currentTimeMillis() - currentTime) / 1000} seconds!")
+      _wordsData
+    }
+    else {
+      logger.debug("CLEANSING :: Skip!")
+      sqlContext.read.parquet("acf_cleaned_data")
     }
 
-    val wordsData = tokenizer.transform(bugInfoDF)
+    val rescaledData = if (transform) {
+      logger.debug("TRANSFORM :: Start!")
+      val currentTime = System.currentTimeMillis()
 
-    val hashingTF = new HashingTF().setInputCol("words").setOutputCol("rawFeatures")
-    //.setNumFeatures(20)
+      val hashingTF = new HashingTF().setInputCol("words").setOutputCol("rawFeatures")
+      //.setNumFeatures(20)
 
-    val featurizedData = hashingTF.transform(wordsData)
-    val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
-    val idfModel = idf.fit(featurizedData)
-    val rescaledData = idfModel.transform(featurizedData)
+      val featurizedData = hashingTF.transform(wordsData)
+      val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
+      val idfModel = idf.fit(featurizedData)
 
-    // Step 2.a :) dummy classifier
+      val _rescaledData = idfModel.transform(featurizedData)
+
+      _rescaledData.write.mode("overwrite").parquet("acf_numerical_data")
+      logger.debug(s"TRANSFORM :: " +
+        s"Done in ${(System.currentTimeMillis() - currentTime) / 1000} seconds!")
+      _rescaledData
+
+    } else {
+      logger.debug("CLEANSING :: Skip!")
+      sqlContext.read.parquet("acf_numerical_data")
+    }
+
+    // Step 2.a one vs all SVM
     val labeledPoints = rescaledData.select("features", "assigned_to").
       map { point =>
         val features = point.getAs[Vector]("features")
-        // map bugs to list of assignments (valid users)
-        // dump all "invalid" entries to a dummy extra class
-        // useful if #validUsersFilter is disabled
-        val assigned_to = assignments.get(point.getAs[Integer]("assigned_to")) match {
-          case Some(index) => index
-          case None => assignments.size + 1
-        }
+        val assigned_to = point.getAs[Integer]("assigned_to").doubleValue()
         LabeledPoint(assigned_to, features)
       }
 
     // Split data into training (60%) and test (40%).
     val splits = labeledPoints.randomSplit(Array(0.9, 0.1), seed = 123456789L)
-    val training = splits(0).cache()
-    val test = splits(1)
+    val trainingData = splits(0).cache()
+    val testData = splits(1)
 
-    logger.debug(s"Training data size ${training.count()}")
-    logger.debug(s"Test data size ${test.count()}")
+    logger.debug(s"Training data size ${trainingData.count()}")
+    logger.debug(s"Test data size ${testData.count()}")
 
     // Run training algorithm to build the model
-    val model = new SVMWithSGDMulticlass().train(training, 100, 1, 0.01, 1)
+    val model = new SVMWithSGDMulticlass().train(trainingData, 100, 1, 0.01, 1)
 
     // Compute raw scores on the test set.
-    val predictionAndLabels = test.map { case LabeledPoint(label, features) =>
+    val predictionAndLabels = testData.map { case LabeledPoint(label, features) =>
       val prediction = model.predict(features)
       (prediction, label)
     }
@@ -111,7 +140,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
     val stopHere = true
 
-    logger.debug(s"We're done in ${(System.currentTimeMillis() - currentTime) / 1000} seconds!")
+    logger.debug(s"We're done in ${(System.currentTimeMillis() - startTime) / 1000} seconds!")
   }
 
   def severityLevel(severity: String): Double = {
