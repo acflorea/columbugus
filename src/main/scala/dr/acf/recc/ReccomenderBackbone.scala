@@ -103,8 +103,8 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     val labeledPoints = rescaledData.select("features", "assigned_to").
       map { point =>
         val features = point.getAs[Vector]("features")
-        val assigned_to = point.getAs[Integer]("assigned_to").doubleValue()
-        LabeledPoint(assigned_to, features)
+        val assigned_to = point.getAs[Integer]("assigned_to")
+        LabeledPoint(assignments.getOrElse(assigned_to, assignments.size).doubleValue(), features)
       }
 
     // Split data into training (60%) and test (40%).
