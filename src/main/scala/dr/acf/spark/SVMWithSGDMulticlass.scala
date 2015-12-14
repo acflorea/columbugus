@@ -1,8 +1,9 @@
 package dr.acf.spark
 
+import org.apache.spark.annotation.Since
 import org.apache.spark.mllib.classification.{ClassificationModel, SVMModel, SVMWithSGD}
 import org.apache.spark.mllib.linalg.Vector
-import org.apache.spark.mllib.regression.LabeledPoint
+import org.apache.spark.mllib.regression.{GeneralizedLinearModel, LabeledPoint}
 import org.apache.spark.rdd.RDD
 import org.slf4j.LoggerFactory
 
@@ -40,7 +41,7 @@ class SVMWithSGDMulticlass {
     // determine number of classes
     val numberOfClasses = input.map(point => point.label).distinct().count().toInt
 
-    logger.debug(s"Training SVMWithSGDMulticlass for ${numberOfClasses+1} distinct classes")
+    logger.debug(s"Training SVMWithSGDMulticlass for ${numberOfClasses + 1} distinct classes")
 
     val binaryModelIds = (0 until numberOfClasses).par
 
@@ -96,14 +97,38 @@ object SVMWithSGDMulticlass {
   * A bag of one-vs-all models
   * @param models array of one vs. all models
   */
-class SVMMultiModel(models: Array[SVMModel]) extends ClassificationModel with Serializable {
+class SVMMultiModel(models: Array[SVMModel])
+  extends ClassificationModel with Serializable {
 
   val indexedModels = models.zipWithIndex
 
-  override def predict(testData: RDD[Vector]): RDD[Double] = super.predict(testData)
+  /**
+    * Predict values for the given data set using the model trained.
+    *
+    * @param testData RDD representing data points to be predicted
+    * @return RDD[Double] where each entry contains the corresponding prediction
+    *
+    */
+  override def predict(testData: RDD[Vector]): RDD[Double] = {
+    val localModels = models.zipWithIndex
+    val bcModels = testData.context.broadcast(localModels)
+    testData.mapPartitions { iter =>
+      val w = bcModels.value
+      iter.map(v => predict(v, w))
+    }
+  }
 
-  override def predict(testData: Vector): Double = {
-    val binaryPredictions = indexedModels.map(im => (im._1.predict(testData), im._2))
+  /**
+    * Predict values for a single data point using the model trained.
+    *
+    * @param testData array representing a single data point
+    * @return predicted category from the trained model
+    */
+  override def predict(testData: Vector): Double = predict(testData, indexedModels)
+
+
+  private def predict(testData: Vector, models: Array[(SVMModel, Int)]): Double = {
+    val binaryPredictions = models.map(im => (im._1.predict(testData), im._2))
     binaryPredictions
       .maxBy { case (score, index) => score }
       ._2

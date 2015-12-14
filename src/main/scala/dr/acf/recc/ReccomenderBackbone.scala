@@ -40,7 +40,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
     // Step 1 - load data from DB
 
-    val wordsData = if (cleansing) {
+    val (wordsData, assignments) = if (cleansing) {
       logger.debug("CLEANSING :: Start!")
       val currentTime = System.currentTimeMillis()
 
@@ -64,13 +64,16 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
       // writeToTable(_wordsData, "acf_cleaned_data")
       _wordsData.write.mode("overwrite").parquet("acf_cleaned_data")
+      bugsAssignmentRDD.toDF().write.mode("overwrite").parquet("acf_assignment_data")
       logger.debug(s"CLEANSING :: " +
         s"Done in ${(System.currentTimeMillis() - currentTime) / 1000} seconds!")
-      _wordsData
+      (_wordsData, assignments)
     }
     else {
       logger.debug("CLEANSING :: Skip!")
-      sqlContext.read.parquet("acf_cleaned_data")
+      val assignmantData = sqlContext.read.parquet("acf_assignments_data").collect.
+        zipWithIndex.map(row => row._1.get(0) -> row._2).toMap
+      (sqlContext.read.parquet("acf_cleaned_data"), assignmantData)
     }
 
     val rescaledData = if (transform) {
