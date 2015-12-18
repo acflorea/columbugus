@@ -27,7 +27,8 @@ class POSTokenizer(override val uid: String)
     val tagger = wrapper.get
 
     val tokens = tagger.tagString(text).split(" ") collect {
-      case wordAndTag if wordAndTag.split("/").tail.startsWith("NN") => wordAndTag.split("/").head
+      case wordAndTag if wordAndTag.split("_").last.startsWith("NN") =>
+        wordAndTag.split("_").head
     }
 
     if (logger.isTraceEnabled()) {
