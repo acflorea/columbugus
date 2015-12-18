@@ -64,7 +64,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       _wordsData.write.mode("overwrite").parquet("acf_cleaned_data")
       logger.debug(s"CLEANSING :: " +
         s"Done in ${(System.currentTimeMillis() - currentTime) / 1000} seconds!")
-      _wordsData
+      sqlContext.read.parquet("acf_cleaned_data")
     }
     else {
       logger.debug("CLEANSING :: Skip!")
