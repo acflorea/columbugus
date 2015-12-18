@@ -47,7 +47,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       val bugInfoRDD: RDD[BugData] = buildBugsRDD
 
       // We only care about the "valid" users (#validUsersFilter)
-      val bugInfoDF = bugInfoRDD.filter(bugData => bugData.assigned_to >= 0).toDF()
+      val bugInfoDF = bugInfoRDD.filter(bugData => bugData.assignment_class >= 0).toDF()
 
       // Step 2 - extract features
       val tokenizer = tokenizerType match {
