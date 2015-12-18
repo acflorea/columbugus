@@ -40,11 +40,14 @@ class NLPTokenizer(override val uid: String)
     pipeline.annotate(document)
 
     val tokens = document.get(classOf[TokensAnnotation]).asScala collect {
-      case token if token.get(classOf[PartOfSpeechAnnotation]).startsWith("NN") =>
+      case token
+        if token.get(classOf[PartOfSpeechAnnotation]).startsWith("NN") =>
         token.get(classOf[TextAnnotation])
     }
 
-    logger.debug(s"${text.length} chars tokenized in ${System.currentTimeMillis() - currentTime}")
+    if(logger.isTraceEnabled()) {
+      logger.trace(s"${text.length} chars tokenized in ${System.currentTimeMillis() - currentTime}")
+    }
 
     tokens
   }
