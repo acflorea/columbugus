@@ -1,11 +1,12 @@
 package dr.acf.recc
 
 import com.typesafe.config.ConfigFactory
+import dr.acf.common.CategoricalVariable
 import dr.acf.connectors.MySQLConnector
-import dr.acf.spark.{POSTokenizer, NLPTokenizer, SVMWithSGDMulticlass, SparkOps}
+import dr.acf.spark._
 import org.apache.spark.ml.feature.{HashingTF, IDF, RegexTokenizer, Tokenizer}
 import org.apache.spark.mllib.evaluation.MulticlassMetrics
-import org.apache.spark.mllib.linalg.Vector
+import org.apache.spark.mllib.linalg.{SparseVector, Vectors, Vector}
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Row
@@ -94,13 +95,29 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       sqlContext.read.parquet("acf_numerical_data")
     }
 
+    // Integrate more features
+    val compIds = rescaledData.select("component_id").map(_.getAs[Int](0)).distinct().collect()
+    val bugSeverity = rescaledData.select("bug_severity").map(_.getAs[String](0)).distinct().collect()
+
     // Step 2.a one vs all SVM
-    val labeledPoints = rescaledData.select("features", "assignment_class").
+    val labeledPoints = rescaledData.select("component_id", "bug_severity", "features", "assignment_class").
       map { point =>
-        val features = point.getAs[Vector]("features")
+        val component_id = point.getAs[Int]("component_id")
+        val bug_severity = point.getAs[String]("bug_severity")
+        val features = point.getAs[SparseVector]("features")
         val assignment_class = point.getAs[Double]("assignment_class")
-        LabeledPoint(assignment_class, features)
+        val labeledPoint = LabeledPoint(
+          assignment_class,
+          Vectors.sparse(
+            compIds.length + bugSeverity.length + features.size,
+            Array(compIds.indexOf(component_id), bugSeverity.indexOf(bug_severity)) ++
+              features.indices map (i => i + compIds.length + bugSeverity.length),
+            Array(1.0, 1.0) ++ features.values
+          )
+        )
+        labeledPoint
       }
+
 
     // Split data into training (90%) and test (10%).
     val splits = labeledPoints.randomSplit(Array(0.9, 0.1), seed = 123456789L)
