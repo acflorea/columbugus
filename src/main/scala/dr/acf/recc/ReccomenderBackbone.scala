@@ -1,12 +1,11 @@
 package dr.acf.recc
 
 import com.typesafe.config.ConfigFactory
-import dr.acf.common.CategoricalVariable
 import dr.acf.connectors.MySQLConnector
 import dr.acf.spark._
 import org.apache.spark.ml.feature.{HashingTF, IDF, RegexTokenizer, Tokenizer}
 import org.apache.spark.mllib.evaluation.MulticlassMetrics
-import org.apache.spark.mllib.linalg.{SparseVector, Vectors, Vector}
+import org.apache.spark.mllib.linalg.{SparseVector, Vectors}
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Row
@@ -77,7 +76,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       val currentTime = System.currentTimeMillis()
 
       val hashingTF = new HashingTF().setInputCol("words").setOutputCol("rawFeatures")
-      //.setNumFeatures(20)
+      //  .setNumFeatures(10000)
 
       val featurizedData = hashingTF.transform(wordsData)
       val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
@@ -106,13 +105,16 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         val bug_severity = point.getAs[String]("bug_severity")
         val features = point.getAs[SparseVector]("features")
         val assignment_class = point.getAs[Double]("assignment_class")
+        val hyperValue = features.values.length / (compIds.length + bugSeverity.length)
         val labeledPoint = LabeledPoint(
           assignment_class,
           Vectors.sparse(
             compIds.length + bugSeverity.length + features.size,
-            Array(compIds.indexOf(component_id), bugSeverity.indexOf(bug_severity)) ++
-              features.indices map (i => i + compIds.length + bugSeverity.length),
-            Array(1.0, 1.0) ++ features.values
+            Array.concat(
+              Array(compIds.indexOf(component_id), bugSeverity.indexOf(bug_severity)),
+              features.indices map (i => i + compIds.length + bugSeverity.length)
+            ),
+            Array.concat(Array(hyperValue, hyperValue), features.values)
           )
         )
         labeledPoint
@@ -261,15 +263,15 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     val bugsLongdescsRDD =
       if (includeComments) {
         bugsLongdescsDataFrame.
-          map(row => (row.getInt(0), s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}")).
-          // map(row => (row.getInt(0), row.getString(2))).
+          // map(row => (row.getInt(0), s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}")).
+          map(row => (row.getInt(0), row.getString(2))).
           reduceByKey((c1, c2) => s"$c1\n$c2").
           map(row => (row._1, Row(row._2)))
       }
       else {
         bugsLongdescsDataFrame.
-          map(row => (row.getInt(0), s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}")).
-          // map(row => (row.getInt(0), row.getString(2))).
+          // map(row => (row.getInt(0), s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}")).
+          map(row => (row.getInt(0), row.getString(2))).
           groupByKey().
           map(row => (row._1, Row(row._2.head)))
       }
