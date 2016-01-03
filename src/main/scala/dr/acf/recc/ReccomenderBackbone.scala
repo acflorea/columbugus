@@ -3,8 +3,9 @@ package dr.acf.recc
 import com.typesafe.config.ConfigFactory
 import dr.acf.connectors.MySQLConnector
 import dr.acf.spark._
-import org.apache.spark.ml.feature.{HashingTF, IDF, RegexTokenizer, Tokenizer}
+import org.apache.spark.ml.feature._
 import org.apache.spark.mllib.evaluation.MulticlassMetrics
+import org.apache.spark.mllib.feature
 import org.apache.spark.mllib.linalg.{SparseVector, Vectors}
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
@@ -33,6 +34,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     val transform = conf.getBoolean("phases.transform")
     val training = conf.getBoolean("phases.training")
     val testing = conf.getBoolean("phases.testing")
+    val pca = conf.getBoolean("phases.pca")
 
     // Charge configs
     val tokenizerType = conf.getInt("global.tokenizerType")
@@ -76,7 +78,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       val currentTime = System.currentTimeMillis()
 
       val hashingTF = new HashingTF().setInputCol("words").setOutputCol("rawFeatures")
-      //  .setNumFeatures(10000)
+        .setNumFeatures(1000)
 
       val featurizedData = hashingTF.transform(wordsData)
       val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
@@ -105,21 +107,47 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         val bug_severity = point.getAs[String]("bug_severity")
         val features = point.getAs[SparseVector]("features")
         val assignment_class = point.getAs[Double]("assignment_class")
-        val hyperValue = features.values.length / (compIds.length + bugSeverity.length)
+        val hyperValue = features.size / (compIds.length + bugSeverity.length)
+        val scalingFactor = features.size / compIds.length
+
+        val compIndexes = Array.tabulate(scalingFactor)(i =>
+          compIds.indexOf(component_id) + i * scalingFactor)
+        val compValues = Array.tabulate(scalingFactor)(i =>
+          1.0)
+
         val labeledPoint = LabeledPoint(
           assignment_class,
+          //        // category, severity, features
+          //          Vectors.sparse(
+          //            compIds.length + bugSeverity.length + features.size,
+          //            Array.concat(
+          //              Array(compIds.indexOf(component_id), bugSeverity.indexOf(bug_severity)),
+          //              features.indices map (i => i + compIds.length + bugSeverity.length)
+          //            ),
+          //            Array.concat(Array(hyperValue, hyperValue), features.values)
+          //          )
+          //         category, features - hyperValue
           Vectors.sparse(
-            compIds.length + bugSeverity.length + features.size,
+            compIds.length + features.size,
             Array.concat(
-              Array(compIds.indexOf(component_id), bugSeverity.indexOf(bug_severity)),
-              features.indices map (i => i + compIds.length + bugSeverity.length)
+              Array(compIds.indexOf(component_id)),
+              features.indices map (i => i + compIds.length)
             ),
-            Array.concat(Array(hyperValue, hyperValue), features.values)
+            Array.concat(Array(130), features.values)
           )
+          //          //         category, features - more dimensions
+          //          Vectors.sparse(
+          //            compIds.length * scalingFactor + features.size,
+          //            Array.concat(
+          //              compIndexes,
+          //              features.indices map (i => i + compIds.length * scalingFactor)
+          //            ),
+          //            Array.concat(compValues, features.values)
+          //        )
+
         )
         labeledPoint
       }
-
 
     // Split data into training (90%) and test (10%).
     val splits = labeledPoints.randomSplit(Array(0.9, 0.1), seed = 123456789L)
@@ -129,11 +157,22 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     logger.debug(s"Training data size ${trainingData.count()}")
     logger.debug(s"Test data size ${testData.count()}")
 
+    val (trainingProjected, testProjected) = if (pca) {
+      // Compute the top 10 principal components.
+      val PCAModel = new feature.PCA(10).fit(trainingData.map(_.features))
+      // Project vectors to the linear space spanned by the top 10 principal components, keeping the label
+      (trainingData.map(p => p.copy(features = PCAModel.transform(p.features))),
+      testData.map(p => p.copy(features = PCAModel.transform(p.features))))
+    }
+    else {
+      (trainingData, testData)
+    }
+
     // Run training algorithm to build the model
-    val model = new SVMWithSGDMulticlass().train(trainingData, 100, 1, 0.01, 1)
+    val model = new SVMWithSGDMulticlass().train(trainingProjected, 100, 1, 0.01, 1)
 
     // Compute raw scores on the test set.
-    val predictionAndLabels = testData.map { case LabeledPoint(label, features) =>
+    val predictionAndLabels = testProjected.map { case LabeledPoint(label, features) =>
       val prediction = model.predict(features)
       (prediction, label)
     }

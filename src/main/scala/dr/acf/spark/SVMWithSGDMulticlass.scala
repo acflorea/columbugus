@@ -55,12 +55,24 @@ class SVMWithSGDMulticlass {
         case LabeledPoint(label, features) => LabeledPoint(if (label == i) 1.0 else 0.0, features)
       }
 
+      val undersample = true
+
+      val trainData = if (undersample) {
+        val positives = inputProjection filter (_.label == 1.0)
+        // Perform random undersampling - Handling imbalanced datasets: A review
+        // http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.96.9248
+        val negatives = inputProjection filter (_.label == 0.0) sample(false, 0.1, 123456789L)
+        positives union negatives
+      }
+      else
+        inputProjection
+
       logger.debug(s"Train $i vs all - training started")
 
       // train each model
-      inputProjection.cache()
-      val model = SVMWithSGD.train(inputProjection, numIterations, stepSize, regParam, miniBatchFraction)
-      inputProjection.unpersist(false)
+      trainData.cache()
+      val model = SVMWithSGD.train(trainData, numIterations, stepSize, regParam, miniBatchFraction)
+      trainData.unpersist(false)
 
       logger.debug(s"Train $i vs all - training complete")
 
