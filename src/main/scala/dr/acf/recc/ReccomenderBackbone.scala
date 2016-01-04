@@ -78,7 +78,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       val currentTime = System.currentTimeMillis()
 
       val hashingTF = new HashingTF().setInputCol("words").setOutputCol("rawFeatures")
-        .setNumFeatures(1000)
+      //  .setNumFeatures(1000)
 
       val featurizedData = hashingTF.transform(wordsData)
       val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
@@ -101,6 +101,10 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     val bugSeverity = rescaledData.select("bug_severity").map(_.getAs[String](0)).distinct().collect()
 
     // Step 2.a one vs all SVM
+
+    // val normalizer = new Normalizer().setInputCol("features").setOutputCol("features_n")
+    // val normalizedData = normalizer.transform(rescaledData)
+
     val labeledPoints = rescaledData.select("component_id", "bug_severity", "features", "assignment_class").
       map { point =>
         val component_id = point.getAs[Int]("component_id")
@@ -133,7 +137,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
               Array(compIds.indexOf(component_id)),
               features.indices map (i => i + compIds.length)
             ),
-            Array.concat(Array(130), features.values)
+            Array.concat(Array(130.0), features.values)
           )
           //          //         category, features - more dimensions
           //          Vectors.sparse(
@@ -159,10 +163,10 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
     val (trainingProjected, testProjected) = if (pca) {
       // Compute the top 10 principal components.
-      val PCAModel = new feature.PCA(10).fit(trainingData.map(_.features))
+      val PCAModel = new feature.PCA(100).fit(trainingData.map(_.features))
       // Project vectors to the linear space spanned by the top 10 principal components, keeping the label
       (trainingData.map(p => p.copy(features = PCAModel.transform(p.features))),
-      testData.map(p => p.copy(features = PCAModel.transform(p.features))))
+        testData.map(p => p.copy(features = PCAModel.transform(p.features))))
     }
     else {
       (trainingData, testData)
@@ -292,11 +296,21 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         ") as buglongdescsslice"
     )
 
+    // Bugs fulltext
+    val bugsFulltextDataFrame = mySQLDF(
+      "(" +
+        "select l.bug_id, l.comments " +
+        "from bugs_fulltext l " +
+        "where " + testFilter("l.bug_id") +
+        ") as bugfulltextslice"
+    )
+
     // ($bug_id,t$timestamp:: $short_desc)
     val idAndDescRDD = bugsDataFrame.select("bug_id", "creation_ts", "short_desc",
       "bug_status", "assigned_to", "component_id", "bug_severity").
-      map(row => (row.getInt(0), Row(s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}",
-        row.getString(3), row.getInt(4), row.getInt(5), row.getString(6))))
+      // map(row => (row.getInt(0), Row(s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}",
+      map(row => (row.getInt(0), Row(row.getString(2),
+      row.getString(3), row.getInt(4), row.getInt(5), row.getString(6))))
 
     // ($bug_id,(t$timestamp:: $comment)...)
     val bugsLongdescsRDD =
@@ -308,9 +322,9 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
           map(row => (row._1, Row(row._2)))
       }
       else {
-        bugsLongdescsDataFrame.
+        bugsFulltextDataFrame.
           // map(row => (row.getInt(0), s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}")).
-          map(row => (row.getInt(0), row.getString(2))).
+          map(row => (row.getInt(0), row.getString(1))).
           groupByKey().
           map(row => (row._1, Row(row._2.head)))
       }

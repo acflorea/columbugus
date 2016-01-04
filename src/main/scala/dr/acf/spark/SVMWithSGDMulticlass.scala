@@ -55,7 +55,7 @@ class SVMWithSGDMulticlass {
         case LabeledPoint(label, features) => LabeledPoint(if (label == i) 1.0 else 0.0, features)
       }
 
-      val undersample = true
+      val undersample = false
 
       val trainData = if (undersample) {
         val positives = inputProjection filter (_.label == 1.0)
