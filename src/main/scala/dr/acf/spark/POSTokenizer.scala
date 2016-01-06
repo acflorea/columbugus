@@ -35,7 +35,9 @@ class POSTokenizer(override val uid: String)
       logger.trace(s"${text.length} chars tokenized in ${System.currentTimeMillis() - currentTime}")
     }
 
-    tokens
+    tokens.collect {
+      case token if token.length > 2 => token.toLowerCase
+    }
   }
 
   override protected def validateInputType(inputType: DataType): Unit = {

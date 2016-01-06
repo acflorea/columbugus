@@ -1,5 +1,7 @@
 package dr.acf.recc
 
+import java.sql.Timestamp
+
 import com.typesafe.config.ConfigFactory
 import dr.acf.connectors.MySQLConnector
 import dr.acf.spark._
@@ -98,65 +100,37 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
     // Integrate more features
     val compIds = rescaledData.select("component_id").map(_.getAs[Int](0)).distinct().collect()
-    val bugSeverity = rescaledData.select("bug_severity").map(_.getAs[String](0)).distinct().collect()
 
     // Step 2.a one vs all SVM
-
-    // val normalizer = new Normalizer().setInputCol("features").setOutputCol("features_n")
-    // val normalizedData = normalizer.transform(rescaledData)
-
-    val labeledPoints = rescaledData.select("component_id", "bug_severity", "features", "assignment_class").
-      map { point =>
-        val component_id = point.getAs[Int]("component_id")
-        val bug_severity = point.getAs[String]("bug_severity")
-        val features = point.getAs[SparseVector]("features")
-        val assignment_class = point.getAs[Double]("assignment_class")
-        val hyperValue = features.size / (compIds.length + bugSeverity.length)
-        val scalingFactor = features.size / compIds.length
-
-        val compIndexes = Array.tabulate(scalingFactor)(i =>
-          compIds.indexOf(component_id) + i * scalingFactor)
-        val compValues = Array.tabulate(scalingFactor)(i =>
-          1.0)
-
-        val labeledPoint = LabeledPoint(
-          assignment_class,
-          //        // category, severity, features
-          //          Vectors.sparse(
-          //            compIds.length + bugSeverity.length + features.size,
-          //            Array.concat(
-          //              Array(compIds.indexOf(component_id), bugSeverity.indexOf(bug_severity)),
-          //              features.indices map (i => i + compIds.length + bugSeverity.length)
-          //            ),
-          //            Array.concat(Array(hyperValue, hyperValue), features.values)
-          //          )
-          //         category, features - hyperValue
-          Vectors.sparse(
-            compIds.length + features.size,
-            Array.concat(
-              Array(compIds.indexOf(component_id)),
-              features.indices map (i => i + compIds.length)
-            ),
-            Array.concat(Array(130.0), features.values)
-          )
-          //          //         category, features - more dimensions
-          //          Vectors.sparse(
-          //            compIds.length * scalingFactor + features.size,
-          //            Array.concat(
-          //              compIndexes,
-          //              features.indices map (i => i + compIds.length * scalingFactor)
-          //            ),
-          //            Array.concat(compValues, features.values)
-          //        )
-
-        )
-        labeledPoint
-      }
+    val categoryScalingFactor = conf.getDouble("training.categoryScalingFactor")
 
     // Split data into training (90%) and test (10%).
-    val splits = labeledPoints.randomSplit(Array(0.9, 0.1), seed = 123456789L)
-    val trainingData = splits(0).cache()
-    val testData = splits(1)
+    val trainingCount = rescaledData.count() / 10 * 9 toInt
+    // Function to transform row into labeled points
+    def rowToLabeledPoint = (row: Row) => {
+      val component_id = row.getAs[Int]("component_id")
+      val features = row.getAs[SparseVector]("features")
+      val assignment_class = row.getAs[Double]("assignment_class")
+
+      val labeledPoint = LabeledPoint(
+        assignment_class,
+        Vectors.sparse(
+          compIds.length + features.size,
+          Array.concat(
+            Array(compIds.indexOf(component_id)),
+            features.indices map (i => i + compIds.length)
+          ),
+          Array.concat(Array(categoryScalingFactor), features.values)
+        )
+      )
+      labeledPoint
+    }
+
+    val allData = rescaledData.select("index", "component_id", "features", "assignment_class")
+      .map(rowToLabeledPoint).zipWithIndex()
+    val trainingData = allData.filter(_._2 <= trainingCount).map(_._1).cache()
+    // keep most recent 10% of data for testing
+    val testData = allData.filter(_._2 > trainingCount).map(_._1)
 
     logger.debug(s"Training data size ${trainingData.count()}")
     logger.debug(s"Test data size ${testData.count()}")
@@ -305,25 +279,16 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         ") as bugfulltextslice"
     )
 
-    // ($bug_id,t$timestamp:: $short_desc)
-    val idAndDescRDD = bugsDataFrame.select("bug_id", "creation_ts", "short_desc",
-      "bug_status", "assigned_to", "component_id", "bug_severity").
-      // map(row => (row.getInt(0), Row(s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}",
-      map(row => (row.getInt(0), Row(row.getString(2),
-      row.getString(3), row.getInt(4), row.getInt(5), row.getString(6))))
-
-    // ($bug_id,(t$timestamp:: $comment)...)
+    // ($bug_id,($comment)...)
     val bugsLongdescsRDD =
       if (includeComments) {
         bugsLongdescsDataFrame.
-          // map(row => (row.getInt(0), s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}")).
           map(row => (row.getInt(0), row.getString(2))).
           reduceByKey((c1, c2) => s"$c1\n$c2").
           map(row => (row._1, Row(row._2)))
       }
       else {
         bugsFulltextDataFrame.
-          // map(row => (row.getInt(0), s"t${row.getTimestamp(1).getTime}:: ${row.getString(2)}")).
           map(row => (row.getInt(0), row.getString(1))).
           groupByKey().
           map(row => (row._1, Row(row._2.head)))
@@ -335,8 +300,15 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     val assignments = bugAssignmentData.collect.
       zipWithIndex.map(elem => elem._1.assigned_to -> elem._2).toMap
 
+    // ($bug_id,t$timestamp:: $short_desc)
+    val idAndDescRDD = bugsDataFrame.select("bug_id", "short_desc",
+      "bug_status", "assigned_to", "component_id", "bug_severity", "creation_ts").
+      map(row => (row.getInt(0), Row(row.getString(1),
+        row.getString(2), row.getInt(3), row.getInt(4), row.getString(5), row.getTimestamp(6))))
+
     // join dataframes
-    val bugsRDD = idAndDescRDD.leftOuterJoin[Row](bugsLongdescsRDD).
+    val bugsRDD = idAndDescRDD.
+      leftOuterJoin[Row](bugsLongdescsRDD).
       map { row =>
         val key = row._1
         val r1 = row._2._1
@@ -344,35 +316,49 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         r2Opt match {
           case Some(r2) =>
             BugData(
+              -1,
               key,
               s"${r1.getString(0)}\n${r2.getString(0)}",
-              r1.getString(1),
-              r1.getInt(2),
+              r1.getString(1), // "bug_status"
+              r1.getInt(2), // "assigned_to"
               assignments.getOrElse(r1.getInt(2), -1).toDouble,
-              r1.getInt(3),
-              r1.getString(4)
+              r1.getInt(3), // "component_id"
+              r1.getString(4), // "bug_severity"
+              r1.getTimestamp(5)
             )
           case None =>
             BugData(
+              -1,
               key,
               r1.getString(0),
               r1.getString(1),
               r1.getInt(2),
               assignments.getOrElse(r1.getInt(2), -1).toDouble,
               r1.getInt(3),
-              r1.getString(4)
+              r1.getString(4),
+              r1.getTimestamp(5)
             )
         }
       }
+      // Sort by creation time
+      .sortBy(bugData => bugData.creation_ts.getTime)
+      // Add index
+      .zipWithIndex()
+      // Stick the index into BugData
+      .map {
+      rowWithIndex => rowWithIndex._1.copy(index = rowWithIndex._2)
+    }
 
     bugsRDD
+
   }
 }
 
-case class BugData(bug_id: Integer, bug_data: String,
+case class BugData(index: Long, bug_id: Integer, bug_data: String,
                    bug_status: String, assigned_to: Integer,
                    assignment_class: Double,
-                   component_id: Integer, bug_severity: String)
+                   component_id: Integer, bug_severity: String,
+                   creation_ts: Timestamp)
 
 case class BugAssignmentData(assigned_to: Integer, no: Long)
 
