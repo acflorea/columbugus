@@ -101,6 +101,9 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     // Integrate more features
     val compIds = rescaledData.select("component_id").map(_.getAs[Int](0)).distinct().collect()
 
+    // val assignment = rescaledData.select("assigned_to", "assignment_class").distinct().collect()
+    // assignment.foreach(println)
+
     // Step 2.a one vs all SVM
     val categoryScalingFactor = conf.getDouble("training.categoryScalingFactor")
 
@@ -215,13 +218,15 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
     val mostRecentDatesWithDelta = 0 to timeIntervals map { i =>
       mySQLDF(
-        s"(select DATE_SUB(max(delta_ts), INTERVAL ${timeThreshold * (timeIntervals - i)} DAY) from bugs) as maxDate").
+        s"(select DATE_SUB(max(delta_ts), INTERVAL ${timeThreshold * (timeIntervals - i)} DAY) " +
+          s"from bugs) as maxDate").
         collect().head.getTimestamp(0)
     }
 
     val dateFilter =
       (interval: Int, prefix: String) =>
-        s"${prefix}delta_ts <= '${mostRecentDatesWithDelta(interval + 1)}' and ${prefix}delta_ts > '${mostRecentDatesWithDelta(interval)}'"
+        s"${prefix}delta_ts <= '${mostRecentDatesWithDelta(interval + 1)}' " +
+          s"and ${prefix}delta_ts > '${mostRecentDatesWithDelta(interval)}'"
 
     // Assignment data - all users with more than "issuesThreshold" items fixed
     // after "mostRecentDateWithDelta"
@@ -233,6 +238,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
           "where " + testFilter("b.bug_id") +
           " AND " + resolutionFilter("b.") + " " +
           " AND " + dateFilter(i, "b.") + " " +
+          " AND b.bug_id not in (select d.dupe from duplicates d) " +
           "group by b.assigned_to " +
           "having " + minIssuesFilter("") + " " +
           "order by bugs_assigned desc" +
@@ -247,6 +253,15 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
     val assignments = bugAssignmentData.collect.
       zipWithIndex.map(elem => elem._1.assigned_to -> elem._2).toMap
+
+    // Duplicates -- Which bugs are duplicates of which other bugs.
+    val bugsDuplicatesDataFrame = mySQLDF(
+      "(" +
+        "select d.dupe_of, d.dupe " +
+        "from duplicates d " +
+        "where " + testFilter("d.dupe_of") +
+        ") as bugduplicates"
+    )
 
     // Main bug data
     val bugsDataFrame = mySQLDF(
@@ -263,16 +278,9 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         "join classifications cl on p.classification_id = cl.id " +
         "where " + testFilter("b.bug_id") +
         " AND " + resolutionFilter("b.") + " " +
+        " AND b.delta_ts > '" + mostRecentDatesWithDelta(0) + "'" +
+        " AND b.bug_id not in (select d.dupe from duplicates d) " +
         ") as bugslice"
-    )
-
-    // Duplicates -- Which bugs are duplicates of which other bugs.
-    val bugsDuplicatesDataFrame = mySQLDF(
-      "(" +
-        "select d.dupe_of, d.dupe " +
-        "from duplicates d " +
-        "where " + testFilter("d.dupe_of") +
-        ") as bugduplicates"
     )
 
     // The meat of bugzilla -- here is where all user comments are stored!
@@ -281,6 +289,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         "select l.bug_id, l.bug_when, l.thetext " +
         "from longdescs l " +
         "where " + testFilter("l.bug_id") +
+        " AND l.bug_id not in (select d.dupe from duplicates d) " +
         ") as buglongdescsslice"
     )
 
@@ -290,6 +299,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         "select l.bug_id, l.comments " +
         "from bugs_fulltext l " +
         "where " + testFilter("l.bug_id") +
+        " AND l.bug_id not in (select d.dupe from duplicates d) " +
         ") as bugfulltextslice"
     )
 
