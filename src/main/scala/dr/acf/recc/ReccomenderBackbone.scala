@@ -168,7 +168,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     println("Weighted Precision = " + weightedPrecision)
     println("Weighted Recall = " + weightedRecall)
     println("Weighted fMeasure = " + weightedFMeasure)
-
+    println("Confusion Matrix = " + metrics.confusionMatrix.toString(500, 10000))
 
     // Step 3...Infinity - TDB
 
@@ -202,6 +202,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     val includeComments = conf.getBoolean("global.includeComments")
     val issuesThreshold = conf.getInt("global.issuesThreshold")
     val timeThreshold = conf.getInt("global.timeThreshold")
+    val timeIntervals = conf.getInt("global.timeIntervals")
 
     val testFilter =
       (column: String) => if (testMode) s"$column > 300000 " else "1 = 1 "
@@ -212,27 +213,40 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     val minIssuesFilter =
       (prefix: String) => s"${prefix}bugs_assigned > '$issuesThreshold'"
 
-    val mostRecentDateWithDelta = mySQLDF(
-      s"(select DATE_SUB(max(delta_ts), INTERVAL $timeThreshold DAY) from bugs) as maxDate").
-      collect().head.getTimestamp(0)
+    val mostRecentDatesWithDelta = 0 to timeIntervals map { i =>
+      mySQLDF(
+        s"(select DATE_SUB(max(delta_ts), INTERVAL ${timeThreshold * (timeIntervals - i)} DAY) from bugs) as maxDate").
+        collect().head.getTimestamp(0)
+    }
 
     val dateFilter =
-      (prefix: String) => s"${prefix}delta_ts > '$mostRecentDateWithDelta'"
+      (interval: Int, prefix: String) =>
+        s"${prefix}delta_ts <= '${mostRecentDatesWithDelta(interval + 1)}' and ${prefix}delta_ts > '${mostRecentDatesWithDelta(interval)}'"
 
     // Assignment data - all users with more than "issuesThreshold" items fixed
     // after "mostRecentDateWithDelta"
-    val bugAssignmentDataFrame = mySQLDF(
-      "(" +
-        "select b.assigned_to, count(*) as bugs_assigned " +
-        "from bugs b " +
-        "where " + testFilter("b.bug_id") +
-        " AND " + resolutionFilter("b.") + " " +
-        " AND " + dateFilter("b.") + " " +
-        "group by b.assigned_to " +
-        "having " + minIssuesFilter("") + " " +
-        "order by bugs_assigned desc" +
-        ") as bugslice"
-    )
+    val bugAssignmentDataFrame = (0 until timeIntervals map { i =>
+      mySQLDF(
+        "(" +
+          "select b.assigned_to, count(*) as bugs_assigned " +
+          "from bugs b " +
+          "where " + testFilter("b.bug_id") +
+          " AND " + resolutionFilter("b.") + " " +
+          " AND " + dateFilter(i, "b.") + " " +
+          "group by b.assigned_to " +
+          "having " + minIssuesFilter("") + " " +
+          "order by bugs_assigned desc" +
+          ") as bugslice"
+      )
+    }).reduce {
+      (df1, df2) => df1.join(df2, "assigned_to")
+    }
+
+    val bugAssignmentData = bugAssignmentDataFrame.map(row =>
+      BugAssignmentData(row.getInt(0), row.getLong(1)))
+
+    val assignments = bugAssignmentData.collect.
+      zipWithIndex.map(elem => elem._1.assigned_to -> elem._2).toMap
 
     // Main bug data
     val bugsDataFrame = mySQLDF(
@@ -293,12 +307,6 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
           groupByKey().
           map(row => (row._1, Row(row._2.head)))
       }
-
-    val bugAssignmentData = bugAssignmentDataFrame.
-      map(row => BugAssignmentData(row.getInt(0), row.getLong(1)))
-
-    val assignments = bugAssignmentData.collect.
-      zipWithIndex.map(elem => elem._1.assigned_to -> elem._2).toMap
 
     // ($bug_id,t$timestamp:: $short_desc)
     val idAndDescRDD = bugsDataFrame.select("bug_id", "short_desc",

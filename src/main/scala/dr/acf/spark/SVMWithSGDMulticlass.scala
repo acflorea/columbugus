@@ -57,24 +57,29 @@ class SVMWithSGDMulticlass {
 
       val undersample = false
 
+      logger.debug(s"Train $i vs all with ${inputProjection filter (_.label == 1.0) count()} positive samples")
+
       val trainData = if (undersample) {
         val positives = inputProjection filter (_.label == 1.0)
+        val positivesCount = positives.count()
         // Perform random undersampling - Handling imbalanced datasets: A review
         // http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.96.9248
-        val negatives = inputProjection filter (_.label == 0.0) sample(false, 0.1, 123456789L)
+        val rawNegatives = inputProjection filter (_.label == 0.0)
+        val negativesCount = rawNegatives.count()
+        val samplingRate = negativesCount / (1 + (positivesCount * 10)) / 100.0
+        val negatives = if (samplingRate < 1.0)
+          rawNegatives.sample(false, samplingRate, 123456789L)
+        else
+          rawNegatives
         positives union negatives
       }
       else
         inputProjection
 
-      logger.debug(s"Train $i vs all - training started")
-
       // train each model
       trainData.cache()
       val model = SVMWithSGD.train(trainData, numIterations, stepSize, regParam, miniBatchFraction)
       trainData.unpersist(false)
-
-      logger.debug(s"Train $i vs all - training complete")
 
       model.clearThreshold()
       model
