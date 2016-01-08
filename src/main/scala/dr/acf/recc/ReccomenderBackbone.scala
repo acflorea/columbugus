@@ -106,6 +106,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
     // Step 2.a one vs all SVM
     val categoryScalingFactor = conf.getDouble("training.categoryScalingFactor")
+    val includeCategory = conf.getBoolean("training.includeCategory")
 
     // Split data into training (90%) and test (10%).
     val trainingCount = rescaledData.count() / 10 * 9 toInt
@@ -115,7 +116,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       val features = row.getAs[SparseVector]("features")
       val assignment_class = row.getAs[Double]("assignment_class")
 
-      val labeledPoint = LabeledPoint(
+      val labeledPoint = if (includeCategory) LabeledPoint(
         assignment_class,
         Vectors.sparse(
           compIds.length + features.size,
@@ -126,6 +127,11 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
           Array.concat(Array(categoryScalingFactor), features.values)
         )
       )
+      else
+        LabeledPoint(
+          assignment_class,
+          features
+        )
       labeledPoint
     }
 
