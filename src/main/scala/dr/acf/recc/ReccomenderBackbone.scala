@@ -14,6 +14,8 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Row
 import org.slf4j.LoggerFactory
 
+import scala.collection.mutable
+
 /**
   * The main algorithm behind the Reccomender System
   * Created by aflorea on 18.11.2015.
@@ -77,13 +79,23 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
     val rescaledData = if (transform) {
       logger.debug("TRANSFORM :: Start!")
+
+      val minDocFreq = conf.getInt("transform.minDocFreq")
+
       val currentTime = System.currentTimeMillis()
 
-      val hashingTF = new HashingTF().setInputCol("words").setOutputCol("rawFeatures")
-      //  .setNumFeatures(1000)
+      val tst = wordsData.map(r => r.getAs[mutable.WrappedArray[String]]("words").toSet[String])
+      val vocabularySize = tst.reduce((w1, w2) => w1.union(w2)).size
+      logger.debug(s"Vocabulary size $vocabularySize")
 
-      val featurizedData = hashingTF.transform(wordsData)
-      val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
+      val hashingTF = new HashingTF().setInputCol("words").setOutputCol("rawFeatures")
+        .setNumFeatures(vocabularySize)
+
+      val featurizedData = hashingTF.transform(wordsData).cache()
+
+      hashingTF.getNumFeatures
+
+      val idf = new IDF().setMinDocFreq(minDocFreq).setInputCol("rawFeatures").setOutputCol("features")
       val idfModel = idf.fit(featurizedData)
 
       val _rescaledData = idfModel.transform(featurizedData)
@@ -232,6 +244,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     val issuesThreshold = conf.getInt("global.issuesThreshold")
     val timeThreshold = conf.getInt("global.timeThreshold")
     val timeIntervals = conf.getInt("global.timeIntervals")
+    val timeThresholdForTraining = conf.getInt("global.timeThresholdForTraining")
 
     val testFilter =
       (column: String) => if (testMode) s"$column > 300000 " else "1 = 1 "
@@ -248,6 +261,12 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
           s"from bugs) as maxDate").
         collect().head.getTimestamp(0)
     }
+
+    val oldestValidDate =
+      mySQLDF(
+        s"(select DATE_SUB(max(delta_ts), INTERVAL $timeThresholdForTraining DAY) " +
+          s"from bugs) as maxDate").
+        collect().head.getTimestamp(0)
 
     val dateFilter =
       (interval: Int, prefix: String) =>
@@ -324,7 +343,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         "join classifications cl on p.classification_id = cl.id " +
         "where " + testFilter("b.bug_id") +
         " AND " + resolutionFilter("b.") + " " +
-        " AND b.delta_ts > '" + mostRecentDatesWithDelta(0) + "'" +
+        " AND b.delta_ts > '" + oldestValidDate + "'" +
         " AND b.bug_id not in (select d.dupe from duplicates d) " +
         ") as bugslice"
     )
@@ -344,7 +363,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
           "join classifications cl on p.classification_id = cl.id " +
           "where " + testFilter("b.bug_id") +
           " AND " + resolutionFilter("b.") + " " +
-          " AND b.delta_ts > '" + mostRecentDatesWithDelta(0) + "'" +
+          " AND b.delta_ts > '" + oldestValidDate + "'" +
           " AND b.bug_id not in (select d.dupe from duplicates d) " +
           ") as bugslice"
       )
