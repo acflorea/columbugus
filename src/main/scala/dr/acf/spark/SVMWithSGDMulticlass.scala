@@ -1,9 +1,8 @@
 package dr.acf.spark
 
-import org.apache.spark.annotation.Since
 import org.apache.spark.mllib.classification.{ClassificationModel, SVMModel, SVMWithSGD}
 import org.apache.spark.mllib.linalg.Vector
-import org.apache.spark.mllib.regression.{GeneralizedLinearModel, LabeledPoint}
+import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
 import org.slf4j.LoggerFactory
 
@@ -41,7 +40,7 @@ class SVMWithSGDMulticlass {
     // determine number of classes
     val numberOfClasses = input.map(point => point.label).distinct().count().toInt
 
-    logger.debug(s"Training SVMWithSGDMulticlass for ${numberOfClasses + 1} distinct classes")
+    logger.debug(s"Training SVMWithSGDMulticlass for $numberOfClasses distinct classes")
 
     val binaryModelIds = (0 until numberOfClasses).par
 

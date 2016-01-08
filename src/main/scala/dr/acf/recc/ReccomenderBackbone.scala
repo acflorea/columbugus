@@ -107,77 +107,95 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     // Step 2.a one vs all SVM
     val categoryScalingFactor = conf.getDouble("training.categoryScalingFactor")
     val includeCategory = conf.getBoolean("training.includeCategory")
+    val normalize = conf.getBoolean("training.normalize")
 
-    // Split data into training (90%) and test (10%).
-    val trainingCount = rescaledData.count() / 10 * 9 toInt
-    // Function to transform row into labeled points
-    def rowToLabeledPoint = (row: Row) => {
-      val component_id = row.getAs[Int]("component_id")
-      val features = row.getAs[SparseVector]("features")
-      val assignment_class = row.getAs[Double]("assignment_class")
+    val normalizer = new feature.Normalizer()
 
-      val labeledPoint = if (includeCategory) LabeledPoint(
-        assignment_class,
-        Vectors.sparse(
-          compIds.length + features.size,
-          Array.concat(
-            Array(compIds.indexOf(component_id)),
-            features.indices map (i => i + compIds.length)
-          ),
-          Array.concat(Array(categoryScalingFactor), features.values)
-        )
-      )
-      else
-        LabeledPoint(
-          assignment_class,
-          features
-        )
-      labeledPoint
+    Seq(categoryScalingFactor) foreach {
+
+      hyperParam =>
+
+        // Function to transform row into labeled points
+        def rowToLabeledPoint = (row: Row) => {
+          val component_id = row.getAs[Int]("component_id")
+          val features = row.getAs[SparseVector]("features")
+          val assignment_class = row.getAs[Double]("assignment_class")
+
+          val labeledPoint = if (includeCategory) LabeledPoint(
+            assignment_class,
+            Vectors.sparse(
+              compIds.length + features.size,
+              Array.concat(
+                Array(compIds.indexOf(component_id)),
+                features.indices map (i => i + compIds.length)
+              ),
+              Array.concat(Array(hyperParam), features.values)
+            )
+          )
+          else
+            LabeledPoint(
+              assignment_class,
+              features
+            )
+          if (normalize) {
+            labeledPoint.copy(features = normalizer.transform(labeledPoint.features))
+          } else {
+            labeledPoint
+          }
+        }
+
+        val allData = rescaledData.select("index", "component_id", "features", "assignment_class")
+          .map(rowToLabeledPoint)
+          //.filter(p => p.label < 40.0)
+          .zipWithIndex()
+
+        // Split data into training (90%) and test (10%).
+        val trainingCount = allData.count() / 10 * 9 toInt
+
+        val trainingData = allData.filter(_._2 <= trainingCount).map(_._1).cache()
+        // keep most recent 10% of data for testing
+        val testData = allData.filter(_._2 > trainingCount).map(_._1)
+
+        logger.debug(s"Training data size ${trainingData.count()}")
+        logger.debug(s"Test data size ${testData.count()}")
+
+        val (trainingProjected, testProjected) = if (pca) {
+          // Compute the top 10 principal components.
+          val PCAModel = new feature.PCA(100).fit(trainingData.map(_.features))
+          // Project vectors to the linear space spanned by the top 10 principal components, keeping the label
+          (trainingData.map(p => p.copy(features = PCAModel.transform(p.features))),
+            testData.map(p => p.copy(features = PCAModel.transform(p.features))))
+        }
+        else {
+          (trainingData, testData)
+        }
+
+        // Run training algorithm to build the model
+        val model = new SVMWithSGDMulticlass().train(trainingProjected, 100, 1, 0.01, 1)
+
+        // Compute raw scores on the test set.
+        val predictionAndLabels = testProjected.map { case LabeledPoint(label, features) =>
+          val prediction = model.predict(features)
+          (prediction, label)
+        }
+
+        // Get evaluation metrics.
+        val metrics = new MulticlassMetrics(predictionAndLabels)
+
+        val fMeasure = metrics.fMeasure
+        val weightedPrecision = metrics.weightedPrecision
+        val weightedRecall = metrics.weightedRecall
+        val weightedFMeasure = metrics.weightedFMeasure
+
+        println("categoryScalingFactor = " + hyperParam)
+        println("fMeasure = " + fMeasure)
+        println("Weighted Precision = " + weightedPrecision)
+        println("Weighted Recall = " + weightedRecall)
+        println("Weighted fMeasure = " + weightedFMeasure)
+      // println("Confusion Matrix = " + metrics.confusionMatrix.toString(500, 10000))
+
     }
 
-    val allData = rescaledData.select("index", "component_id", "features", "assignment_class")
-      .map(rowToLabeledPoint).zipWithIndex()
-    val trainingData = allData.filter(_._2 <= trainingCount).map(_._1).cache()
-    // keep most recent 10% of data for testing
-    val testData = allData.filter(_._2 > trainingCount).map(_._1)
-
-    logger.debug(s"Training data size ${trainingData.count()}")
-    logger.debug(s"Test data size ${testData.count()}")
-
-    val (trainingProjected, testProjected) = if (pca) {
-      // Compute the top 10 principal components.
-      val PCAModel = new feature.PCA(100).fit(trainingData.map(_.features))
-      // Project vectors to the linear space spanned by the top 10 principal components, keeping the label
-      (trainingData.map(p => p.copy(features = PCAModel.transform(p.features))),
-        testData.map(p => p.copy(features = PCAModel.transform(p.features))))
-    }
-    else {
-      (trainingData, testData)
-    }
-
-    // Run training algorithm to build the model
-    val model = new SVMWithSGDMulticlass().train(trainingProjected, 100, 1, 0.01, 1)
-
-    // Compute raw scores on the test set.
-    val predictionAndLabels = testProjected.map { case LabeledPoint(label, features) =>
-      val prediction = model.predict(features)
-      (prediction, label)
-    }
-
-    // Get evaluation metrics.
-    val metrics = new MulticlassMetrics(predictionAndLabels)
-
-    val fMeasure = metrics.fMeasure
-    val weightedPrecision = metrics.weightedPrecision
-    val weightedRecall = metrics.weightedRecall
-    val weightedFMeasure = metrics.weightedFMeasure
-
-
-    println("fMeasure = " + fMeasure)
-    println("Weighted Precision = " + weightedPrecision)
-    println("Weighted Recall = " + weightedRecall)
-    println("Weighted fMeasure = " + weightedFMeasure)
-    println("Confusion Matrix = " + metrics.confusionMatrix.toString(500, 10000))
 
     // Step 3...Infinity - TDB
 
@@ -205,6 +223,8 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     * @return
     */
   def buildBugsRDD: RDD[BugData] = {
+
+    val use_assigned_to = false
 
     // Charge configs
     val testMode = conf.getBoolean("global.testMode")
@@ -234,28 +254,48 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         s"${prefix}delta_ts <= '${mostRecentDatesWithDelta(interval + 1)}' " +
           s"and ${prefix}delta_ts > '${mostRecentDatesWithDelta(interval)}'"
 
+    val dateFilterAssign =
+      (interval: Int, prefix: String) =>
+        s"${prefix}bug_when <= '${mostRecentDatesWithDelta(interval + 1)}' " +
+          s"and ${prefix}bug_when > '${mostRecentDatesWithDelta(interval)}'"
+
     // Assignment data - all users with more than "issuesThreshold" items fixed
     // after "mostRecentDateWithDelta"
     val bugAssignmentDataFrame = (0 until timeIntervals map { i =>
-      mySQLDF(
-        "(" +
-          "select b.assigned_to, count(*) as bugs_assigned " +
-          "from bugs b " +
-          "where " + testFilter("b.bug_id") +
-          " AND " + resolutionFilter("b.") + " " +
-          " AND " + dateFilter(i, "b.") + " " +
-          " AND b.bug_id not in (select d.dupe from duplicates d) " +
-          "group by b.assigned_to " +
-          "having " + minIssuesFilter("") + " " +
-          "order by bugs_assigned desc" +
-          ") as bugslice"
-      )
+      if (use_assigned_to)
+        mySQLDF(
+          "(" +
+            "select b.assigned_to, count(*) as bugs_assigned " +
+            "from bugs b " +
+            "where " + testFilter("b.bug_id") +
+            " AND " + resolutionFilter("b.") + " " +
+            " AND " + dateFilter(i, "b.") + " " +
+            " AND b.bug_id not in (select d.dupe from duplicates d) " +
+            "group by b.assigned_to " +
+            "having " + minIssuesFilter("") + " " +
+            "order by bugs_assigned desc" +
+            ") as bugslice"
+        )
+      else
+        mySQLDF(
+          "(" +
+            "select ba.who as assigned_to, count(*) as bugs_assigned " +
+            "from bugs_activity ba " +
+            "where " + testFilter("ba.bug_id") +
+            " AND ba.fieldid = '11' and ba.added = 'FIXED' " +
+            " AND " + dateFilterAssign(i, "ba.") + " " +
+            " AND ba.bug_id not in (select d.dupe from duplicates d) " +
+            "group by ba.who " +
+            "having " + minIssuesFilter("") + " " +
+            "order by bugs_assigned desc" +
+            ") as bugslice"
+        )
     }).reduce {
       (df1, df2) => df1.join(df2, "assigned_to")
     }
 
     val bugAssignmentData = bugAssignmentDataFrame.map(row =>
-      BugAssignmentData(row.getInt(0), row.getLong(1)))
+      BugAssignmentData(row.getInt(0), (1 to timeIntervals map (i => row.getLong(i))).sum))
 
     val assignments = bugAssignmentData.collect.
       zipWithIndex.map(elem => elem._1.assigned_to -> elem._2).toMap
@@ -270,7 +310,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     )
 
     // Main bug data
-    val bugsDataFrame = mySQLDF(
+    val bugsDataFrame = if (use_assigned_to) mySQLDF(
       "(" +
         "select b.bug_id, b.creation_ts, b.short_desc," +
         "b.bug_status, b.assigned_to, b.component_id, b.bug_severity, " +
@@ -288,6 +328,26 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
         " AND b.bug_id not in (select d.dupe from duplicates d) " +
         ") as bugslice"
     )
+    else
+      mySQLDF(
+        "(" +
+          "select b.bug_id, b.creation_ts, b.short_desc," +
+          "b.bug_status, ba.who as assigned_to, b.component_id, b.bug_severity, " +
+          "b.resolution, b.delta_ts, " +
+          "c.name as component_name, c.product_id, " +
+          "p.name as product_name, p.classification_id, " +
+          "cl.name as classification_name " +
+          "from bugs b " +
+          "join bugs_activity ba on b.bug_id = ba.bug_id and ba.fieldid = '11' and ba.added='FIXED' " +
+          "join components c on b.component_id = c.id " +
+          "join products p on c.product_id = p.id " +
+          "join classifications cl on p.classification_id = cl.id " +
+          "where " + testFilter("b.bug_id") +
+          " AND " + resolutionFilter("b.") + " " +
+          " AND b.delta_ts > '" + mostRecentDatesWithDelta(0) + "'" +
+          " AND b.bug_id not in (select d.dupe from duplicates d) " +
+          ") as bugslice"
+      )
 
     // The meat of bugzilla -- here is where all user comments are stored!
     val bugsLongdescsDataFrame = mySQLDF(
