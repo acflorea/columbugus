@@ -81,19 +81,33 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       logger.debug("TRANSFORM :: Start!")
 
       val minDocFreq = conf.getInt("transform.minDocFreq")
+      val maxDocFreq = conf.getInt("transform.maxDocFreq")
 
       val currentTime = System.currentTimeMillis()
 
-      val tst = wordsData.map(r => r.getAs[mutable.WrappedArray[String]]("words").toSet[String])
-      val vocabularySize = tst.reduce((w1, w2) => w1.union(w2)).size
+      val vocabulary = wordsData.map(r => r.getAs[mutable.WrappedArray[String]]("words"))
+        .flatMap(words => words map (word => (word, 1)))
+        .reduceByKey(_ + _)
+
+      val invertedIndex = vocabulary.map(pair => (pair._2, 1))
+        .reduceByKey(_ + _)
+
+      // Words that appear over a certain threshold
+      // thanks case head fix method error line eclipse
+      // problem code test project file reply bug attachment patch
+      val stopWords = vocabulary.filter(pair => pair._2 > maxDocFreq || pair._2 < minDocFreq)
+        .map(pair => pair._1).collect()
+
+      val stopWordsRemover = new StopWordsRemover().setInputCol("words").setOutputCol("filteredwords")
+        .setStopWords(stopWords)
+
+      val vocabularySize = vocabulary.count() - stopWords.length
       logger.debug(s"Vocabulary size $vocabularySize")
 
-      val hashingTF = new HashingTF().setInputCol("words").setOutputCol("rawFeatures")
-        .setNumFeatures(vocabularySize)
+      val hashingTF = new HashingTF().setInputCol("filteredwords").setOutputCol("rawFeatures")
+        .setNumFeatures(vocabularySize.toInt)
 
-      val featurizedData = hashingTF.transform(wordsData).cache()
-
-      hashingTF.getNumFeatures
+      val featurizedData = hashingTF.transform(stopWordsRemover.transform(wordsData)).cache()
 
       val idf = new IDF().setMinDocFreq(minDocFreq).setInputCol("rawFeatures").setOutputCol("features")
       val idfModel = idf.fit(featurizedData)
@@ -124,6 +138,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     val normalizer = new feature.Normalizer()
 
     Seq(categoryScalingFactor) foreach {
+    // Seq(82,84,86,88,92,94,96) foreach {
 
       hyperParam =>
 
@@ -158,7 +173,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
         val allData = rescaledData.select("index", "component_id", "features", "assignment_class")
           .map(rowToLabeledPoint)
-          //.filter(p => p.label < 40.0)
+          //.filter(p => p.label < 20.0)
           .zipWithIndex()
 
         // Split data into training (90%) and test (10%).
