@@ -95,7 +95,9 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       // Words that appear over a certain threshold
       // thanks case head fix method error line eclipse
       // problem code test project file reply bug attachment patch
-      val stopWords = vocabulary.filter(pair => pair._2 > maxDocFreq || pair._2 < minDocFreq)
+      val stopWords = vocabulary
+        .filter(pair => pair._2 > maxDocFreq || pair._2 < minDocFreq)
+        .filter(pair => pair._1.length > 2)
         .map(pair => pair._1).collect()
 
       val stopWordsRemover = new StopWordsRemover().setInputCol("words").setOutputCol("filteredwords")

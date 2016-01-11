@@ -36,7 +36,8 @@ class POSTokenizer(override val uid: String)
     }
 
     tokens.collect {
-      case token if token.length > 2 => token.toLowerCase
+      // case token if token.length > 2 => token.toLowerCase
+      case token => token.toLowerCase
     }
   }
 
