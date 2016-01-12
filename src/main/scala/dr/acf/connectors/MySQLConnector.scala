@@ -1,5 +1,6 @@
 package dr.acf.connectors
 
+import java.sql.DriverManager
 import java.util.Properties
 
 import com.typesafe.config.ConfigFactory
@@ -14,6 +15,7 @@ trait MySQLConnector {
   this: SparkOps =>
 
   private lazy val (fullURL, url, username, password) = {
+    DriverManager.registerDriver(new com.mysql.jdbc.Driver)
     val conf = ConfigFactory.load()
     val url = conf.getString("mySQL.url")
     val username = conf.getString("mySQL.username")
@@ -42,10 +44,10 @@ trait MySQLConnector {
     * @return a DataFrame wrapper over the database rows
     */
   def mySQLDF(dbtable: String): DataFrame = {
-
     val jdbcDF = sqlContext.read.format("jdbc").options(
       Map("url" -> fullURL,
-        "dbtable" -> dbtable)
+        "dbtable" -> dbtable,
+        "driver" -> "com.mysql.jdbc.Driver")
     ).load()
     jdbcDF
   }
@@ -73,6 +75,7 @@ trait MySQLConnector {
     val jdbcDF = sqlContext.read.format("jdbc").options(
       Map("url" -> fullURL,
         "dbtable" -> dbtable,
+        "driver" -> "com.mysql.jdbc.Driver",
         "partitionColumn" -> partitionColumn,
         "lowerBound" -> lowerBound.toString,
         "upperBound" -> upperBound.toString,

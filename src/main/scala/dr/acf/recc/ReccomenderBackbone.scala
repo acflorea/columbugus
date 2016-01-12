@@ -40,6 +40,9 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     val testing = conf.getBoolean("phases.testing")
     val pca = conf.getBoolean("phases.pca")
 
+    // File System root
+    val fsRoot = conf.getString("filesystem.root")
+
     // Charge configs
     val tokenizerType = conf.getInt("global.tokenizerType")
     val minWordSize = conf.getInt("global.minWordSize")
@@ -67,14 +70,14 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
       val _wordsData = tokenizer.transform(bugInfoDF)
 
       // writeToTable(_wordsData, "acf_cleaned_data")
-      _wordsData.write.mode("overwrite").parquet("acf_cleaned_data")
+      _wordsData.write.mode("overwrite").parquet(s"$fsRoot/acf_cleaned_data")
       logger.debug(s"CLEANSING :: " +
         s"Done in ${(System.currentTimeMillis() - currentTime) / 1000} seconds!")
-      sqlContext.read.parquet("acf_cleaned_data")
+      sqlContext.read.parquet(s"$fsRoot/acf_cleaned_data")
     }
     else {
       logger.debug("CLEANSING :: Skip!")
-      sqlContext.read.parquet("acf_cleaned_data")
+      sqlContext.read.parquet(s"$fsRoot/acf_cleaned_data")
     }
 
     val rescaledData = if (transform) {
@@ -116,14 +119,14 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
 
       val _rescaledData = idfModel.transform(featurizedData)
 
-      _rescaledData.write.mode("overwrite").parquet("acf_numerical_data")
+      _rescaledData.write.mode("overwrite").parquet(s"$fsRoot/acf_numerical_data")
       logger.debug(s"TRANSFORM :: " +
         s"Done in ${(System.currentTimeMillis() - currentTime) / 1000} seconds!")
-      sqlContext.read.parquet("acf_numerical_data")
+      sqlContext.read.parquet(s"$fsRoot/acf_numerical_data")
 
     } else {
       logger.debug("CLEANSING :: Skip!")
-      sqlContext.read.parquet("acf_numerical_data")
+      sqlContext.read.parquet(s"$fsRoot/acf_numerical_data")
     }
 
     // Integrate more features
@@ -140,7 +143,7 @@ object ReccomenderBackbone extends SparkOps with MySQLConnector {
     val normalizer = new feature.Normalizer()
 
     Seq(categoryScalingFactor) foreach {
-    // Seq(82,84,86,88,92,94,96) foreach {
+      // Seq(82,84,86,88,92,94,96) foreach {
 
       hyperParam =>
 
