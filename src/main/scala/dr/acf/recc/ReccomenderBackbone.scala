@@ -6,6 +6,7 @@ import dr.acf.spark._
 import org.apache.spark.ml.feature._
 import org.apache.spark.mllib.evaluation.MulticlassMetrics
 import org.apache.spark.mllib.feature
+import org.apache.spark.mllib.feature.ChiSqSelector
 import org.apache.spark.mllib.linalg.{SparseVector, Vectors}
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
@@ -31,7 +32,7 @@ object ReccomenderBackbone extends SparkOps {
   def main(args: Array[String]) {
 
     logger.debug("Start!")
-    val currentTime = System.currentTimeMillis()
+    val startTime = System.currentTimeMillis()
 
     // Execution parameters
     val cleansing = conf.getBoolean("phases.cleansing")
@@ -39,6 +40,7 @@ object ReccomenderBackbone extends SparkOps {
     val training = conf.getBoolean("phases.training")
     val testing = conf.getBoolean("phases.testing")
     val pca = conf.getBoolean("phases.pca")
+    val chi2 = conf.getBoolean("phases.chi2")
 
     // File System root
     val fsRoot = conf.getString("filesystem.root")
@@ -51,7 +53,7 @@ object ReccomenderBackbone extends SparkOps {
 
     val wordsData = if (cleansing) {
       logger.debug("CLEANSING :: Start!")
-      val DDcurrentTime = System.currentTimeMillis()
+      val currentTime = System.currentTimeMillis()
 
       val bugInfoRDD: RDD[BugData] = DBExtractor.buildBugsRDD
 
@@ -176,8 +178,42 @@ object ReccomenderBackbone extends SparkOps {
           }
         }
 
-        val allData = rescaledData.select("index", "component_id", "features", "assignment_class")
+        val rawData = rescaledData.select("index", "component_id", "features", "assignment_class")
           .map(rowToLabeledPoint)
+
+        /** PCA */
+        val rawData_PCA = if (pca) {
+          // Compute the top 10 principal components.
+          val PCAModel = new feature.PCA(100).fit(rawData.map(_.features))
+          // Project vectors to the linear space spanned by the top 10 principal components, keeping the label
+          rawData.map(p => p.copy(features = PCAModel.transform(p.features)))
+        }
+        else {
+          rawData
+        }
+
+        /** CHI2 */
+        val rawData_CHI2 = if (chi2) {
+          // Discretize data in 16 equal bins since ChiSqSelector requires categorical features
+          // Even though features are doubles, the ChiSqSelector treats each unique value as a category
+          val discretizedData = rawData_PCA.map { lp =>
+            LabeledPoint(lp.label, Vectors.dense(lp.features.toArray.map { x => (x / 16).floor }))
+          }
+          // Create ChiSqSelector that will select top 50 of 692 features
+          val selector = new ChiSqSelector(10000)
+          // Create ChiSqSelector model (selecting features)
+          val transformer = selector.fit(discretizedData)
+          // Filter the top 50 features from each feature vector
+          val filteredData = discretizedData.map { lp =>
+            LabeledPoint(lp.label, transformer.transform(lp.features))
+          }
+          filteredData
+        }
+        else {
+          rawData_PCA
+        }
+
+        val allData = rawData_CHI2
           //.filter(p => p.label < 20.0)
           .zipWithIndex()
 
@@ -191,22 +227,11 @@ object ReccomenderBackbone extends SparkOps {
         logger.debug(s"Training data size ${trainingData.count()}")
         logger.debug(s"Test data size ${testData.count()}")
 
-        val (trainingProjected, testProjected) = if (pca) {
-          // Compute the top 10 principal components.
-          val PCAModel = new feature.PCA(100).fit(trainingData.map(_.features))
-          // Project vectors to the linear space spanned by the top 10 principal components, keeping the label
-          (trainingData.map(p => p.copy(features = PCAModel.transform(p.features))),
-            testData.map(p => p.copy(features = PCAModel.transform(p.features))))
-        }
-        else {
-          (trainingData, testData)
-        }
-
         // Run training algorithm to build the model
-        val model = new SVMWithSGDMulticlass().train(trainingProjected, 100, 1, 0.01, 1)
+        val model = new SVMWithSGDMulticlass().train(trainingData, 100, 1, 0.01, 1)
 
         // Compute raw scores on the test set.
-        val predictionAndLabels = testProjected.map { case LabeledPoint(label, features) =>
+        val predictionAndLabels = testData.map { case LabeledPoint(label, features) =>
           val prediction = model.predict(features)
           (prediction, label)
         }
@@ -233,7 +258,7 @@ object ReccomenderBackbone extends SparkOps {
 
     val stopHere = true
 
-    logger.debug(s"We're done in ${(System.currentTimeMillis() - currentTime) / 1000} seconds!")
+    logger.debug(s"We're done in ${(System.currentTimeMillis() - startTime) / 1000} seconds!")
   }
 
   def severityLevel(severity: String): Double = {
