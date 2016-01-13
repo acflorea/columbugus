@@ -30,3 +30,10 @@ t<timestamp>:: <comment_1>
 
 
 - TF/IDF computation
+
+
+- Launch on GCloud
+
+sudo gcloud beta dataproc jobs submit spark --cluster cluster-1 --class dr.acf.recc.Reccome
+nderBackbone --jars columbugus-assembly-1.1.jar --properties spark.driver.memory=8g,spark.executor.memory=8g,spark.
+executor.cores=3,spark.yarn.executor.memoryOverhead=600
