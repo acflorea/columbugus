@@ -1,7 +1,9 @@
 package dr.acf.spark
 
+import com.typesafe.config.ConfigFactory
 import org.apache.spark.mllib.classification.{ClassificationModel, SVMModel, SVMWithSGD}
-import org.apache.spark.mllib.linalg.Vector
+import org.apache.spark.mllib.feature.ChiSqSelector
+import org.apache.spark.mllib.linalg.{Vectors, Vector}
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
 import org.slf4j.LoggerFactory
@@ -12,6 +14,9 @@ import scala.collection.parallel.ForkJoinTaskSupport
   * Created by aflorea on 29.11.2015.
   */
 class SVMWithSGDMulticlass {
+
+  // cofig stuff
+  val conf = ConfigFactory.load()
 
   def logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -36,6 +41,7 @@ class SVMWithSGDMulticlass {
              regParam: Double,
              miniBatchFraction: Double): SVMMultiModel = {
 
+    val chi2 = conf.getBoolean("phases.localchi2")
 
     // determine number of classes
     val numberOfClasses = input.map(point => point.label).distinct().count().toInt
@@ -54,9 +60,30 @@ class SVMWithSGDMulticlass {
         case LabeledPoint(label, features) => LabeledPoint(if (label == i) 1.0 else 0.0, features)
       }
 
+      /** CHI2 */
+      val rawData_CHI2 = if (chi2) {
+        // Discretize data in 16 equal bins since ChiSqSelector requires categorical features
+        // Even though features are doubles, the ChiSqSelector treats each unique value as a category
+        val discretizedData = inputProjection.map { lp =>
+          LabeledPoint(lp.label, Vectors.dense(lp.features.toArray.map { x => (x * 100 / 16).floor }))
+        }
+        // Create ChiSqSelector that will select top 50 of 692 features
+        val selector = new ChiSqSelector(1000)
+        // Create ChiSqSelector model (selecting features)
+        val transformer = selector.fit(discretizedData)
+        // Filter the top 50 features from each feature vector
+        val filteredData = discretizedData.map { lp =>
+          LabeledPoint(lp.label, transformer.transform(lp.features))
+        }
+        filteredData
+      }
+      else {
+        inputProjection
+      }
+
       val undersample = false
 
-      logger.debug(s"Train $i vs all with ${inputProjection filter (_.label == 1.0) count()} positive samples")
+      logger.debug(s"Train $i vs all with ${rawData_CHI2 filter (_.label == 1.0) count()} positive samples")
 
       val trainData = if (undersample) {
         val positives = inputProjection filter (_.label == 1.0)

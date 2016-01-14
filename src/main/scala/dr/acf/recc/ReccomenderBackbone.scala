@@ -40,7 +40,7 @@ object ReccomenderBackbone extends SparkOps {
     val training = conf.getBoolean("phases.training")
     val testing = conf.getBoolean("phases.testing")
     val pca = conf.getBoolean("phases.pca")
-    val chi2 = conf.getBoolean("phases.chi2")
+    val chi2 = conf.getBoolean("phases.globalchi2")
 
     // File System root
     val fsRoot = conf.getString("filesystem.root")
@@ -102,11 +102,12 @@ object ReccomenderBackbone extends SparkOps {
       // problem code test project file reply bug attachment patch
       val stopWords = vocabulary
         .filter(pair => pair._2 > maxDocFreq || pair._2 < minDocFreq)
-        .filter(pair => pair._1.length > 2)
+        //.filter(pair => pair._1.length > 2)
         .map(pair => pair._1).collect()
 
       val stopWordsRemover = new StopWordsRemover().setInputCol("words").setOutputCol("filteredwords")
         .setStopWords(stopWords)
+        //.setStopWords(Array.empty[String])
 
       val vocabularySize = vocabulary.count() - stopWords.length
       logger.debug(s"Vocabulary size $vocabularySize")
@@ -196,13 +197,15 @@ object ReccomenderBackbone extends SparkOps {
         val rawData_CHI2 = if (chi2) {
           // Discretize data in 16 equal bins since ChiSqSelector requires categorical features
           // Even though features are doubles, the ChiSqSelector treats each unique value as a category
-          val discretizedData = rawData_PCA.map { lp =>
-            LabeledPoint(lp.label, Vectors.dense(lp.features.toArray.map { x => (x / 16).floor }))
-          }
+          val discretizedData = rawData_PCA
+          //            .map { lp =>
+//            LabeledPoint(lp.label, Vectors.dense(lp.features.toArray.map { x => (x * 100 / 16).floor }))
+//          }
           // Create ChiSqSelector that will select top 50 of 692 features
           val selector = new ChiSqSelector(10000)
           // Create ChiSqSelector model (selecting features)
           val transformer = selector.fit(discretizedData)
+          discretizedData.unpersist()
           // Filter the top 50 features from each feature vector
           val filteredData = discretizedData.map { lp =>
             LabeledPoint(lp.label, transformer.transform(lp.features))
