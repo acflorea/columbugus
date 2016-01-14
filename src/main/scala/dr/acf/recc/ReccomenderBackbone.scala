@@ -102,12 +102,12 @@ object ReccomenderBackbone extends SparkOps {
       // problem code test project file reply bug attachment patch
       val stopWords = vocabulary
         .filter(pair => pair._2 > maxDocFreq || pair._2 < minDocFreq)
-        //.filter(pair => pair._1.length > 2)
+        .filter(pair => pair._1.length > 2)
         .map(pair => pair._1).collect()
 
       val stopWordsRemover = new StopWordsRemover().setInputCol("words").setOutputCol("filteredwords")
         .setStopWords(stopWords)
-        //.setStopWords(Array.empty[String])
+      //.setStopWords(Array.empty[String])
 
       val vocabularySize = vocabulary.count() - stopWords.length
       logger.debug(s"Vocabulary size $vocabularySize")
@@ -180,55 +180,51 @@ object ReccomenderBackbone extends SparkOps {
         }
 
         val rawData = rescaledData.select("index", "component_id", "features", "assignment_class")
-          .map(rowToLabeledPoint)
+          .map(rowToLabeledPoint).zipWithIndex()
+
+        // Split data into training (90%) and test (10%).
+        val trainingCount = rawData.count() / 10 * 9 toInt
+
+        val trainingData = rawData.filter(_._2 <= trainingCount).map(_._1).cache()
+        // keep most recent 10% of data for testing
+        val testData = rawData.filter(_._2 > trainingCount).map(_._1)
+
+        logger.debug(s"Training data size ${trainingData.count()}")
+        logger.debug(s"Test data size ${testData.count()}")
+
 
         /** PCA */
-        val rawData_PCA = if (pca) {
+        val trainingData_PCA = if (pca) {
           // Compute the top 10 principal components.
-          val PCAModel = new feature.PCA(100).fit(rawData.map(_.features))
+          val PCAModel = new feature.PCA(100).fit(trainingData.map(_.features))
           // Project vectors to the linear space spanned by the top 10 principal components, keeping the label
-          rawData.map(p => p.copy(features = PCAModel.transform(p.features)))
+          trainingData.map(p => p.copy(features = PCAModel.transform(p.features)))
         }
         else {
-          rawData
+          trainingData
         }
 
         /** CHI2 */
         val rawData_CHI2 = if (chi2) {
-          // Discretize data in 16 equal bins since ChiSqSelector requires categorical features
-          // Even though features are doubles, the ChiSqSelector treats each unique value as a category
-          val discretizedData = rawData_PCA
-          //            .map { lp =>
-//            LabeledPoint(lp.label, Vectors.dense(lp.features.toArray.map { x => (x * 100 / 16).floor }))
-//          }
-          // Create ChiSqSelector that will select top 50 of 692 features
+          // Create ChiSqSelector that will select top 10000
           val selector = new ChiSqSelector(10000)
           // Create ChiSqSelector model (selecting features)
-          val transformer = selector.fit(discretizedData)
-          discretizedData.unpersist()
+          val cached = trainingData_PCA.cache()
+          val transformer = selector.fit(cached)
+          cached.unpersist()
           // Filter the top 50 features from each feature vector
-          val filteredData = discretizedData.map { lp =>
+          val filteredData = trainingData.map { lp =>
             LabeledPoint(lp.label, transformer.transform(lp.features))
           }
           filteredData
         }
         else {
-          rawData_PCA
+          trainingData
         }
 
         val allData = rawData_CHI2
           //.filter(p => p.label < 20.0)
           .zipWithIndex()
-
-        // Split data into training (90%) and test (10%).
-        val trainingCount = allData.count() / 10 * 9 toInt
-
-        val trainingData = allData.filter(_._2 <= trainingCount).map(_._1).cache()
-        // keep most recent 10% of data for testing
-        val testData = allData.filter(_._2 > trainingCount).map(_._1)
-
-        logger.debug(s"Training data size ${trainingData.count()}")
-        logger.debug(s"Test data size ${testData.count()}")
 
         // Run training algorithm to build the model
         val model = new SVMWithSGDMulticlass().train(trainingData, 100, 1, 0.01, 1)
