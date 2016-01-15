@@ -1,6 +1,5 @@
 package dr.acf.recc
 
-import com.typesafe.config.ConfigFactory
 import dr.acf.extractors.{BugData, DBExtractor}
 import dr.acf.spark._
 import org.apache.spark.ml.feature._
@@ -129,6 +128,7 @@ object ReccomenderBackbone extends SparkOps {
     }
 
     val categoryScalingFactor = conf.getDouble("preprocess.categoryScalingFactor")
+    val chi2Features = conf.getInt("preprocess.chi2Features")
 
     val (trainingData, testData, trainingCount, testCount) = if (preprocess) {
 
@@ -198,7 +198,7 @@ object ReccomenderBackbone extends SparkOps {
       /** CHI2 */
       val (trainingData_CHI2, testData_CHI2) = if (chi2) {
         // Create ChiSqSelector that will select top 10000
-        val selector = new ChiSqSelector(10000)
+        val selector = new ChiSqSelector(chi2Features)
         // Create ChiSqSelector model (selecting features)
         val cached = trainingData_PCA.cache()
         val transformer = selector.fit(cached)
@@ -216,14 +216,14 @@ object ReccomenderBackbone extends SparkOps {
         (trainingData_PCA, testData_PCA)
       }
 
-      trainingData_CHI2.saveAsObjectFile(s"$fsRoot/acf_training_data")
-      testData_CHI2.saveAsObjectFile(s"$fsRoot/acf_test_data")
+      trainingData_CHI2.saveAsObjectFile(s"$fsRoot/acf_training_data_$chi2Features")
+      testData_CHI2.saveAsObjectFile(s"$fsRoot/acf_test_data_$chi2Features")
 
       (trainingData_CHI2, testData_CHI2, trainingCount, allDataCount - trainingCount)
 
     } else {
-      val _trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data")
-      val _testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data")
+      val _trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_$chi2Features")
+      val _testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_$chi2Features")
       // Split data into training (90%) and test (10%).
       val trainingCount = _trainingData.count()
       val testCount = _testData.count()
@@ -235,7 +235,8 @@ object ReccomenderBackbone extends SparkOps {
     logger.debug(s"Test data size $testCount")
 
     // Run training algorithm to build the model
-    val model = new SVMWithSGDMulticlass().train(trainingData, 100, 1, 0.01, 1)
+    val undersample = conf.getBoolean("preprocess.undersampling")
+    val model = new SVMWithSGDMulticlass(undersample).train(trainingData, 100, 1, 0.01, 1)
 
     // Compute raw scores on the test set.
     val predictionAndLabels = testData.map { case LabeledPoint(label, features) =>

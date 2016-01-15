@@ -1,6 +1,5 @@
 package dr.acf.spark
 
-import com.typesafe.config.ConfigFactory
 import org.apache.spark.mllib.classification.{ClassificationModel, SVMModel, SVMWithSGD}
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.regression.LabeledPoint
@@ -12,7 +11,7 @@ import scala.collection.parallel.ForkJoinTaskSupport
 /**
   * Created by aflorea on 29.11.2015.
   */
-class SVMWithSGDMulticlass {
+class SVMWithSGDMulticlass(undersample: Boolean) {
 
   def logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -53,8 +52,6 @@ class SVMWithSGDMulticlass {
       val inputProjection = input.map {
         case LabeledPoint(label, features) => LabeledPoint(if (label == i) 1.0 else 0.0, features)
       }
-
-      val undersample = false
 
       logger.debug(s"Train $i vs all with ${inputProjection filter (_.label == 1.0) count()} positive samples")
 
