@@ -16,7 +16,6 @@ trait MySQLConnector {
 
   private lazy val (fullURL, url, username, password) = {
     DriverManager.registerDriver(new com.mysql.jdbc.Driver)
-    val conf = ConfigFactory.load()
     val url = conf.getString("mySQL.url")
     val username = conf.getString("mySQL.username")
     val password = conf.getString("mySQL.password")

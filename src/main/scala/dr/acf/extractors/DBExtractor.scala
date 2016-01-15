@@ -14,9 +14,6 @@ import org.apache.spark.sql.Row
   */
 object DBExtractor extends SparkOps with MySQLConnector {
 
-  // cofig stuff
-  val conf = ConfigFactory.load()
-
   /**
     * Returns an RDD containing (bug_id, bug_details) type of data
     * The details are in the form t<timestamp>:: info

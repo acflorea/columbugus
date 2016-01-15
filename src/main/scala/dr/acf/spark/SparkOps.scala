@@ -8,8 +8,9 @@ import org.apache.spark.{SparkContext, SparkConf}
   */
 trait SparkOps {
 
+  val conf = ConfigFactory.load()
+
   implicit lazy val sc = {
-    val conf = ConfigFactory.load()
     val master = conf.getString("spark.master")
     val appName = conf.getString("spark.appName")
 

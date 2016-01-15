@@ -24,9 +24,6 @@ object ReccomenderBackbone extends SparkOps {
   // this is used to implicitly convert an RDD to a DataFrame.
   import sqlContext.implicits._
 
-  // cofig stuff
-  val conf = ConfigFactory.load()
-
   val logger = LoggerFactory.getLogger(getClass.getName)
 
   def main(args: Array[String]) {
@@ -40,7 +37,7 @@ object ReccomenderBackbone extends SparkOps {
     val training = conf.getBoolean("phases.training")
     val testing = conf.getBoolean("phases.testing")
     val pca = conf.getBoolean("phases.pca")
-    val chi2 = conf.getBoolean("phases.globalchi2")
+    val chi2 = conf.getBoolean("phases.chi2")
 
     // File System root
     val fsRoot = conf.getString("filesystem.root")
