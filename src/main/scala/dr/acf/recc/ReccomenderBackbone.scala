@@ -34,10 +34,9 @@ object ReccomenderBackbone extends SparkOps {
     // Execution parameters
     val cleansing = conf.getBoolean("phases.cleansing")
     val transform = conf.getBoolean("phases.transform")
-    val training = conf.getBoolean("phases.training")
-    val testing = conf.getBoolean("phases.testing")
-    val pca = conf.getBoolean("phases.pca")
-    val chi2 = conf.getBoolean("phases.chi2")
+    val preprocess = conf.getBoolean("phases.preprocess")
+    val pca = conf.getBoolean("preprocess.pca")
+    val chi2 = conf.getBoolean("preprocess.chi2")
 
     // File System root
     val fsRoot = conf.getString("filesystem.root")
@@ -129,126 +128,135 @@ object ReccomenderBackbone extends SparkOps {
       sqlContext.read.parquet(s"$fsRoot/acf_numerical_data")
     }
 
-    // Integrate more features
-    val compIds = rescaledData.select("component_id").map(_.getAs[Int](0)).distinct().collect()
+    val categoryScalingFactor = conf.getDouble("preprocess.categoryScalingFactor")
 
-    // val assignment = rescaledData.select("assigned_to", "assignment_class").distinct().collect()
-    // assignment.foreach(println)
+    val (trainingData, testData, trainingCount, testCount) = if (preprocess) {
 
-    // Step 2.a one vs all SVM
-    val categoryScalingFactor = conf.getDouble("training.categoryScalingFactor")
-    val includeCategory = conf.getBoolean("training.includeCategory")
-    val normalize = conf.getBoolean("training.normalize")
+      // Integrate more features
+      val compIds = rescaledData.select("component_id").map(_.getAs[Int](0)).distinct().collect()
 
-    val normalizer = new feature.Normalizer()
+      // val assignment = rescaledData.select("assigned_to", "assignment_class").distinct().collect()
+      // assignment.foreach(println)
 
-    Seq(categoryScalingFactor) foreach {
-      // Seq(82,84,86,88,92,94,96) foreach {
+      // Step 2.a one vs all SVM
+      val includeCategory = conf.getBoolean("preprocess.includeCategory")
+      val normalize = conf.getBoolean("preprocess.normalize")
 
-      hyperParam =>
+      val normalizer = new feature.Normalizer()
 
-        // Function to transform row into labeled points
-        def rowToLabeledPoint = (row: Row) => {
-          val component_id = row.getAs[Int]("component_id")
-          val features = row.getAs[SparseVector]("features")
-          val assignment_class = row.getAs[Double]("assignment_class")
+      // Function to transform row into labeled points
+      def rowToLabeledPoint = (row: Row) => {
+        val component_id = row.getAs[Int]("component_id")
+        val features = row.getAs[SparseVector]("features")
+        val assignment_class = row.getAs[Double]("assignment_class")
 
-          val labeledPoint = if (includeCategory) LabeledPoint(
-            assignment_class,
-            Vectors.sparse(
-              compIds.length + features.size,
-              Array.concat(
-                Array(compIds.indexOf(component_id)),
-                features.indices map (i => i + compIds.length)
-              ),
-              Array.concat(Array(hyperParam), features.values)
-            )
+        val labeledPoint = if (includeCategory) LabeledPoint(
+          assignment_class,
+          Vectors.sparse(
+            compIds.length + features.size,
+            Array.concat(
+              Array(compIds.indexOf(component_id)),
+              features.indices map (i => i + compIds.length)
+            ),
+            Array.concat(Array(categoryScalingFactor), features.values)
           )
-          else
-            LabeledPoint(
-              assignment_class,
-              features
-            )
-          if (normalize) {
-            labeledPoint.copy(features = normalizer.transform(labeledPoint.features))
-          } else {
-            labeledPoint
-          }
+        )
+        else
+          LabeledPoint(
+            assignment_class,
+            features
+          )
+        if (normalize) {
+          labeledPoint.copy(features = normalizer.transform(labeledPoint.features))
+        } else {
+          labeledPoint
         }
+      }
 
-        val rawData = rescaledData.select("index", "component_id", "features", "assignment_class")
-          .map(rowToLabeledPoint).zipWithIndex()
+      val rawData = rescaledData.select("index", "component_id", "features", "assignment_class")
+        .map(rowToLabeledPoint).zipWithIndex()
 
-        // Split data into training (90%) and test (10%).
-        val trainingCount = rawData.count() / 10 * 9 toInt
+      // Split data into training (90%) and test (10%).
+      val allDataCount = rawData.count()
+      val trainingCount = allDataCount / 10 * 9 toInt
 
-        val trainingData = rawData.filter(_._2 <= trainingCount).map(_._1).cache()
-        // keep most recent 10% of data for testing
-        val testData = rawData.filter(_._2 > trainingCount).map(_._1)
+      val trainingData = rawData.filter(_._2 <= trainingCount).map(_._1).cache()
+      val testData = rawData.filter(_._2 > trainingCount).map(_._1).cache()
 
-        logger.debug(s"Training data size ${trainingData.count()}")
-        logger.debug(s"Test data size ${testData.count()}")
+      /** PCA */
+      val (trainingData_PCA, testData_PCA) = if (pca) {
+        // Compute the top 10 principal components.
+        val PCAModel = new feature.PCA(100).fit(trainingData.map(_.features))
+        // Project vectors to the linear space spanned by the top 10 principal components, keeping the label
+        (trainingData.map(p => p.copy(features = PCAModel.transform(p.features))),
+          testData.map(p => p.copy(features = PCAModel.transform(p.features))))
+      }
+      else {
+        (trainingData, testData)
+      }
 
-
-        /** PCA */
-        val trainingData_PCA = if (pca) {
-          // Compute the top 10 principal components.
-          val PCAModel = new feature.PCA(100).fit(trainingData.map(_.features))
-          // Project vectors to the linear space spanned by the top 10 principal components, keeping the label
-          trainingData.map(p => p.copy(features = PCAModel.transform(p.features)))
+      /** CHI2 */
+      val (trainingData_CHI2, testData_CHI2) = if (chi2) {
+        // Create ChiSqSelector that will select top 10000
+        val selector = new ChiSqSelector(10000)
+        // Create ChiSqSelector model (selecting features)
+        val cached = trainingData_PCA.cache()
+        val transformer = selector.fit(cached)
+        cached.unpersist()
+        // Filter the top 50 features from each feature vector
+        val filteredTrainingData = trainingData_PCA.map { lp =>
+          LabeledPoint(lp.label, transformer.transform(lp.features))
         }
-        else {
-          trainingData
+        val filteredTestData = testData_PCA.map { lp =>
+          LabeledPoint(lp.label, transformer.transform(lp.features))
         }
+        (filteredTrainingData, filteredTestData)
+      }
+      else {
+        (trainingData_PCA, testData_PCA)
+      }
 
-        /** CHI2 */
-        val rawData_CHI2 = if (chi2) {
-          // Create ChiSqSelector that will select top 10000
-          val selector = new ChiSqSelector(10000)
-          // Create ChiSqSelector model (selecting features)
-          val cached = trainingData_PCA.cache()
-          val transformer = selector.fit(cached)
-          cached.unpersist()
-          // Filter the top 50 features from each feature vector
-          val filteredData = trainingData.map { lp =>
-            LabeledPoint(lp.label, transformer.transform(lp.features))
-          }
-          filteredData
-        }
-        else {
-          trainingData
-        }
+      trainingData_CHI2.saveAsObjectFile(s"$fsRoot/acf_training_data")
+      testData_CHI2.saveAsObjectFile(s"$fsRoot/acf_test_data")
 
-        val allData = rawData_CHI2
-          //.filter(p => p.label < 20.0)
-          .zipWithIndex()
+      (trainingData_CHI2, testData_CHI2, trainingCount, allDataCount - trainingCount)
 
-        // Run training algorithm to build the model
-        val model = new SVMWithSGDMulticlass().train(trainingData, 100, 1, 0.01, 1)
+    } else {
+      val _trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data")
+      val _testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data")
+      // Split data into training (90%) and test (10%).
+      val trainingCount = _trainingData.count()
+      val testCount = _testData.count()
 
-        // Compute raw scores on the test set.
-        val predictionAndLabels = testData.map { case LabeledPoint(label, features) =>
-          val prediction = model.predict(features)
-          (prediction, label)
-        }
-
-        // Get evaluation metrics.
-        val metrics = new MulticlassMetrics(predictionAndLabels)
-
-        val fMeasure = metrics.fMeasure
-        val weightedPrecision = metrics.weightedPrecision
-        val weightedRecall = metrics.weightedRecall
-        val weightedFMeasure = metrics.weightedFMeasure
-
-        println("categoryScalingFactor = " + hyperParam)
-        println("fMeasure = " + fMeasure)
-        println("Weighted Precision = " + weightedPrecision)
-        println("Weighted Recall = " + weightedRecall)
-        println("Weighted fMeasure = " + weightedFMeasure)
-      // println("Confusion Matrix = " + metrics.confusionMatrix.toString(500, 10000))
-
+      (_trainingData, _testData, trainingCount, testCount)
     }
 
+    logger.debug(s"Training data size $trainingCount")
+    logger.debug(s"Test data size $testCount")
+
+    // Run training algorithm to build the model
+    val model = new SVMWithSGDMulticlass().train(trainingData, 100, 1, 0.01, 1)
+
+    // Compute raw scores on the test set.
+    val predictionAndLabels = testData.map { case LabeledPoint(label, features) =>
+      val prediction = model.predict(features)
+      (prediction, label)
+    }
+
+    // Get evaluation metrics.
+    val metrics = new MulticlassMetrics(predictionAndLabels)
+
+    val fMeasure = metrics.fMeasure
+    val weightedPrecision = metrics.weightedPrecision
+    val weightedRecall = metrics.weightedRecall
+    val weightedFMeasure = metrics.weightedFMeasure
+
+    println("categoryScalingFactor = " + categoryScalingFactor)
+    println("fMeasure = " + fMeasure)
+    println("Weighted Precision = " + weightedPrecision)
+    println("Weighted Recall = " + weightedRecall)
+    println("Weighted fMeasure = " + weightedFMeasure)
+    // println("Confusion Matrix = " + metrics.confusionMatrix.toString(500, 10000))
 
     // Step 3...Infinity - TDB
 
