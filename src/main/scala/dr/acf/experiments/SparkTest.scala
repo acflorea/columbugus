@@ -2,6 +2,7 @@ package dr.acf.experiments
 
 import dr.acf.connectors.MySQLConnector
 import dr.acf.spark.SparkOps
+import dr.acf.spark.SparkOps._
 
 /**
   * Created by aflorea on 15.11.2015.

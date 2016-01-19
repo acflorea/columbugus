@@ -1,6 +1,7 @@
 package dr.acf.experiments
 
 import dr.acf.spark.SparkOps
+import dr.acf.spark.SparkOps._
 import org.apache.spark.mllib.clustering.{LDA, DistributedLDAModel}
 import org.apache.spark.mllib.linalg.distributed.{RowMatrix, MatrixEntry}
 import org.apache.spark.mllib.linalg._
@@ -54,7 +55,7 @@ object LDATests extends SparkOps {
           1,
           size,
           (0 to size map { i => if (indices.contains(i)) 1 else 0 }).scan(0)(_ + _).tail.toArray,
-          Array.fill[Int](indices.size)(0),
+          Array.fill[Int](indices.length)(0),
           values,
           false
         )
@@ -64,7 +65,7 @@ object LDATests extends SparkOps {
     for (topic <- Range(0, 3)) {
       print("Topic " + topic + ":")
       for (word <- Range(0, ldaModel.vocabSize)) {
-        print(" " + topics(word, topic));
+        print(" " + topics(word, topic))
       }
       println()
     }

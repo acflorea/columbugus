@@ -6,8 +6,9 @@ import org.apache.spark.{SparkContext, SparkConf}
 /**
   * Created by aflorea on 17.11.2015.
   */
-trait SparkOps {
+trait SparkOps
 
+object SparkOps {
   val conf = ConfigFactory.load()
 
   implicit lazy val sc = {

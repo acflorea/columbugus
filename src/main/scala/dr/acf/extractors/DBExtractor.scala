@@ -2,9 +2,9 @@ package dr.acf.extractors
 
 import java.sql.Timestamp
 
-import com.typesafe.config.ConfigFactory
 import dr.acf.connectors.MySQLConnector
 import dr.acf.spark.SparkOps
+import dr.acf.spark.SparkOps._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Row
 

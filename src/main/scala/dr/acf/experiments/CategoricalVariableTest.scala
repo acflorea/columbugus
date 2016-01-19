@@ -2,6 +2,7 @@ package dr.acf.experiments
 
 import dr.acf.common.CategoricalVariable
 import dr.acf.spark.SparkOps
+import dr.acf.spark.SparkOps._
 
 /**
   * Created by aflorea on 30.11.2015.
