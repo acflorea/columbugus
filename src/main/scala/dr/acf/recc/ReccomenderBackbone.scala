@@ -36,6 +36,7 @@ object ReccomenderBackbone extends SparkOps {
     val preprocess = conf.getBoolean("phases.preprocess")
     val pca = conf.getBoolean("preprocess.pca")
     val chi2 = conf.getBoolean("preprocess.chi2")
+    val lda = conf.getBoolean("preprocess.lda")
 
     // File System root
     val fsRoot = conf.getString("filesystem.root")
@@ -203,7 +204,7 @@ object ReccomenderBackbone extends SparkOps {
         val cached = trainingData_PCA.cache()
         val transformer = selector.fit(cached)
         cached.unpersist()
-        // Filter the top 50 features from each feature vector
+        // Filter the top features from each feature vector
         val filteredTrainingData = trainingData_PCA.map { lp =>
           LabeledPoint(lp.label, transformer.transform(lp.features))
         }

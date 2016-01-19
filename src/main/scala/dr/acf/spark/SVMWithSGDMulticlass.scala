@@ -62,7 +62,7 @@ class SVMWithSGDMulticlass(undersample: Boolean) {
         // http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.96.9248
         val rawNegatives = inputProjection filter (_.label == 0.0)
         val negativesCount = rawNegatives.count()
-        val samplingRate = negativesCount / (1 + (positivesCount * 10)) / 100.0
+        val samplingRate = (positivesCount * 1.0) / negativesCount
         val negatives = if (samplingRate < 1.0)
           rawNegatives.sample(withReplacement = false, samplingRate, 123456789L)
         else
