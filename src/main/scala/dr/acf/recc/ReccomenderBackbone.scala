@@ -36,6 +36,7 @@ object ReccomenderBackbone extends SparkOps {
     val cleansing = conf.getBoolean("phases.cleansing")
     val transform = conf.getBoolean("phases.transform")
     val preprocess = conf.getBoolean("phases.preprocess")
+    val simple = conf.getBoolean("preprocess.simple")
     val pca = conf.getBoolean("preprocess.pca")
     val chi2 = conf.getBoolean("preprocess.chi2")
     val lda = conf.getBoolean("preprocess.lda")
@@ -43,11 +44,10 @@ object ReccomenderBackbone extends SparkOps {
     // File System root
     val fsRoot = conf.getString("filesystem.root")
 
-
     // Step 1 - load data from DB
-
     val wordsData: DataFrame = dataCleansing(cleansing, fsRoot)
 
+    // Step 2 - transform to numerical features
     val rescaledData: DataFrame = dataTransform(transform, fsRoot, wordsData)
 
     val categoryScalingFactor = conf.getDouble("preprocess.categoryScalingFactor")
@@ -55,18 +55,15 @@ object ReccomenderBackbone extends SparkOps {
     val ldaTopics = conf.getInt("preprocess.ldaTopics")
     val ldaOptimizer = conf.getString("preprocess.ldaOptimizer")
 
-    val (trainingData, testData, trainingCount, testCount) = if (preprocess) {
+    // Integrate more features
+    val compIds = rescaledData.select("component_id").map(_.getAs[Int](0)).distinct().collect()
 
-      // Integrate more features
-      val compIds = rescaledData.select("component_id").map(_.getAs[Int](0)).distinct().collect()
+    val inputDataSVM = mutable.Map.empty[String, (RDD[LabeledPoint], RDD[LabeledPoint])]
 
-      // val assignment = rescaledData.select("assigned_to", "assignment_class").distinct().collect()
-      // assignment.foreach(println)
+    if (preprocess) {
 
-      // Step 2.a one vs all SVM
       val includeCategory = conf.getBoolean("preprocess.includeCategory")
       val normalize = conf.getBoolean("preprocess.normalize")
-
       val normalizer = new feature.Normalizer()
 
       // Function to transform row into labeled points
@@ -103,48 +100,74 @@ object ReccomenderBackbone extends SparkOps {
 
       // Split data into training (90%) and test (10%).
       val allDataCount = rawData.count()
-      val trainingCount = allDataCount / 10 * 9 toInt
+      val trainingDataCount = allDataCount / 10 * 9 toInt
 
-      val trainingData = rawData.filter(_._2 <= trainingCount).map(_._1).cache()
-      val testData = rawData.filter(_._2 > trainingCount).map(_._1).cache()
+      logger.debug(s"Training data size $trainingDataCount")
+      logger.debug(s"Test data size ${allDataCount - trainingDataCount}")
 
-      /** PCA */
-      val (trainingData_PCA, testData_PCA) = if (pca) {
+      val rawTrainingData = rawData.filter(_._2 <= trainingDataCount).map(_._1).cache()
+      val rawTestData = rawData.filter(_._2 > trainingDataCount).map(_._1).cache()
+
+      // Simple model
+      if (simple) {
+        logger.debug("Training simple model")
+
+        val trainingData = rawTrainingData
+        val testData = rawTestData
+
+        trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_simple")
+        testData.saveAsObjectFile(s"$fsRoot/acf_test_data_simple")
+
+        inputDataSVM.put("simple", (trainingData, testData))
+      }
+
+      // PCA
+      if (pca) {
+        logger.debug("Training PCA model")
+
+        /** PCA */
         // Compute the top 10 principal components.
-        val PCAModel = new feature.PCA(100).fit(trainingData.map(_.features))
+        val PCAModel = new feature.PCA(100).fit(rawTrainingData.map(_.features))
         // Project vectors to the linear space spanned by the top 10 principal components, keeping the label
-        (trainingData.map(p => p.copy(features = PCAModel.transform(p.features))),
-          testData.map(p => p.copy(features = PCAModel.transform(p.features))))
-      }
-      else {
-        (trainingData, testData)
+        val trainingData = rawTrainingData.map(p => p.copy(features = PCAModel.transform(p.features)))
+        val testData = rawTestData.map(p => p.copy(features = PCAModel.transform(p.features)))
+
+        trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_PCA_100")
+        testData.saveAsObjectFile(s"$fsRoot/acf_test_data_PCA_100")
+
+        inputDataSVM.put("PCA", (trainingData, testData))
       }
 
-      /** CHI2 */
-      val (trainingData_CHI2, testData_CHI2) = if (chi2) {
-        // Create ChiSqSelector that will select top 10000
+      // CHI2
+      if (chi2) {
+        logger.debug("Training CHI2 model")
+
+        // Create ChiSqSelector that will select top chi2Features features
         val selector = new ChiSqSelector(chi2Features)
         // Create ChiSqSelector model (selecting features)
-        val cached = trainingData_PCA.cache()
+        val cached = rawTrainingData.cache()
         val transformer = selector.fit(cached)
         cached.unpersist()
         // Filter the top features from each feature vector
-        val filteredTrainingData = trainingData_PCA.map { lp =>
+        val trainingData = rawTrainingData.map { lp =>
           LabeledPoint(lp.label, transformer.transform(lp.features))
         }
-        val filteredTestData = testData_PCA.map { lp =>
+        val testData = rawTestData.map { lp =>
           LabeledPoint(lp.label, transformer.transform(lp.features))
         }
-        (filteredTrainingData, filteredTestData)
-      }
-      else {
-        (trainingData_PCA, testData_PCA)
+
+        trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_CHI2_$chi2Features")
+        testData.saveAsObjectFile(s"$fsRoot/acf_test_data_CHI2_$chi2Features")
+
+        inputDataSVM.put("CHI2", (trainingData, testData))
       }
 
-      /** LDA */
-      val (trainingData_LDA, testData_LDA) = if (lda) {
+      // LDA
+      if (lda) {
+        logger.debug("Training LDA model")
+
         // Index documents with unique IDs
-        val zippedData = trainingData_CHI2.union(testData_CHI2).zipWithIndex.map(_.swap)
+        val zippedData = rawTrainingData.union(rawTestData).zipWithIndex.map(_.swap)
         val corpus = zippedData.map(point => (point._1, point._2.features))
         // Cluster the documents into n topics using LDA
         val ldaModel = new LDA().setK(ldaTopics)
@@ -164,45 +187,66 @@ object ReccomenderBackbone extends SparkOps {
             (index, LabeledPoint(labelPoint.label, topics))
         }
 
-        val transformedTraining = transformed.filter(_._1 <= trainingCount).map(_._2)
-        val transformedTest = transformed.filter(_._1 > trainingCount).map(_._2)
+        val trainingData = transformed.filter(_._1 <= trainingDataCount).map(_._2)
+        val testData = transformed.filter(_._1 > trainingDataCount).map(_._2)
 
-        (transformedTraining, transformedTest)
+        trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_LDA_$ldaTopics")
+        testData.saveAsObjectFile(s"$fsRoot/acf_test_data_LDA_$ldaTopics")
+
+        inputDataSVM.put("LDA", (trainingData, testData))
       }
-      else {
-        (trainingData_CHI2, testData_CHI2)
-      }
-
-      trainingData_LDA.saveAsObjectFile(s"$fsRoot/acf_training_data_${chi2Features}_$ldaTopics")
-      testData_LDA.saveAsObjectFile(s"$fsRoot/acf_test_data_${chi2Features}_$ldaTopics")
-
-      val _trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_${chi2Features}_$ldaTopics")
-      val _testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_${chi2Features}_$ldaTopics")
-
-      (_trainingData, _testData, trainingCount, allDataCount - trainingCount)
 
     } else {
-      val _trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_${chi2Features}_$ldaTopics")
-      val _testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_${chi2Features}_$ldaTopics")
-      // Split data into training (90%) and test (10%).
-      val trainingCount = _trainingData.count()
-      val testCount = _testData.count()
 
-      (_trainingData, _testData, trainingCount, testCount)
+      if (simple) {
+        val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_simple")
+        val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_simple")
+
+        inputDataSVM.put("simple", (trainingData, testData))
+      }
+
+      if (pca) {
+        val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_PCA_100")
+        val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_PCA_100")
+
+        inputDataSVM.put("PCA", (trainingData, testData))
+      }
+
+      if (chi2) {
+        val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_CHI2_$chi2Features")
+        val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_CHI2_$chi2Features")
+
+        inputDataSVM.put("CHI2", (trainingData, testData))
+      }
+
+      if (lda) {
+        val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_LDA_$ldaTopics")
+        val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_LDA_$ldaTopics")
+
+        inputDataSVM.put("LDA", (trainingData, testData))
+      }
+
     }
-
-    logger.debug(s"Training data size $trainingCount")
-    logger.debug(s"Test data size $testCount")
 
     // Run training algorithm to build the model
     val undersample = conf.getBoolean("preprocess.undersampling")
-    val model = new SVMWithSGDMulticlass(undersample).train(trainingData, 100, 1, 0.01, 1)
 
-    // Compute raw scores on the test set.
-    val predictionAndLabels = testData.map { case LabeledPoint(label, features) =>
-      val prediction = model.predict(features)
-      (prediction, label)
+    // TRAIN and predict
+    val SVMModels = inputDataSVM map {
+      elector =>
+        val key = elector._1
+        val trainingData = elector._2._1
+        val testData = elector._2._1
+        val model = new SVMWithSGDMulticlass(undersample).train(trainingData, 100, 1, 0.01, 1)
+
+        testData.zipWithIndex().map(_.swap).map(data =>
+          ((data._1, data._2.label), Seq(model.predict(data._2.features))))
     }
+
+    val predictionAndLabels = SVMModels.reduce((predictions1, predictions2) =>
+      predictions1.join(predictions2).map { joined =>
+        (joined._1, joined._2._1 ++ joined._2._2)
+      }).map(prediction => (prediction._1._2, prediction._2.groupBy(identity).maxBy(_._2.size)._1))
 
     // Get evaluation metrics.
     val metrics = new MulticlassMetrics(predictionAndLabels)
@@ -217,7 +261,7 @@ object ReccomenderBackbone extends SparkOps {
     println("Weighted Precision = " + weightedPrecision)
     println("Weighted Recall = " + weightedRecall)
     println("Weighted fMeasure = " + weightedFMeasure)
-    // println("Confusion Matrix = " + metrics.confusionMatrix.toString(500, 10000))
+    println("Confusion Matrix = " + metrics.confusionMatrix.toString(500, 10000))
 
     // Step 3...Infinity - TDB
 
@@ -226,8 +270,10 @@ object ReccomenderBackbone extends SparkOps {
     logger.debug(s"We're done in ${(System.currentTimeMillis() - startTime) / 1000} seconds!")
   }
 
+
   /**
     * If transform : TF/IDF, FREQUENCY-FILTERING, SAVE DATAFRAME else : LOAD DATAFRAME
+    *
     * @param transform
     * @param fsRoot - file system root
     * @param wordsData
@@ -288,7 +334,7 @@ object ReccomenderBackbone extends SparkOps {
 
   /**
     * If cleansing : LOAD, FILTER, TOKENIZE, SAVE DATAFRAME - else LOAD DATAFRAME
- *
+    *
     * @param cleansing
     * @param fsRoot - file system root
     * @return - cleaned dataframe
