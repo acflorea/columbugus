@@ -18,6 +18,8 @@ object SparkOps {
     val sparkConf = new SparkConf().setMaster(master).setAppName(appName)
 
     sparkConf.set("spark.driver.memory", conf.getString("spark.driver.memory"))
+    sparkConf.set("spark.driver.maxResultSize", conf.getString("spark.driver.maxResultSize"))
+
 
     new SparkContext(sparkConf)
   }

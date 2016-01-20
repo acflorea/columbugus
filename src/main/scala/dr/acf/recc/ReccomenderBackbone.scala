@@ -132,7 +132,8 @@ object ReccomenderBackbone extends SparkOps {
 
     val categoryScalingFactor = conf.getDouble("preprocess.categoryScalingFactor")
     val chi2Features = conf.getInt("preprocess.chi2Features")
-    val ldaTopics= conf.getInt("preprocess.ldaTopics")
+    val ldaTopics = conf.getInt("preprocess.ldaTopics")
+    val ldaOptimizer = conf.getString("preprocess.ldaOptimizer")
 
     val (trainingData, testData, trainingCount, testCount) = if (preprocess) {
 
@@ -223,46 +224,29 @@ object ReccomenderBackbone extends SparkOps {
       /** LDA */
       val (trainingData_LDA, testData_LDA) = if (lda) {
         // Index documents with unique IDs
-        val featuresOnly = trainingData_CHI2.map(lp => lp.features)
-        val corpus = featuresOnly.zipWithIndex.map(_.swap).cache()
+        val zippedData = trainingData_CHI2.union(testData_CHI2).zipWithIndex.map(_.swap)
+        val corpus = zippedData.map(point => (point._1, point._2.features))
         // Cluster the documents into n topics using LDA
-        val ldaModel = new LDA().setK(ldaTopics).setOptimizer("em").run(corpus)
+        val ldaModel = new LDA().setK(ldaTopics)
+          .setOptimizer(ldaOptimizer)
+          .run(corpus.cache())
           .asInstanceOf[DistributedLDAModel]
+        corpus.unpersist()
         // Output topics. Each is a distribution over words (matching word count vectors)
         println(s"LDA :: Learned $ldaTopics topics (as distributions over vocab of ${ldaModel.vocabSize} words)")
-        val topics = ldaModel.topicsMatrix.asInstanceOf[DenseMatrix]
-        val transformedTraining = trainingData_CHI2.map {
-          lp =>
-            val features = lp.features.toSparse
-            val size = features.size
-            val indices = features.indices
-            val values = features.values
-            val valuesMatrix = new SparseMatrix(
-              1,
-              size,
-              (0 to size map { i => if (indices.contains(i)) 1 else 0 }).scan(0)(_ + _).tail.toArray,
-              Array.fill[Int](indices.length)(0),
-              values,
-              false
-            )
-            LabeledPoint(lp.label, new DenseVector(valuesMatrix.multiply(topics).values))
+
+        val transformed = ldaModel.topicDistributions.join(zippedData).map {
+          point =>
+            val index = point._1
+            val dataPair = point._2
+            val topics = dataPair._1
+            val labelPoint = dataPair._2
+            (index, LabeledPoint(labelPoint.label, topics))
         }
-        val transformedTest = testData_CHI2.map {
-          lp =>
-            val features = lp.features.toSparse
-            val size = features.size
-            val indices = features.indices
-            val values = features.values
-            val valuesMatrix = new SparseMatrix(
-              1,
-              size,
-              (0 to size map { i => if (indices.contains(i)) 1 else 0 }).scan(0)(_ + _).tail.toArray,
-              Array.fill[Int](indices.length)(0),
-              values,
-              false
-            )
-            LabeledPoint(lp.label, new DenseVector(valuesMatrix.multiply(topics).values))
-        }
+
+        val transformedTraining = transformed.filter(_._1 <= trainingCount).map(_._2)
+        val transformedTest = transformed.filter(_._1 > trainingCount).map(_._2)
+
         (transformedTraining, transformedTest)
       }
       else {
@@ -272,7 +256,10 @@ object ReccomenderBackbone extends SparkOps {
       trainingData_LDA.saveAsObjectFile(s"$fsRoot/acf_training_data_${chi2Features}_$ldaTopics")
       testData_LDA.saveAsObjectFile(s"$fsRoot/acf_test_data_${chi2Features}_$ldaTopics")
 
-      (trainingData_LDA, testData_LDA, trainingCount, allDataCount - trainingCount)
+      val _trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_${chi2Features}_$ldaTopics")
+      val _testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_${chi2Features}_$ldaTopics")
+
+      (_trainingData, _testData, trainingCount, allDataCount - trainingCount)
 
     } else {
       val _trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_${chi2Features}_$ldaTopics")
