@@ -11,7 +11,7 @@ import org.apache.spark.mllib.feature.ChiSqSelector
 import org.apache.spark.mllib.linalg._
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.Row
+import org.apache.spark.sql.{DataFrame, Row}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
@@ -43,92 +43,12 @@ object ReccomenderBackbone extends SparkOps {
     // File System root
     val fsRoot = conf.getString("filesystem.root")
 
-    // Charge configs
-    val tokenizerType = conf.getInt("global.tokenizerType")
-    val minWordSize = conf.getInt("global.minWordSize")
 
     // Step 1 - load data from DB
 
-    val wordsData = if (cleansing) {
-      logger.debug("CLEANSING :: Start!")
-      val currentTime = System.currentTimeMillis()
+    val wordsData: DataFrame = dataCleansing(cleansing, fsRoot)
 
-      val bugInfoRDD: RDD[BugData] = DBExtractor.buildBugsRDD
-
-      // We only care about the "valid" users (#validUsersFilter)
-      val bugInfoDF = bugInfoRDD.filter(bugData => bugData.assignment_class >= 0).toDF()
-
-      // Step 2 - extract features
-      val tokenizer = tokenizerType match {
-        case 0 => new Tokenizer().setInputCol("bug_data").setOutputCol("words")
-        case 1 => new RegexTokenizer("\\w+|\\$[\\d\\.]+|\\S+").
-          setMinTokenLength(minWordSize).setInputCol("bug_data").setOutputCol("words")
-        case 2 => new NLPTokenizer().setInputCol("bug_data").setOutputCol("words")
-        case 3 => new POSTokenizer().setInputCol("bug_data").setOutputCol("words")
-      }
-
-      val _wordsData = tokenizer.transform(bugInfoDF)
-
-      // writeToTable(_wordsData, "acf_cleaned_data")
-      _wordsData.write.mode("overwrite").parquet(s"$fsRoot/acf_cleaned_data")
-      logger.debug(s"CLEANSING :: " +
-        s"Done in ${(System.currentTimeMillis() - currentTime) / 1000} seconds!")
-      sqlContext.read.parquet(s"$fsRoot/acf_cleaned_data")
-    }
-    else {
-      logger.debug("CLEANSING :: Skip!")
-      sqlContext.read.parquet(s"$fsRoot/acf_cleaned_data")
-    }
-
-    val rescaledData = if (transform) {
-      logger.debug("TRANSFORM :: Start!")
-
-      val minDocFreq = conf.getInt("transform.minDocFreq")
-      val maxDocFreq = conf.getInt("transform.maxDocFreq")
-
-      val currentTime = System.currentTimeMillis()
-
-      val vocabulary = wordsData.map(r => r.getAs[mutable.WrappedArray[String]]("words"))
-        .flatMap(words => words map (word => (word, 1)))
-        .reduceByKey(_ + _)
-
-      val invertedIndex = vocabulary.map(pair => (pair._2, 1))
-        .reduceByKey(_ + _)
-
-      // Words that appear over a certain threshold
-      // thanks case head fix method error line eclipse
-      // problem code test project file reply bug attachment patch
-      val stopWords = vocabulary
-        .filter(pair => pair._2 > maxDocFreq || pair._2 < minDocFreq)
-        .filter(pair => pair._1.length > 2)
-        .map(pair => pair._1).collect()
-
-      val stopWordsRemover = new StopWordsRemover().setInputCol("words").setOutputCol("filteredwords")
-        .setStopWords(stopWords)
-      //.setStopWords(Array.empty[String])
-
-      val vocabularySize = vocabulary.count() - stopWords.length
-      logger.debug(s"Vocabulary size $vocabularySize")
-
-      val hashingTF = new HashingTF().setInputCol("filteredwords").setOutputCol("rawFeatures")
-        .setNumFeatures(vocabularySize.toInt)
-
-      val featurizedData = hashingTF.transform(stopWordsRemover.transform(wordsData)).cache()
-
-      val idf = new IDF().setMinDocFreq(minDocFreq).setInputCol("rawFeatures").setOutputCol("features")
-      val idfModel = idf.fit(featurizedData)
-
-      val _rescaledData = idfModel.transform(featurizedData)
-
-      _rescaledData.write.mode("overwrite").parquet(s"$fsRoot/acf_numerical_data")
-      logger.debug(s"TRANSFORM :: " +
-        s"Done in ${(System.currentTimeMillis() - currentTime) / 1000} seconds!")
-      sqlContext.read.parquet(s"$fsRoot/acf_numerical_data")
-
-    } else {
-      logger.debug("CLEANSING :: Skip!")
-      sqlContext.read.parquet(s"$fsRoot/acf_numerical_data")
-    }
+    val rescaledData: DataFrame = dataTransform(transform, fsRoot, wordsData)
 
     val categoryScalingFactor = conf.getDouble("preprocess.categoryScalingFactor")
     val chi2Features = conf.getInt("preprocess.chi2Features")
@@ -304,6 +224,112 @@ object ReccomenderBackbone extends SparkOps {
     val stopHere = true
 
     logger.debug(s"We're done in ${(System.currentTimeMillis() - startTime) / 1000} seconds!")
+  }
+
+  /**
+    * If transform : TF/IDF, FREQUENCY-FILTERING, SAVE DATAFRAME else : LOAD DATAFRAME
+    * @param transform
+    * @param fsRoot - file system root
+    * @param wordsData
+    * @return - transformed dataframe
+    */
+  private def dataTransform(transform: Boolean, fsRoot: String, wordsData: DataFrame): DataFrame = {
+    val rescaledData = if (transform) {
+      logger.debug("TRANSFORM :: Start!")
+
+      val minDocFreq = conf.getInt("transform.minDocFreq")
+      val maxDocFreq = conf.getInt("transform.maxDocFreq")
+
+      val currentTime = System.currentTimeMillis()
+
+      val vocabulary = wordsData.map(r => r.getAs[mutable.WrappedArray[String]]("words"))
+        .flatMap(words => words map (word => (word, 1)))
+        .reduceByKey(_ + _)
+
+      val invertedIndex = vocabulary.map(pair => (pair._2, 1))
+        .reduceByKey(_ + _)
+
+      // Words that appear over a certain threshold
+      // thanks case head fix method error line eclipse
+      // problem code test project file reply bug attachment patch
+      val stopWords = vocabulary
+        .filter(pair => pair._2 > maxDocFreq || pair._2 < minDocFreq)
+        .filter(pair => pair._1.length > 2)
+        .map(pair => pair._1).collect()
+
+      val stopWordsRemover = new StopWordsRemover().setInputCol("words").setOutputCol("filteredwords")
+        .setStopWords(stopWords)
+      //.setStopWords(Array.empty[String])
+
+      val vocabularySize = vocabulary.count() - stopWords.length
+      logger.debug(s"Vocabulary size $vocabularySize")
+
+      val hashingTF = new HashingTF().setInputCol("filteredwords").setOutputCol("rawFeatures")
+        .setNumFeatures(vocabularySize.toInt)
+
+      val featurizedData = hashingTF.transform(stopWordsRemover.transform(wordsData)).cache()
+
+      val idf = new IDF().setMinDocFreq(minDocFreq).setInputCol("rawFeatures").setOutputCol("features")
+      val idfModel = idf.fit(featurizedData)
+
+      val _rescaledData = idfModel.transform(featurizedData)
+
+      _rescaledData.write.mode("overwrite").parquet(s"$fsRoot/acf_numerical_data")
+      logger.debug(s"TRANSFORM :: " +
+        s"Done in ${(System.currentTimeMillis() - currentTime) / 1000} seconds!")
+      sqlContext.read.parquet(s"$fsRoot/acf_numerical_data")
+
+    } else {
+      logger.debug("CLEANSING :: Skip!")
+      sqlContext.read.parquet(s"$fsRoot/acf_numerical_data")
+    }
+    rescaledData
+  }
+
+  /**
+    * If cleansing : LOAD, FILTER, TOKENIZE, SAVE DATAFRAME - else LOAD DATAFRAME
+ *
+    * @param cleansing
+    * @param fsRoot - file system root
+    * @return - cleaned dataframe
+    */
+  private def dataCleansing(cleansing: Boolean, fsRoot: String): DataFrame = {
+    val wordsData = if (cleansing) {
+      logger.debug("CLEANSING :: Start!")
+
+      // Charge configs
+      val tokenizerType = conf.getInt("global.tokenizerType")
+      val minWordSize = conf.getInt("global.minWordSize")
+
+      val currentTime = System.currentTimeMillis()
+
+      val bugInfoRDD: RDD[BugData] = DBExtractor.buildBugsRDD
+
+      // We only care about the "valid" users (#validUsersFilter)
+      val bugInfoDF = bugInfoRDD.filter(bugData => bugData.assignment_class >= 0).toDF()
+
+      // Step 2 - extract features
+      val tokenizer = tokenizerType match {
+        case 0 => new Tokenizer().setInputCol("bug_data").setOutputCol("words")
+        case 1 => new RegexTokenizer("\\w+|\\$[\\d\\.]+|\\S+").
+          setMinTokenLength(minWordSize).setInputCol("bug_data").setOutputCol("words")
+        case 2 => new NLPTokenizer().setInputCol("bug_data").setOutputCol("words")
+        case 3 => new POSTokenizer().setInputCol("bug_data").setOutputCol("words")
+      }
+
+      val _wordsData = tokenizer.transform(bugInfoDF)
+
+      // writeToTable(_wordsData, "acf_cleaned_data")
+      _wordsData.write.mode("overwrite").parquet(s"$fsRoot/acf_cleaned_data")
+      logger.debug(s"CLEANSING :: " +
+        s"Done in ${(System.currentTimeMillis() - currentTime) / 1000} seconds!")
+      sqlContext.read.parquet(s"$fsRoot/acf_cleaned_data")
+    }
+    else {
+      logger.debug("CLEANSING :: Skip!")
+      sqlContext.read.parquet(s"$fsRoot/acf_cleaned_data")
+    }
+    wordsData
   }
 
   def severityLevel(severity: String): Double = {
