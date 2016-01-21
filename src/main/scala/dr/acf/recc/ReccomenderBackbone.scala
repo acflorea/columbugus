@@ -97,6 +97,7 @@ object ReccomenderBackbone extends SparkOps {
 
       val rawData = rescaledData.select("index", "component_id", "features", "assignment_class")
         .map(rowToLabeledPoint).zipWithIndex()
+      //.filter(_._2 < 100)
 
       // Split data into training (90%) and test (10%).
       val allDataCount = rawData.count()
@@ -167,7 +168,7 @@ object ReccomenderBackbone extends SparkOps {
         logger.debug("Training LDA model")
 
         // Index documents with unique IDs
-        val zippedData = rawTrainingData.union(rawTestData).zipWithIndex.map(_.swap)
+        val zippedData = rawData.map(_.swap)
         val corpus = zippedData.map(point => (point._1, point._2.features))
         // Cluster the documents into n topics using LDA
         val ldaModel = new LDA().setK(ldaTopics)
@@ -178,14 +179,14 @@ object ReccomenderBackbone extends SparkOps {
         // Output topics. Each is a distribution over words (matching word count vectors)
         println(s"LDA :: Learned $ldaTopics topics (as distributions over vocab of ${ldaModel.vocabSize} words)")
 
-        val transformed = ldaModel.topicDistributions.join(zippedData).map {
+        val transformed = zippedData.join(ldaModel.topicDistributions).map {
           point =>
             val index = point._1
             val dataPair = point._2
-            val topics = dataPair._1
-            val labelPoint = dataPair._2
+            val labelPoint = dataPair._1
+            val topics = dataPair._2
             (index, LabeledPoint(labelPoint.label, topics))
-        }
+        }.sortByKey()
 
         val trainingData = transformed.filter(_._1 <= trainingDataCount).map(_._2)
         val testData = transformed.filter(_._1 > trainingDataCount).map(_._2)
@@ -234,22 +235,34 @@ object ReccomenderBackbone extends SparkOps {
     // TRAIN and predict
     val SVMModels = inputDataSVM map {
       elector =>
+        // Elector ID (simple, PCA, CHI2, LDA)
         val key = elector._1
+        // Training data for this elector
         val trainingData = elector._2._1
-        val testData = elector._2._1
+        // Test data for this elector
+        val testData = elector._2._2
+        // Train an SVM model for this elector
         val model = new SVMWithSGDMulticlass(undersample).train(trainingData, 100, 1, 0.01, 1)
 
+        // TestData :: (index,classLabel) -> Seq(prediction)
         testData.zipWithIndex().map(_.swap).map(data =>
           ((data._1, data._2.label), Seq(model.predict(data._2.features))))
     }
 
+    // Let's vote
     val predictionAndLabels = SVMModels.reduce((predictions1, predictions2) =>
-      predictions1.join(predictions2).map { joined =>
-        (joined._1, joined._2._1 ++ joined._2._2)
-      }).map(prediction => (prediction._1._2, prediction._2.groupBy(identity).maxBy(_._2.size)._1))
+      predictions1.join(predictions2)
+        .map { joined =>
+          // Combine predictions
+          (joined._1, joined._2._1 ++ joined._2._2)
+        }
+    )
 
     // Get evaluation metrics.
-    val metrics = new MulticlassMetrics(predictionAndLabels)
+    val metrics = new MulticlassMetrics(predictionAndLabels.map { prediction =>
+      //print(prediction._1._2, " ---  ", prediction._2.mkString(","))
+      (prediction._1._2, prediction._2.groupBy(identity).maxBy(_._2.size)._1)
+    })
 
     val fMeasure = metrics.fMeasure
     val weightedPrecision = metrics.weightedPrecision
