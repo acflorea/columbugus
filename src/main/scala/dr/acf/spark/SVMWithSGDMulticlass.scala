@@ -2,6 +2,7 @@ package dr.acf.spark
 
 import org.apache.spark.mllib.classification.{ClassificationModel, SVMModel, SVMWithSGD}
 import org.apache.spark.mllib.linalg.Vector
+import org.apache.spark.mllib.optimization.{L1Updater, HingeGradient}
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
 import org.slf4j.LoggerFactory
@@ -23,10 +24,10 @@ class SVMWithSGDMulticlass(undersample: Boolean) {
     *
     * NOTE: Labels used in SVM should be {0, 1}.
     *
-    * @param input RDD of (label, array of features) pairs.
-    * @param numIterations Number of iterations of gradient descent to run.
-    * @param stepSize Step size to be used for each iteration of gradient descent.
-    * @param regParam Regularization parameter.
+    * @param input             RDD of (label, array of features) pairs.
+    * @param numIterations     Number of iterations of gradient descent to run.
+    * @param stepSize          Step size to be used for each iteration of gradient descent.
+    * @param regParam          Regularization parameter.
     * @param miniBatchFraction Fraction of data to be used per iteration.
     */
   def train(
@@ -74,7 +75,10 @@ class SVMWithSGDMulticlass(undersample: Boolean) {
 
       // train each model
       trainData.cache()
+      // val svm = new SVMWithSGD()
+      // svm.optimizer.setUpdater(new L1Updater)
       val model = SVMWithSGD.train(trainData, numIterations, stepSize, regParam, miniBatchFraction)
+      // val model = svm.run(trainData)
       trainData.unpersist(false)
 
       model.clearThreshold()
@@ -92,7 +96,7 @@ class SVMWithSGDMulticlass(undersample: Boolean) {
     * update the gradient in each iteration.
     * NOTE: Labels used in SVM should be {0, 1, 2 ... k-1}
     *
-    * @param input RDD of (label, array of features) pairs.
+    * @param input         RDD of (label, array of features) pairs.
     * @param numIterations Number of iterations of gradient descent to run.
     * @return a SVMModel which has the weights and offset from training.
     */
@@ -108,6 +112,7 @@ object SVMWithSGDMulticlass {
 
 /**
   * A bag of one-vs-all models
+  *
   * @param models array of one vs. all models
   */
 class SVMMultiModel(models: Array[SVMModel])
@@ -127,7 +132,7 @@ class SVMMultiModel(models: Array[SVMModel])
     val bcModels = testData.context.broadcast(localModels)
     testData.mapPartitions { iter =>
       val w = bcModels.value
-      iter.map(v => predict(v, w))
+      iter.map(v => predict(v, w)._2)
     }
   }
 
@@ -137,14 +142,22 @@ class SVMMultiModel(models: Array[SVMModel])
     * @param testData array representing a single data point
     * @return predicted category from the trained model
     */
-  override def predict(testData: Vector): Double = predict(testData, indexedModels)
+  override def predict(testData: Vector): Double = predict(testData, indexedModels)._2
+
+  /**
+    * Predict 1 value for a single data point using the model trained.
+    *
+    * @param testData array representing a single data point
+    * @return predicted category from the trained model
+    */
+  def predict1(testData: Vector): (Double, Int) = predict(testData, indexedModels)
 
 
-  private def predict(testData: Vector, models: Array[(SVMModel, Int)]): Double = {
+  private def predict(testData: Vector, models: Array[(SVMModel, Int)], howMany: Int = 1): (Double, Int) = {
     val binaryPredictions = models.map(im => (im._1.predict(testData), im._2))
-    binaryPredictions
+    val max = binaryPredictions
       .maxBy { case (score, index) => score }
-      ._2
+    max
   }
 
 }

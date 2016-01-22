@@ -167,12 +167,20 @@ object ReccomenderBackbone extends SparkOps {
       if (lda) {
         logger.debug("Training LDA model")
 
+        val alpha = conf.getDouble("preprocess.ldaAlpha")
+        val beta = conf.getDouble("preprocess.ldaBeta")
+
         // Index documents with unique IDs
         val zippedData = rawData.map(_.swap)
         val corpus = zippedData.map(point => (point._1, point._2.features))
         // Cluster the documents into n topics using LDA
         val ldaModel = new LDA().setK(ldaTopics)
+          .setCheckpointInterval(30)
           .setOptimizer(ldaOptimizer)
+          // 50/k +1
+          .setDocConcentration(alpha)
+          // 0.1 + 1 (em); 1.0 / k (online)
+          .setTopicConcentration(beta)
           .run(corpus.cache())
           .asInstanceOf[DistributedLDAModel]
         corpus.unpersist()
@@ -259,9 +267,13 @@ object ReccomenderBackbone extends SparkOps {
     )
 
     // Get evaluation metrics.
-    val metrics = new MulticlassMetrics(predictionAndLabels.map { prediction =>
-      //print(prediction._1._2, " ---  ", prediction._2.mkString(","))
-      (prediction._1._2, prediction._2.groupBy(identity).maxBy(_._2.size)._1)
+    val metrics = new MulticlassMetrics(predictionAndLabels.map { pl =>
+      val label = pl._1._2
+      val prediction = pl._2.groupBy(identity).maxBy(_._2.size)._1
+      // if (label != prediction) {
+      //  println(s"$label, ($prediction)  ---  ${pl._2.mkString(",")}")
+      // }
+      (label, prediction)
     })
 
     val fMeasure = metrics.fMeasure
@@ -274,7 +286,7 @@ object ReccomenderBackbone extends SparkOps {
     println("Weighted Precision = " + weightedPrecision)
     println("Weighted Recall = " + weightedRecall)
     println("Weighted fMeasure = " + weightedFMeasure)
-    println("Confusion Matrix = " + metrics.confusionMatrix.toString(500, 10000))
+    // println("Confusion Matrix = " + metrics.confusionMatrix.toString(500, 10000))
 
     // Step 3...Infinity - TDB
 
