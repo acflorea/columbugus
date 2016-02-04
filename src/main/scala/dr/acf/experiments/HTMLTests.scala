@@ -17,7 +17,7 @@ object HTMLTests {
 
   def main(args: Array[String]) {
 
-    val ROOT_FOLDER = "/mnt/Storage/#DATASOURCES/Bug_Recommender/5"
+    val ROOT_FOLDER = "/mnt/Storage/#DATASOURCES/Bug_Recommender/2"
 
     val folder = new File(ROOT_FOLDER)
 
@@ -66,25 +66,31 @@ object HTMLTests {
 
           //    assigned_to
           val doubleSpan = bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[12]/td[2]/span/span")
-          val assigned_to = if (doubleSpan.nonEmpty) {
+          val assigned_to = (if (doubleSpan.nonEmpty) {
             doubleSpan(0).asInstanceOf[TagNode].getText
           } else {
             bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[12]/td[2]/span")(0).asInstanceOf[TagNode].getText
-          }
+          }).toString.replace("\n", "").trim
 
 
           //    bug_file_loc
           //    bug_severity
           //    bug_status
+          val bug_status = changeForm.findElementByAttValue("id", "static_bug_status", true, true).
+            getText.toString.split("\n").head.trim
+
           //    creation_ts
           //    delta_ts
           if (historyEntries.isEmpty) {
             logger.debug(s"History is empty for $id. Skipping")
           }
           else {
-            val delta_ts: DateTime = toPDTDate(historyEntries.filter(_.length == 5).last(1).toString.split("\n").head)
+            val delta_ts: DateTime = toPDTDate(historyEntries.filter(_.length == 5).
+              last(1).toString.split("\n").head)
 
             //    short_desc
+            val short_desc = changeForm.findElementByAttValue("id", "short_desc_nonedit_display", true, true).
+              getText.toString
             //    op_sys
             //    priority
             //    rep_platform
@@ -92,7 +98,7 @@ object HTMLTests {
             //    version
             //    resolution
             val resolution = changeForm.findElementByAttValue("id", "static_bug_status", true, true).
-              getText.toString.split("\n").head
+              getText.toString.split("\n").drop(1).head.trim
 
             //    target_milestone
             //    qa_contact
@@ -107,12 +113,17 @@ object HTMLTests {
             //    remaining_time
             //    alias
             //    product_id
+            val product_id = bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[5]/td[1]")(0).asInstanceOf[TagNode].getText
+
             //    component_id
+            val component_id = bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[6]/td[2]")(0).asInstanceOf[TagNode].
+              getText.toString.replace("\n", "").trim
+
             //    deadline
 
-            val bugData = BugData(-1, Integer.valueOf(bug_id), "<>", resolution, -1, -1, -1, "<>", null)
+            val bugData = BugData(-1, Integer.valueOf(bug_id), short_desc, resolution, -1, -1, -1, "<>", null)
 
-            println(bugData, assigned_to)
+            println(bugData, assigned_to, component_id, bug_status)
           }
         }
       }
