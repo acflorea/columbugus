@@ -9,6 +9,7 @@ import org.apache.spark.{SparkContext, SparkConf}
 trait SparkOps
 
 object SparkOps {
+
   val conf = ConfigFactory.load()
 
   implicit lazy val sc = {

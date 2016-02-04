@@ -18,6 +18,7 @@ object DBExtractor extends SparkOps with MySQLConnector {
     * Returns an RDD containing (bug_id, bug_details) type of data
     * The details are in the form t<timestamp>:: info
     * (the description and comments are included)
+    *
     * @return
     */
   def buildBugsRDD: RDD[BugData] = {
@@ -31,6 +32,7 @@ object DBExtractor extends SparkOps with MySQLConnector {
     val timeThreshold = conf.getInt("global.timeThreshold")
     val timeIntervals = conf.getInt("global.timeIntervals")
     val timeThresholdForTraining = conf.getInt("global.timeThresholdForTraining")
+    val statusFieldId = conf.getInt("global.statusFieldId")
 
     val testFilter =
       (column: String) => if (testMode) s"$column > 300000 " else "1 = 1 "
@@ -87,7 +89,7 @@ object DBExtractor extends SparkOps with MySQLConnector {
             "select ba.who as assigned_to, count(*) as bugs_assigned " +
             "from bugs_activity ba " +
             "where " + testFilter("ba.bug_id") +
-            " AND ba.fieldid = '11' and ba.added = 'FIXED' " +
+            " AND ba.fieldid = '" + statusFieldId + "' and ba.added = 'FIXED' " +
             " AND " + dateFilterAssign(i, "ba.") + " " +
             " AND ba.bug_id not in (select d.dupe from duplicates d) " +
             "group by ba.who " +
@@ -143,7 +145,8 @@ object DBExtractor extends SparkOps with MySQLConnector {
           "p.name as product_name, p.classification_id, " +
           "cl.name as classification_name " +
           "from bugs b " +
-          "join bugs_activity ba on b.bug_id = ba.bug_id and ba.fieldid = '11' and ba.added='FIXED' " +
+          "join bugs_activity ba on b.bug_id = ba.bug_id and ba.fieldid = '" +
+          statusFieldId + "' and ba.added='FIXED' " +
           "join components c on b.component_id = c.id " +
           "join products p on c.product_id = p.id " +
           "join classifications cl on p.classification_id = cl.id " +

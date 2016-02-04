@@ -12,7 +12,7 @@ import scala.collection.parallel.ForkJoinTaskSupport
 /**
   * Created by aflorea on 29.11.2015.
   */
-class SVMWithSGDMulticlass(undersample: Boolean) {
+class SVMWithSGDMulticlass(undersample: Boolean, seed: Long) {
 
   def logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -63,9 +63,9 @@ class SVMWithSGDMulticlass(undersample: Boolean) {
         // http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.96.9248
         val rawNegatives = inputProjection filter (_.label == 0.0)
         val negativesCount = rawNegatives.count()
-        val samplingRate = (positivesCount * 1.0) / negativesCount
+        val samplingRate = (Math.max(positivesCount, 100) * 10.0) / negativesCount
         val negatives = if (samplingRate < 1.0)
-          rawNegatives.sample(withReplacement = false, samplingRate, 123456789L)
+          rawNegatives.sample(withReplacement = false, samplingRate, seed)
         else
           rawNegatives
         positives union negatives

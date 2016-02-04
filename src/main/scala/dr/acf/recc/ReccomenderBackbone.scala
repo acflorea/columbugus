@@ -241,7 +241,7 @@ object ReccomenderBackbone extends SparkOps {
     val undersample = conf.getBoolean("preprocess.undersampling")
 
     // TRAIN and predict
-    val SVMModels = inputDataSVM map {
+    val SVMModels = inputDataSVM flatMap {
       elector =>
         // Elector ID (simple, PCA, CHI2, LDA)
         val key = elector._1
@@ -250,11 +250,16 @@ object ReccomenderBackbone extends SparkOps {
         // Test data for this elector
         val testData = elector._2._2
         // Train an SVM model for this elector
-        val model = new SVMWithSGDMulticlass(undersample).train(trainingData, 100, 1, 0.01, 1)
 
-        // TestData :: (index,classLabel) -> Seq(prediction)
-        testData.zipWithIndex().map(_.swap).map(data =>
-          ((data._1, data._2.label), Seq(model.predict(data._2.features))))
+        val ldaModels = conf.getInt("preprocess.ldaModels")
+        (1 to ldaModels) map {
+          i =>
+            val model = new SVMWithSGDMulticlass(undersample, i * 12345L).train(trainingData, 100, 1, 0.01, 1)
+
+            // TestData :: (index,classLabel) -> Seq(prediction)
+            testData.zipWithIndex().map(_.swap).map(data =>
+              ((data._1, data._2.label), Seq(model.predict(data._2.features))))
+        }
     }
 
     // Let's vote
