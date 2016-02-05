@@ -49,7 +49,7 @@ object HTMLTests {
         val historyEntries = historyTable collect {
           case tr: TagNode if tr.evaluateXPath("/td").nonEmpty =>
             tr.evaluateXPath("/td").collect {
-              case td: TagNode => td.getText
+              case td: TagNode => td.getText.toString.replace("\n", "").trim
             }
         }
 
@@ -72,25 +72,39 @@ object HTMLTests {
             bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[12]/td[2]/span")(0).asInstanceOf[TagNode].getText
           }).toString.replace("\n", "").trim
 
-
-          //    bug_file_loc
           //    bug_severity
+
           //    bug_status
           val bug_status = changeForm.findElementByAttValue("id", "static_bug_status", true, true).
             getText.toString.split("\n").head.trim
 
           //    creation_ts
-          //    delta_ts
+          val creation_ts =
+            toPDTDate(bz_show_bug_column_2.evaluateXPath("/table/tbody/tr[1]/td[2]")(0).
+              asInstanceOf[TagNode].getText.toString.substring(0, 20), "yyyy-MM-dd HH:mm")
+
           if (historyEntries.isEmpty) {
             logger.debug(s"History is empty for $id. Skipping")
           }
           else {
+
+            val completeHistoryMap = (historyEntries zipWithIndex) map (_.swap) toMap
+
+            val completeHistory = (completeHistoryMap map {
+              historyEntry => if (historyEntry._2.length == 5)
+                historyEntry
+              else
+                historyEntry._1 -> (completeHistoryMap.get(historyEntry._1 - 1).get.take(2) ++ historyEntry._2)
+            }).toSeq.sortBy(_._1).map(_._2)
+
+            // delta_ts
             val delta_ts: DateTime = toPDTDate(historyEntries.filter(_.length == 5).
-              last(1).toString.split("\n").head)
+              last(1).split("\n").head)
 
             //    short_desc
             val short_desc = changeForm.findElementByAttValue("id", "short_desc_nonedit_display", true, true).
               getText.toString
+
             //    op_sys
             //    priority
             //    rep_platform
@@ -124,6 +138,8 @@ object HTMLTests {
             val bugData = BugData(-1, Integer.valueOf(bug_id), short_desc, resolution, -1, -1, -1, "<>", null)
 
             println(bugData, assigned_to, component_id, bug_status)
+
+            completeHistory map (_.mkString(",")) foreach println
           }
         }
       }
@@ -131,11 +147,12 @@ object HTMLTests {
   }
 
 
-  def toPDTDate(fullDate: String): DateTime = {
-    val formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
+  def toPDTDate(fullDate: String, pattern: String = "yyyy-MM-dd HH:mm:ss"): DateTime = {
+    val formatter = DateTimeFormat.forPattern(pattern)
     val timeZone = fullDate.substring(fullDate.length - 3)
     val actualDate = fullDate.substring(0, fullDate.length - 4)
     val dt = formatter.withZone(DateTimeZone.forID("PST8PDT")).parseDateTime(actualDate)
     dt
   }
+
 }
