@@ -111,6 +111,14 @@ object HTMLTests {
             val resolution = changeForm.findElementByAttValue("id", "static_bug_status", true, true).
               getText.toString.split("\n").drop(1).head.trim
 
+            // duplicate of
+            val duplicateOf = if (resolution == "DUPLICATE") {
+              Some(changeForm.findElementByAttValue("id", "static_bug_status", true, true).
+                getText.toString.split("\n").drop(2).head.trim.split(" ").last)
+            } else {
+              None
+            }
+
             //    product_id
             val product_id = bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[5]/td[1]")(0).asInstanceOf[TagNode].getText
 
@@ -123,7 +131,7 @@ object HTMLTests {
             val longdescsHead =
               (changeForm.evaluateXPath("/table/tbody/tr/td/div[@id='comments']/div/div[@class='bz_first_comment_head']/span[@class='bz_comment_time']") ++
                 changeForm.evaluateXPath("/table/tbody/tr/td/div[@id='comments']/div/div[@class='bz_comment_head']/span[@class='bz_comment_time']")).
-                map(_.asInstanceOf[TagNode].getText.toString.replace("\n", "").trim)
+                map(node => toPDTDate(node.asInstanceOf[TagNode].getText.toString.replace("\n", "").trim))
             val longdescsBody = changeForm.evaluateXPath("/table/tbody/tr/td/div[@id='comments']/div/pre[@class='bz_comment_text']").
               map(_.asInstanceOf[TagNode].getText.toString.trim)
 
