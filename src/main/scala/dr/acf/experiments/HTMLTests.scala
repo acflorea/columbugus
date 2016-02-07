@@ -3,7 +3,7 @@ package dr.acf.experiments
 import java.io.{File, FilenameFilter}
 
 import dr.acf.extractors.BugData
-import org.htmlcleaner.{HtmlCleaner, TagNode}
+import org.htmlcleaner.{ContentNode, HtmlCleaner, TagNode}
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{DateTime, DateTimeZone}
 import org.slf4j.LoggerFactory
@@ -73,6 +73,8 @@ object HTMLTests {
           }).toString.replace("\n", "").trim
 
           //    bug_severity
+          val bug_severity = bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[10]/td[2]")(0).asInstanceOf[TagNode].
+            getText.toString.split("\n")(1).trim
 
           //    bug_status
           val bug_status = changeForm.findElementByAttValue("id", "static_bug_status", true, true).
@@ -105,27 +107,10 @@ object HTMLTests {
             val short_desc = changeForm.findElementByAttValue("id", "short_desc_nonedit_display", true, true).
               getText.toString
 
-            //    op_sys
-            //    priority
-            //    rep_platform
-            //    reporter
-            //    version
             //    resolution
             val resolution = changeForm.findElementByAttValue("id", "static_bug_status", true, true).
               getText.toString.split("\n").drop(1).head.trim
 
-            //    target_milestone
-            //    qa_contact
-            //    status_whiteboard
-            //    votes
-            //    keywords
-            //    lastdiffed
-            //    everconfirmed
-            //    reporter_accessible
-            //    cclist_accessible
-            //    estimated_time
-            //    remaining_time
-            //    alias
             //    product_id
             val product_id = bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[5]/td[1]")(0).asInstanceOf[TagNode].getText
 
@@ -133,7 +118,18 @@ object HTMLTests {
             val component_id = bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[6]/td[2]")(0).asInstanceOf[TagNode].
               getText.toString.replace("\n", "").trim
 
-            //    deadline
+
+            // Long descs
+            val longdescsHead =
+              (changeForm.evaluateXPath("/table/tbody/tr/td/div[@id='comments']/div/div[@class='bz_first_comment_head']/span[@class='bz_comment_time']") ++
+                changeForm.evaluateXPath("/table/tbody/tr/td/div[@id='comments']/div/div[@class='bz_comment_head']/span[@class='bz_comment_time']")).
+                map(_.asInstanceOf[TagNode].getText.toString.replace("\n", "").trim)
+            val longdescsBody = changeForm.evaluateXPath("/table/tbody/tr/td/div[@id='comments']/div/pre[@class='bz_comment_text']").
+              map(_.asInstanceOf[TagNode].getText.toString.trim)
+
+
+            // STORE !!!
+
 
             val bugData = BugData(-1, Integer.valueOf(bug_id), short_desc, resolution, -1, -1, -1, "<>", null)
 
