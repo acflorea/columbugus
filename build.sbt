@@ -18,6 +18,7 @@ libraryDependencies ++= Seq("org.apache.spark" %% "spark-core" % "1.5.2" % "prov
   , "edu.stanford.nlp" % "stanford-corenlp" % "3.5.2"
   , "edu.stanford.nlp" % "stanford-corenlp" % "3.5.2" classifier "models"
   , "org.slf4j" % "slf4j-api" % "1.7.13"
+  , "com.typesafe.slick" %% "slick" % "3.1.1"
 )
 
 run in Compile <<=

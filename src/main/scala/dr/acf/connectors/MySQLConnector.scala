@@ -3,7 +3,6 @@ package dr.acf.connectors
 import java.sql.DriverManager
 import java.util.Properties
 
-import com.typesafe.config.ConfigFactory
 import dr.acf.spark.SparkOps
 import dr.acf.spark.SparkOps._
 import org.apache.spark.sql.DataFrame
