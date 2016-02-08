@@ -4,12 +4,21 @@ import java.sql.Timestamp
 
 import slick.driver.MySQLDriver.api._
 
+
 /**
   * Created by aflorea on 07.02.2016.
   */
 trait SlickConnector {
 
   val db = Database.forConfig("mySQLBugsDB")
+
+  val bugs = TableQuery[Bugs]
+  val bug_activities = TableQuery[Bugs_Activity]
+  val longdescs = TableQuery[Longdescs]
+  val duplicates = TableQuery[Duplicates]
+  val components = TableQuery[Components]
+  val products = TableQuery[Products]
+  val classifications = TableQuery[Classifications]
 
 }
 

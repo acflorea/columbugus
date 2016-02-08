@@ -1,17 +1,23 @@
-package dr.acf.experiments
+package dr.acf.extractors
 
 import java.io.{File, FilenameFilter}
+import java.sql.Timestamp
 
-import dr.acf.extractors.BugData
-import org.htmlcleaner.{ContentNode, HtmlCleaner, TagNode}
+import dr.acf.connectors.SlickConnector
+import org.htmlcleaner.{HtmlCleaner, TagNode}
+import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat
-import org.joda.time.{DateTime, DateTimeZone}
 import org.slf4j.LoggerFactory
+import slick.driver.MySQLDriver.api._
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 
 /**
   * Created by aflorea on 15.11.2015.
   */
-object HTMLTests {
+object BugzillaHTMLParser extends SlickConnector {
 
   val logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -62,7 +68,7 @@ object HTMLTests {
           val bz_show_bug_column_2 = changeForm.findElementByAttValue("id", "bz_show_bug_column_2", true, true)
 
           //    bug_id
-          val bug_id = changeForm.findElementByAttValue("name", "id", true, true).getAttributeByName("value")
+          val bug_id = Integer.valueOf(changeForm.findElementByAttValue("name", "id", true, true).getAttributeByName("value"))
 
           //    assigned_to
           val doubleSpan = bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[12]/td[2]/span/span")
@@ -100,7 +106,7 @@ object HTMLTests {
             }).toSeq.sortBy(_._1).map(_._2)
 
             // delta_ts
-            val delta_ts: DateTime = toPDTDate(historyEntries.filter(_.length == 5).
+            val delta_ts = toPDTDate(historyEntries.filter(_.length == 5).
               last(1).split("\n").head)
 
             //    short_desc
@@ -138,6 +144,14 @@ object HTMLTests {
 
             // STORE !!!
 
+            val setup = DBIO.seq(
+
+              bugs +=(bug_id, creation_ts, short_desc, bug_status, -1, -1, bug_severity, resolution, delta_ts)
+
+            )
+
+            val f = db.run(setup)
+            Await.result(f, Duration.Inf)
 
             val bugData = BugData(-1, Integer.valueOf(bug_id), short_desc, resolution, -1, -1, -1, "<>", null)
 
@@ -151,12 +165,12 @@ object HTMLTests {
   }
 
 
-  def toPDTDate(fullDate: String, pattern: String = "yyyy-MM-dd HH:mm:ss"): DateTime = {
+  def toPDTDate(fullDate: String, pattern: String = "yyyy-MM-dd HH:mm:ss"): Timestamp = {
     val formatter = DateTimeFormat.forPattern(pattern)
     val timeZone = fullDate.substring(fullDate.length - 3)
     val actualDate = fullDate.substring(0, fullDate.length - 4)
     val dt = formatter.withZone(DateTimeZone.forID("PST8PDT")).parseDateTime(actualDate)
-    dt
+    new Timestamp(dt.getMillis)
   }
 
 }
