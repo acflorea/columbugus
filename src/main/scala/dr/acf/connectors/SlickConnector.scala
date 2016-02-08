@@ -19,7 +19,21 @@ trait SlickConnector {
   val components = TableQuery[Components]
   val products = TableQuery[Products]
   val classifications = TableQuery[Classifications]
+  val assignments = TableQuery[Assignments]
 
+}
+
+/**
+  * Assignments
+  *
+  * @param tag
+  */
+class Assignments(tag: Tag) extends Table[(Int, String)](tag, "assignments") {
+  def assignment_id = column[Int]("assignment_id", O.PrimaryKey)
+
+  def assignment_name = column[String]("assignment_name")
+
+  def * = (assignment_id, assignment_name)
 }
 
 /**
