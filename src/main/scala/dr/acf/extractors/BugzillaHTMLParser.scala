@@ -10,6 +10,7 @@ import org.joda.time.format.DateTimeFormat
 import org.slf4j.LoggerFactory
 import slick.driver.MySQLDriver.api._
 
+import scala.collection.mutable
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
@@ -34,6 +35,9 @@ object BugzillaHTMLParser extends SlickConnector {
     val ids = folder.listFiles(noHistory) map { f =>
       f.getName.split(".html").head
     }
+
+    val assignments = new mutable.HashMap[String, Int]()
+    val components = new mutable.HashMap[String, Int]()
 
     ids foreach { id =>
 
@@ -72,7 +76,7 @@ object BugzillaHTMLParser extends SlickConnector {
 
           //    assigned_to
           val doubleSpan = bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[12]/td[2]/span/span")
-          val assigned_to = (if (doubleSpan.nonEmpty) {
+          val assigned_to_str = (if (doubleSpan.nonEmpty) {
             doubleSpan(0).asInstanceOf[TagNode].getText
           } else {
             bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[12]/td[2]/span")(0).asInstanceOf[TagNode].getText
@@ -129,7 +133,7 @@ object BugzillaHTMLParser extends SlickConnector {
             val product_id = bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[5]/td[1]")(0).asInstanceOf[TagNode].getText
 
             //    component_id
-            val component_id = bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[6]/td[2]")(0).asInstanceOf[TagNode].
+            val component_id_str = bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[6]/td[2]")(0).asInstanceOf[TagNode].
               getText.toString.replace("\n", "").trim
 
 
@@ -144,9 +148,21 @@ object BugzillaHTMLParser extends SlickConnector {
 
             // STORE !!!
 
+            val assign_to = assignments.get(assigned_to_str) match {
+              case Some(_id) => _id
+              case None => assignments.put(assigned_to_str, assignments.size + 1)
+                assignments.size
+            }
+
+            val component_id = components.get(component_id_str) match {
+              case Some(_id) => _id
+              case None => components.put(component_id_str, components.size + 1)
+                components.size
+            }
+
             val setup = DBIO.seq(
 
-              bugs +=(bug_id, creation_ts, short_desc, bug_status, -1, -1, bug_severity, resolution, delta_ts)
+              bugs +=(bug_id, creation_ts, short_desc, bug_status, assign_to, component_id, bug_severity, resolution, delta_ts)
 
             )
 
@@ -155,7 +171,7 @@ object BugzillaHTMLParser extends SlickConnector {
 
             val bugData = BugData(-1, Integer.valueOf(bug_id), short_desc, resolution, -1, -1, -1, "<>", null)
 
-            println(bugData, assigned_to, component_id, bug_status)
+            println(bugData, assigned_to_str, component_id_str, bug_status)
 
             completeHistory map (_.mkString(",")) foreach println
           }
