@@ -11,9 +11,8 @@ import org.slf4j.LoggerFactory
 import slick.driver.MySQLDriver.api._
 
 import scala.concurrent.Await
-import scala.concurrent.duration.Duration
-
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
 
 /**
   * Created by aflorea on 15.11.2015.
@@ -24,7 +23,7 @@ object BugzillaHTMLParser extends SlickConnector {
 
   def main(args: Array[String]) {
 
-    val ROOT_FOLDER = "/mnt/Storage/#DATASOURCES/Bug_Recommender/2"
+    val ROOT_FOLDER = "/mnt/Storage/#DATASOURCES/Bug_Recommender/test"
 
     val folder = new File(ROOT_FOLDER)
 
@@ -38,16 +37,13 @@ object BugzillaHTMLParser extends SlickConnector {
 
     val assignmentsMap = new scala.collection.mutable.HashMap[String, Int]()
     val componentsMap = new scala.collection.mutable.HashMap[String, Int]()
+    val productsMap = new scala.collection.mutable.HashMap[String, Int]()
 
-//    Await.result(db.run(DBIO.seq(
-//      assignments.result.map(_.foreach { case (id, name) => assignmentsMap.put(name, id) }),
-//      components.result.map(_.foreach { case (id, product_id, name) => componentsMap.put(name, id) })
-//    )), Duration.Inf)
-
-    db.run(DBIO.seq(
+    Await.result(db.run(DBIO.seq(
       assignments.result.map(_.foreach { case (id, name) => assignmentsMap.put(name, id) }),
-      components.result.map(_.foreach { case (id, product_id, name) => componentsMap.put(name, id) })
-    ))
+      components.result.map(_.foreach { case (id, product_id, name) => componentsMap.put(name, id) }),
+      products.result.map(_.foreach { case (id, classification_id, name) => productsMap.put(name, id) })
+    )), Duration.Inf)
 
     ids foreach { id =>
 
@@ -140,7 +136,8 @@ object BugzillaHTMLParser extends SlickConnector {
             }
 
             //    product_id
-            val product_id = bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[5]/td[1]")(0).asInstanceOf[TagNode].getText
+            val product_id_str = bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[5]/td[1]")(0).asInstanceOf[TagNode].
+              getText.toString
 
             //    component_id
             val component_id_str = bz_show_bug_column_1.evaluateXPath("/table/tbody/tr[6]/td[2]")(0).asInstanceOf[TagNode].
@@ -157,21 +154,28 @@ object BugzillaHTMLParser extends SlickConnector {
 
 
             // STORE !!!
-            val assign_to = assignmentsMap.get(assigned_to_str) match {
+            val product_id = productsMap.get(product_id_str) match {
               case Some(_id) => _id
-              case None => assignmentsMap.put(assigned_to_str, assignmentsMap.size + 1)
-                db.run(assignments +=(assignmentsMap.size, assigned_to_str))
-                assignmentsMap.size
+              case None => productsMap.put(product_id_str, productsMap.size + 1)
+                Await.result(db.run(products +=(productsMap.size, -1, product_id_str)), Duration.Inf)
+                productsMap.size
             }
 
             val component_id = componentsMap.get(component_id_str) match {
               case Some(_id) => _id
               case None => componentsMap.put(component_id_str, componentsMap.size + 1)
-                db.run(components +=(componentsMap.size, -1, component_id_str))
+                Await.result(db.run(components +=(componentsMap.size, product_id, component_id_str)), Duration.Inf)
                 componentsMap.size
             }
 
-            db.run(bugs +=(bug_id, creation_ts, short_desc, bug_status, assign_to, component_id, bug_severity, resolution, delta_ts))
+            val assign_to = assignmentsMap.get(assigned_to_str) match {
+              case Some(_id) => _id
+              case None => assignmentsMap.put(assigned_to_str, assignmentsMap.size + 1)
+                Await.result(db.run(assignments +=(assignmentsMap.size, assigned_to_str)), Duration.Inf)
+                assignmentsMap.size
+            }
+
+            Await.result(db.run(bugs +=(bug_id, creation_ts, short_desc, bug_status, assign_to, component_id, bug_severity, resolution, delta_ts)), Duration.Inf)
 
             val bugData = BugData(-1, Integer.valueOf(bug_id), short_desc, resolution, -1, -1, -1, "<>", null)
 

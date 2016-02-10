@@ -123,12 +123,10 @@ object DBExtractor extends SparkOps with MySQLConnector {
         "b.bug_status, b.assigned_to, b.component_id, b.bug_severity, " +
         "b.resolution, b.delta_ts, " +
         "c.name as component_name, c.product_id, " +
-        "p.name as product_name, p.classification_id, " +
-        "cl.name as classification_name " +
+        "p.name as product_name " +
         "from bugs b " +
         "join components c on b.component_id = c.id " +
         "join products p on c.product_id = p.id " +
-        "join classifications cl on p.classification_id = cl.id " +
         "where " + testFilter("b.bug_id") +
         " AND " + resolutionFilter("b.") + " " +
         " AND b.delta_ts > '" + oldestValidDate + "'" +
@@ -142,14 +140,12 @@ object DBExtractor extends SparkOps with MySQLConnector {
           "b.bug_status, ba.who as assigned_to, b.component_id, b.bug_severity, " +
           "b.resolution, b.delta_ts, " +
           "c.name as component_name, c.product_id, " +
-          "p.name as product_name, p.classification_id, " +
-          "cl.name as classification_name " +
+          "p.name as product_name " +
           "from bugs b " +
           "join bugs_activity ba on b.bug_id = ba.bug_id and ba.fieldid = '" +
           statusFieldId + "' and ba.added='FIXED' " +
           "join components c on b.component_id = c.id " +
           "join products p on c.product_id = p.id " +
-          "join classifications cl on p.classification_id = cl.id " +
           "where " + testFilter("b.bug_id") +
           " AND " + resolutionFilter("b.") + " " +
           " AND b.delta_ts > '" + oldestValidDate + "'" +

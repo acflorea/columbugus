@@ -12,13 +12,16 @@ trait SlickConnector {
 
   val db = Database.forConfig("mySQLBugsDB")
 
+  // ok-ish
   val bugs = TableQuery[Bugs]
   val bug_activities = TableQuery[Bugs_Activity]
   val longdescs = TableQuery[Longdescs]
   val duplicates = TableQuery[Duplicates]
+  // OK
   val components = TableQuery[Components]
+  // OK
   val products = TableQuery[Products]
-  val classifications = TableQuery[Classifications]
+  // OK
   val assignments = TableQuery[Assignments]
 
 }
@@ -166,19 +169,4 @@ class Products(tag: Tag) extends Table[(Int, Int, String)](tag, "products") {
   def name = column[String]("name")
 
   def * = (id, classification_id, name)
-}
-
-/**
-  * Classifications
-  *
-  * @param tag
-  */
-class Classifications(tag: Tag) extends Table[(Int, String)](tag, "classifications") {
-
-  def id = column[Int]("id", O.PrimaryKey)
-
-  def name = column[String]("name")
-
-  def * = (id, name)
-
 }
