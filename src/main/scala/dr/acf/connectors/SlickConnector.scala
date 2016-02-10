@@ -23,6 +23,8 @@ trait SlickConnector {
   val products = TableQuery[Products]
   // OK
   val assignments = TableQuery[Assignments]
+  // OK
+  val fields = TableQuery[Fields]
 
 }
 
@@ -38,6 +40,20 @@ class Assignments(tag: Tag) extends Table[(Int, String)](tag, "assignments") {
 
   def * = (assignment_id, assignment_name)
 }
+
+/**
+  * Fields
+  *
+  * @param tag
+  */
+class Fields(tag: Tag) extends Table[(Int, String)](tag, "fields") {
+  def field_id = column[Int]("field_id", O.PrimaryKey)
+
+  def field_name = column[String]("field_name")
+
+  def * = (field_id, field_name)
+}
+
 
 /**
   * Bug core

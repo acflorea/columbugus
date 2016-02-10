@@ -38,11 +38,13 @@ object BugzillaHTMLParser extends SlickConnector {
     val assignmentsMap = new scala.collection.mutable.HashMap[String, Int]()
     val componentsMap = new scala.collection.mutable.HashMap[String, Int]()
     val productsMap = new scala.collection.mutable.HashMap[String, Int]()
+    val fieldsMap = new scala.collection.mutable.HashMap[String, Int]()
 
     Await.result(db.run(DBIO.seq(
       assignments.result.map(_.foreach { case (id, name) => assignmentsMap.put(name, id) }),
       components.result.map(_.foreach { case (id, product_id, name) => componentsMap.put(name, id) }),
-      products.result.map(_.foreach { case (id, classification_id, name) => productsMap.put(name, id) })
+      products.result.map(_.foreach { case (id, classification_id, name) => productsMap.put(name, id) }),
+      fields.result.map(_.foreach { case (id, name) => fieldsMap.put(name, id) })
     )), Duration.Inf)
 
     ids foreach { id =>
@@ -176,6 +178,23 @@ object BugzillaHTMLParser extends SlickConnector {
             }
 
             Await.result(db.run(bugs +=(bug_id, creation_ts, short_desc, bug_status, assign_to, component_id, bug_severity, resolution, delta_ts)), Duration.Inf)
+
+            completeHistory map { historyEntry =>
+              val field_id = fieldsMap.get(historyEntry(2)) match {
+                case Some(_id) => _id
+                case None => fieldsMap.put(historyEntry(2), fieldsMap.size + 1)
+                  Await.result(db.run(fields +=(fieldsMap.size, historyEntry(2))), Duration.Inf)
+                  fieldsMap.size
+              }
+              val who = assignmentsMap.get(historyEntry(0)) match {
+                case Some(_id) => _id
+                case None => assignmentsMap.put(historyEntry(0), assignmentsMap.size + 1)
+                  Await.result(db.run(assignments +=(assignmentsMap.size, historyEntry(0))), Duration.Inf)
+                  assignmentsMap.size
+              }
+
+              Await.result(db.run(bug_activities +=(bug_id, who, field_id, toPDTDate(historyEntry(1)), historyEntry(3), historyEntry(4))), Duration.Inf)
+            }
 
             val bugData = BugData(-1, Integer.valueOf(bug_id), short_desc, resolution, -1, -1, -1, "<>", null)
 
