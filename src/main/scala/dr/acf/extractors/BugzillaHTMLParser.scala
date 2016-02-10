@@ -10,7 +10,6 @@ import org.joda.time.format.DateTimeFormat
 import org.slf4j.LoggerFactory
 import slick.driver.MySQLDriver.api._
 
-import scala.collection.mutable
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
@@ -37,14 +36,13 @@ object BugzillaHTMLParser extends SlickConnector {
       f.getName.split(".html").head
     }
 
+    val assignmentsMap = new scala.collection.mutable.HashMap[String, Int]()
+    val componentsMap = new scala.collection.mutable.HashMap[String, Int]()
 
-    val assignmentsMap = new mutable.HashMap[String, Int]()
-    db.stream(
-      (for (assignment <- assignments)
-        yield (assignment.assignment_name, assignment.assignment_id)).result
-    ).foreach(assignment => assignmentsMap.put(assignment._1, assignment._2))
-
-    val componentsMap = new mutable.HashMap[String, Int]()
+    Await.result(db.run(DBIO.seq(
+      assignments.result.map(_.foreach { case (id, name) => assignmentsMap.put(name, id) }),
+      components.result.map(_.foreach { case (id, product_id, name) => componentsMap.put(name, id) })
+    )), Duration.Inf)
 
     ids foreach { id =>
 
