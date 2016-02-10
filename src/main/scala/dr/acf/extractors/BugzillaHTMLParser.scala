@@ -4,7 +4,7 @@ import java.io.{File, FilenameFilter}
 import java.sql.Timestamp
 
 import dr.acf.connectors.SlickConnector
-import org.htmlcleaner.{HtmlCleaner, TagNode}
+import org.htmlcleaner.{CleanerProperties, HtmlCleaner, TagNode}
 import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat
 import org.slf4j.LoggerFactory
@@ -23,7 +23,7 @@ object BugzillaHTMLParser extends SlickConnector {
 
   def main(args: Array[String]) {
 
-    val ROOT_FOLDER = "/mnt/Storage/#DATASOURCES/Bug_Recommender/test"
+    val ROOT_FOLDER = "/mnt/Storage/#DATASOURCES/Bug_Recommender/2"
 
     val folder = new File(ROOT_FOLDER)
 
@@ -56,10 +56,12 @@ object BugzillaHTMLParser extends SlickConnector {
         logger.debug(s"Skip bug $id. Missing history file")
       } else {
 
-        val cleaner = new HtmlCleaner()
-        val props = cleaner.getProperties
-        val rootNode = cleaner.clean(bugDataFile)
-        val rootNodeHistory = cleaner.clean(bugHistoryFile)
+        val props = new CleanerProperties();
+        props.setRecognizeUnicodeChars(true);
+        val cleaner = new HtmlCleaner(props)
+
+        val rootNode = cleaner.clean(bugDataFile, "UTF-8")
+        val rootNodeHistory = cleaner.clean(bugHistoryFile, "UTF-8")
 
         val historyTable = rootNodeHistory.
           evaluateXPath("/body/div[@id='bugzilla-body']/table/tbody/tr")
@@ -155,9 +157,14 @@ object BugzillaHTMLParser extends SlickConnector {
                 map(node => toPDTDate(node.asInstanceOf[TagNode].getText.toString.replace("\n", "").trim))
             val longdescsBody = changeForm.evaluateXPath("/table/tbody/tr/td/div[@id='comments']/div/pre[@class='bz_comment_text']").
               map(_.asInstanceOf[TagNode].getText.toString.trim)
+            val longdescsWho = changeForm.evaluateXPath("/table/tbody/tr/td/div[@id='comments']/div/div/span[@class='bz_comment_user']").
+              map(_.asInstanceOf[TagNode].getText.toString.trim)
 
 
             // STORE !!!
+
+            logger.debug(s"BUG ID :: $bug_id")
+
             val product_id = productsMap.get(product_id_str) match {
               case Some(_id) => _id
               case None => productsMap.put(product_id_str, productsMap.size + 1)
@@ -195,14 +202,33 @@ object BugzillaHTMLParser extends SlickConnector {
                   assignmentsMap.size
               }
 
-              Await.result(db.run(bug_activities +=(bug_id, who, field_id, toPDTDate(historyEntry(1)), historyEntry(3), historyEntry(4))), Duration.Inf)
+              try {
+                Await.result(db.run(bug_activities +=(bug_id, who, field_id, toPDTDate(historyEntry(1)), historyEntry(3), historyEntry(4))), Duration.Inf)
+              } catch {
+                case e: Exception => logger.error("Encoding iussue ? ", e)
+              }
             }
 
-            val bugData = BugData(-1, Integer.valueOf(bug_id), short_desc, resolution, -1, -1, -1, "<>", null)
+            (longdescsHead zip longdescsBody zip longdescsWho) map {
+              longdesc =>
 
-            println(bugData, assigned_to_str, component_id_str, bug_status)
+                val who = assignmentsMap.get(longdesc._2) match {
+                  case Some(_id) => _id
+                  case None => assignmentsMap.put(longdesc._2, assignmentsMap.size + 1)
+                    Await.result(db.run(assignments +=(assignmentsMap.size, longdesc._2)), Duration.Inf)
+                    assignmentsMap.size
+                }
+                try {
+                  Await.result(db.run(longdescs +=(bug_id, who, longdesc._1._1, longdesc._1._2)), Duration.Inf)
+                } catch {
+                  case e: Exception => logger.error("Encoding iussue ? ", e)
+                }
+            }
 
-            completeHistory map (_.mkString(",")) foreach println
+            duplicateOf map {
+              dupe_of => Await.result(db.run(duplicates +=(bug_id, Integer.valueOf(dupe_of))), Duration.Inf)
+            }
+
           }
         }
       }

@@ -14,8 +14,11 @@ trait SlickConnector {
 
   // ok-ish
   val bugs = TableQuery[Bugs]
+  // OK
   val bug_activities = TableQuery[Bugs_Activity]
+
   val longdescs = TableQuery[Longdescs]
+  // OK
   val duplicates = TableQuery[Duplicates]
   // OK
   val components = TableQuery[Components]
@@ -129,16 +132,18 @@ class Bugs_Activity(tag: Tag) extends Table[(Int, Int, Int, Timestamp, String, S
   *
   * @param tag
   */
-class Longdescs(tag: Tag) extends Table[(Int, Int, Timestamp, String)](tag, "longdescds") {
+class Longdescs(tag: Tag) extends Table[(Int, Int, Timestamp, String)](tag, "longdescs") {
   def comment_id = column[Int]("comment_id", O.PrimaryKey)
 
   def bug_id = column[Int]("bug_id")
+
+  def who = column[Int]("who")
 
   def bug_when = column[Timestamp]("bug_when")
 
   def thetext = column[String]("thetext")
 
-  def * = (comment_id, bug_id, bug_when, thetext)
+  def * = (bug_id, who, bug_when, thetext)
 }
 
 /**
