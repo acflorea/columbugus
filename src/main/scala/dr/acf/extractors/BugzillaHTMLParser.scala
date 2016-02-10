@@ -24,7 +24,7 @@ object BugzillaHTMLParser extends SlickConnector {
 
   def main(args: Array[String]) {
 
-    val ROOT_FOLDER = "/mnt/Storage/#DATASOURCES/Bug_Recommender/test"
+    val ROOT_FOLDER = "/mnt/Storage/#DATASOURCES/Bug_Recommender/2"
 
     val folder = new File(ROOT_FOLDER)
 
@@ -39,10 +39,15 @@ object BugzillaHTMLParser extends SlickConnector {
     val assignmentsMap = new scala.collection.mutable.HashMap[String, Int]()
     val componentsMap = new scala.collection.mutable.HashMap[String, Int]()
 
-    Await.result(db.run(DBIO.seq(
+//    Await.result(db.run(DBIO.seq(
+//      assignments.result.map(_.foreach { case (id, name) => assignmentsMap.put(name, id) }),
+//      components.result.map(_.foreach { case (id, product_id, name) => componentsMap.put(name, id) })
+//    )), Duration.Inf)
+
+    db.run(DBIO.seq(
       assignments.result.map(_.foreach { case (id, name) => assignmentsMap.put(name, id) }),
       components.result.map(_.foreach { case (id, product_id, name) => componentsMap.put(name, id) })
-    )), Duration.Inf)
+    ))
 
     ids foreach { id =>
 
@@ -155,23 +160,18 @@ object BugzillaHTMLParser extends SlickConnector {
             val assign_to = assignmentsMap.get(assigned_to_str) match {
               case Some(_id) => _id
               case None => assignmentsMap.put(assigned_to_str, assignmentsMap.size + 1)
+                db.run(assignments +=(assignmentsMap.size, assigned_to_str))
                 assignmentsMap.size
             }
 
             val component_id = componentsMap.get(component_id_str) match {
               case Some(_id) => _id
               case None => componentsMap.put(component_id_str, componentsMap.size + 1)
+                db.run(components +=(componentsMap.size, -1, component_id_str))
                 componentsMap.size
             }
 
-            val setup = DBIO.seq(
-              components +=(component_id, -1, component_id_str),
-              assignments +=(assign_to, assigned_to_str),
-              bugs +=(bug_id, creation_ts, short_desc, bug_status, assign_to, component_id, bug_severity, resolution, delta_ts)
-            )
-
-            val f = db.run(setup)
-            Await.result(f, Duration.Inf)
+            db.run(bugs +=(bug_id, creation_ts, short_desc, bug_status, assign_to, component_id, bug_severity, resolution, delta_ts))
 
             val bugData = BugData(-1, Integer.valueOf(bug_id), short_desc, resolution, -1, -1, -1, "<>", null)
 
