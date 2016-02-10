@@ -113,8 +113,10 @@ object BugzillaHTMLParser extends SlickConnector {
             val completeHistory = (completeHistoryMap map {
               historyEntry => if (historyEntry._2.length == 5)
                 historyEntry
-              else
-                historyEntry._1 -> (completeHistoryMap.get(historyEntry._1 - 1).get.take(2) ++ historyEntry._2)
+              else {
+                val lastFullEntry = completeHistoryMap.filter(entry => entry._1 < historyEntry._1 && entry._2.length == 5).maxBy(_._1)
+                historyEntry._1 -> (lastFullEntry._2.take(2) ++ historyEntry._2)
+              }
             }).toSeq.sortBy(_._1).map(_._2)
 
             // delta_ts

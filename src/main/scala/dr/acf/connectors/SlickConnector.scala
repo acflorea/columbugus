@@ -46,10 +46,10 @@ class Assignments(tag: Tag) extends Table[(Int, String)](tag, "assignments") {
   *
   * @param tag
   */
-class Fields(tag: Tag) extends Table[(Int, String)](tag, "fields") {
-  def field_id = column[Int]("field_id", O.PrimaryKey)
+class Fields(tag: Tag) extends Table[(Int, String)](tag, "fielddefs") {
+  def field_id = column[Int]("id", O.PrimaryKey)
 
-  def field_name = column[String]("field_name")
+  def field_name = column[String]("name")
 
   def * = (field_id, field_name)
 }
