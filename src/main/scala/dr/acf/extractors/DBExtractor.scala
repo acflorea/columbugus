@@ -23,9 +23,8 @@ object DBExtractor extends SparkOps with MySQLConnector {
     */
   def buildBugsRDD: RDD[BugData] = {
 
-    val use_assigned_to = false
-
     // Charge configs
+    val use_assigned_to = conf.getBoolean("global.use_assigned_to")
     val testMode = conf.getBoolean("global.testMode")
     val includeComments = conf.getBoolean("global.includeComments")
     val issuesThreshold = conf.getInt("global.issuesThreshold")

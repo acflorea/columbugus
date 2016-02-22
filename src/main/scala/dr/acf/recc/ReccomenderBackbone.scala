@@ -51,6 +51,8 @@ object ReccomenderBackbone extends SparkOps {
     val rescaledData: DataFrame = dataTransform(transform, fsRoot, wordsData)
 
     val categoryScalingFactor = conf.getDouble("preprocess.categoryScalingFactor")
+    val categoryMultiplier = conf.getInt("preprocess.categoryMultiplier")
+
     val chi2Features = conf.getInt("preprocess.chi2Features")
     val ldaTopics = conf.getInt("preprocess.ldaTopics")
     val ldaOptimizer = conf.getString("preprocess.ldaOptimizer")
@@ -64,7 +66,6 @@ object ReccomenderBackbone extends SparkOps {
 
       val includeCategory = conf.getBoolean("preprocess.includeCategory")
       val normalize = conf.getBoolean("preprocess.normalize")
-      val normalizer = new feature.Normalizer()
 
       // Function to transform row into labeled points
       def rowToLabeledPoint = (row: Row) => {
@@ -72,27 +73,30 @@ object ReccomenderBackbone extends SparkOps {
         val features = row.getAs[SparseVector]("features")
         val assignment_class = row.getAs[Double]("assignment_class")
 
-        val labeledPoint = if (includeCategory) LabeledPoint(
-          assignment_class,
-          Vectors.sparse(
-            compIds.length + features.size,
-            Array.concat(
-              Array(compIds.indexOf(component_id)),
-              features.indices map (i => i + compIds.length)
-            ),
-            Array.concat(Array(categoryScalingFactor), features.values)
+        val labeledPoint = if (includeCategory) {
+
+          val categorySize = compIds.length * categoryMultiplier
+          val categoryIndices = 1 to categoryMultiplier map (i => compIds.length * (i - 1) + compIds.indexOf(component_id))
+          val categoryScalingArray = 1 to categoryMultiplier map (i => categoryScalingFactor)
+
+          LabeledPoint(
+            assignment_class,
+            Vectors.sparse(
+              categorySize + features.size,
+              Array.concat(
+                categoryIndices.toArray,
+                features.indices map (i => i + compIds.length)
+              ),
+              Array.concat(categoryScalingArray.toArray, features.values)
+            )
           )
-        )
+        }
         else
           LabeledPoint(
             assignment_class,
             features
           )
-        if (normalize) {
-          labeledPoint.copy(features = normalizer.transform(labeledPoint.features))
-        } else {
           labeledPoint
-        }
       }
 
       val rawData = rescaledData.select("index", "component_id", "features", "assignment_class")
@@ -106,8 +110,13 @@ object ReccomenderBackbone extends SparkOps {
       logger.debug(s"Training data size $trainingDataCount")
       logger.debug(s"Test data size ${allDataCount - trainingDataCount}")
 
-      val rawTrainingData = rawData.filter(_._2 <= trainingDataCount).map(_._1).cache()
-      val rawTestData = rawData.filter(_._2 > trainingDataCount).map(_._1).cache()
+      val (rawTrainingData, rawTestData) = if (normalize) {
+        val scaler = new feature.StandardScaler().fit(rawData.map(x => x._1.features))
+        (rawData.filter(_._2 <= trainingDataCount).map(_._1).map(p => p.copy(features = scaler.transform(p.features))),
+          rawData.filter(_._2 > trainingDataCount).map(_._1).map(p => p.copy(features = scaler.transform(p.features))))
+      } else {
+        (rawData.filter(_._2 <= trainingDataCount).map(_._1).cache(), rawData.filter(_._2 > trainingDataCount).map(_._1).cache())
+      }
 
       // Simple model
       if (simple) {
@@ -245,11 +254,22 @@ object ReccomenderBackbone extends SparkOps {
       elector =>
         // Elector ID (simple, PCA, CHI2, LDA)
         val key = elector._1
-        // Training data for this elector
-        val trainingData = elector._2._1
-        // Test data for this elector
-        val testData = elector._2._2
+
         // Train an SVM model for this elector
+
+        val normalize = conf.getBoolean("postprocess.normalize")
+
+        val (trainingData, testData) = if (normalize) {
+          val _trainingData = elector._2._1
+          val _testData = elector._2._2
+          val scaler = new feature.StandardScaler().fit((_trainingData union _testData).map(x => x.features))
+          (_trainingData.map(p => p.copy(features = scaler.transform(p.features))),
+            _testData.map(p => p.copy(features = scaler.transform(p.features))))
+          // Training and test data for this elector
+        } else {
+          // Training and test data for this elector
+          (elector._2._1, elector._2._2)
+        }
 
         val ldaModels = conf.getInt("preprocess.ldaModels")
         (1 to ldaModels) map {
