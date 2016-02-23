@@ -16,7 +16,7 @@ trait SlickConnector {
   val bugs = TableQuery[Bugs]
   // OK
   val bug_activities = TableQuery[Bugs_Activity]
-
+  // OK
   val longdescs = TableQuery[Longdescs]
   // OK
   val duplicates = TableQuery[Duplicates]

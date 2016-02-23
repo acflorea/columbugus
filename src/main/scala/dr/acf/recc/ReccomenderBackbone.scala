@@ -1,5 +1,6 @@
 package dr.acf.recc
 
+import com.typesafe.config.ConfigRenderOptions
 import dr.acf.extractors.{BugData, DBExtractor}
 import dr.acf.spark._
 import dr.acf.spark.SparkOps._
@@ -26,10 +27,15 @@ object ReccomenderBackbone extends SparkOps {
   import sqlContext.implicits._
 
   val logger = LoggerFactory.getLogger(getClass.getName)
+  val resultsLog = LoggerFactory.getLogger("resultsLog")
 
   def main(args: Array[String]) {
 
     logger.debug("Start!")
+
+    resultsLog.info(s"NEW RUN AT :${System.currentTimeMillis}")
+    resultsLog.info(conf.root().render(ConfigRenderOptions.concise()))
+
     val startTime = System.currentTimeMillis()
 
     // Execution parameters
@@ -96,7 +102,7 @@ object ReccomenderBackbone extends SparkOps {
             assignment_class,
             features
           )
-          labeledPoint
+        labeledPoint
       }
 
       val rawData = rescaledData.select("index", "component_id", "features", "assignment_class")
@@ -107,8 +113,8 @@ object ReccomenderBackbone extends SparkOps {
       val allDataCount = rawData.count()
       val trainingDataCount = allDataCount / 10 * 9 toInt
 
-      logger.debug(s"Training data size $trainingDataCount")
-      logger.debug(s"Test data size ${allDataCount - trainingDataCount}")
+      resultsLog.info(s"Training data size $trainingDataCount")
+      resultsLog.info(s"Test data size ${allDataCount - trainingDataCount}")
 
       val (rawTrainingData, rawTestData) = if (normalize) {
         val scaler = new feature.StandardScaler().fit(rawData.map(x => x._1.features))
@@ -194,7 +200,7 @@ object ReccomenderBackbone extends SparkOps {
           .asInstanceOf[DistributedLDAModel]
         corpus.unpersist()
         // Output topics. Each is a distribution over words (matching word count vectors)
-        println(s"LDA :: Learned $ldaTopics topics (as distributions over vocab of ${ldaModel.vocabSize} words)")
+        resultsLog.info(s"LDA :: Learned $ldaTopics topics (as distributions over vocab of ${ldaModel.vocabSize} words)")
 
         val transformed = zippedData.join(ldaModel.topicDistributions).map {
           point =>
@@ -306,11 +312,11 @@ object ReccomenderBackbone extends SparkOps {
     val weightedRecall = metrics.weightedRecall
     val weightedFMeasure = metrics.weightedFMeasure
 
-    println("categoryScalingFactor = " + categoryScalingFactor)
-    println("fMeasure = " + fMeasure)
-    println("Weighted Precision = " + weightedPrecision)
-    println("Weighted Recall = " + weightedRecall)
-    println("Weighted fMeasure = " + weightedFMeasure)
+    resultsLog.info("categoryScalingFactor = " + categoryScalingFactor)
+    resultsLog.info("fMeasure = " + fMeasure)
+    resultsLog.info("Weighted Precision = " + weightedPrecision)
+    resultsLog.info("Weighted Recall = " + weightedRecall)
+    resultsLog.info("Weighted fMeasure = " + weightedFMeasure)
     // println("Confusion Matrix = " + metrics.confusionMatrix.toString(500, 10000))
 
     // Step 3...Infinity - TDB

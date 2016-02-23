@@ -10,7 +10,7 @@ trait SparkOps
 
 object SparkOps {
 
-  val conf = ConfigFactory.load()
+  val conf = ConfigFactory.load().getConfig("reccsys")
 
   implicit lazy val sc = {
     val master = conf.getString("spark.master")

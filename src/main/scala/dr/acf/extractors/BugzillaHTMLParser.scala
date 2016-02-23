@@ -23,7 +23,7 @@ object BugzillaHTMLParser extends SlickConnector {
 
   def main(args: Array[String]) {
 
-    val ROOT_FOLDER = "/mnt/Storage/#DATASOURCES/Bug_Recommender/2"
+    val ROOT_FOLDER = "/mnt/Storage/#DATASOURCES/Bug_Recommender/4"
 
     val folder = new File(ROOT_FOLDER)
 
@@ -31,9 +31,11 @@ object BugzillaHTMLParser extends SlickConnector {
       override def accept(dir: File, name: String): Boolean = !name.contains("history")
     }
 
-    val ids = folder.listFiles(noHistory) map { f =>
+    val ids = (folder.listFiles(noHistory) map { f =>
       f.getName.split(".html").head
-    }
+    }).filter(id => id.startsWith("51"))
+
+    logger.debug(s"Processing ${ids.length} files")
 
     val assignmentsMap = new scala.collection.mutable.HashMap[String, Int]()
     val componentsMap = new scala.collection.mutable.HashMap[String, Int]()
@@ -47,7 +49,11 @@ object BugzillaHTMLParser extends SlickConnector {
       fields.result.map(_.foreach { case (id, name) => fieldsMap.put(name, id) })
     )), Duration.Inf)
 
-    ids foreach { id =>
+    (ids zipWithIndex) foreach { id_index =>
+
+      val id = id_index._1
+
+      logger.debug(s"${ids.length - id_index._2} files remaining")
 
       val bugDataFile = new File(s"$ROOT_FOLDER/$id.html")
       val bugHistoryFile = new File(s"$ROOT_FOLDER/$id-history.html")
@@ -56,8 +62,8 @@ object BugzillaHTMLParser extends SlickConnector {
         logger.debug(s"Skip bug $id. Missing history file")
       } else {
 
-        val props = new CleanerProperties();
-        props.setRecognizeUnicodeChars(true);
+        val props = new CleanerProperties()
+        props.setRecognizeUnicodeChars(true)
         val cleaner = new HtmlCleaner(props)
 
         val rootNode = cleaner.clean(bugDataFile, "UTF-8")
@@ -165,68 +171,66 @@ object BugzillaHTMLParser extends SlickConnector {
 
             logger.debug(s"BUG ID :: $bug_id")
 
-            val product_id = productsMap.get(product_id_str) match {
-              case Some(_id) => _id
-              case None => productsMap.put(product_id_str, productsMap.size + 1)
-                Await.result(db.run(products +=(productsMap.size, -1, product_id_str)), Duration.Inf)
-                productsMap.size
-            }
+            try {
 
-            val component_id = componentsMap.get(component_id_str) match {
-              case Some(_id) => _id
-              case None => componentsMap.put(component_id_str, componentsMap.size + 1)
-                Await.result(db.run(components +=(componentsMap.size, product_id, component_id_str)), Duration.Inf)
-                componentsMap.size
-            }
-
-            val assign_to = assignmentsMap.get(assigned_to_str) match {
-              case Some(_id) => _id
-              case None => assignmentsMap.put(assigned_to_str, assignmentsMap.size + 1)
-                Await.result(db.run(assignments +=(assignmentsMap.size, assigned_to_str)), Duration.Inf)
-                assignmentsMap.size
-            }
-
-            Await.result(db.run(bugs +=(bug_id, creation_ts, short_desc, bug_status, assign_to, component_id, bug_severity, resolution, delta_ts)), Duration.Inf)
-
-            completeHistory map { historyEntry =>
-              val field_id = fieldsMap.get(historyEntry(2)) match {
+              val product_id = productsMap.get(product_id_str) match {
                 case Some(_id) => _id
-                case None => fieldsMap.put(historyEntry(2), fieldsMap.size + 1)
-                  Await.result(db.run(fields +=(fieldsMap.size, historyEntry(2))), Duration.Inf)
-                  fieldsMap.size
+                case None => productsMap.put(product_id_str, productsMap.size + 1)
+                  Await.result(db.run(products +=(productsMap.size, -1, product_id_str)), Duration.Inf)
+                  productsMap.size
               }
-              val who = assignmentsMap.get(historyEntry(0)) match {
+
+              val component_id = componentsMap.get(component_id_str) match {
                 case Some(_id) => _id
-                case None => assignmentsMap.put(historyEntry(0), assignmentsMap.size + 1)
-                  Await.result(db.run(assignments +=(assignmentsMap.size, historyEntry(0))), Duration.Inf)
+                case None => componentsMap.put(component_id_str, componentsMap.size + 1)
+                  Await.result(db.run(components +=(componentsMap.size, product_id, component_id_str)), Duration.Inf)
+                  componentsMap.size
+              }
+
+              val assign_to = assignmentsMap.get(assigned_to_str) match {
+                case Some(_id) => _id
+                case None => assignmentsMap.put(assigned_to_str, assignmentsMap.size + 1)
+                  Await.result(db.run(assignments +=(assignmentsMap.size, assigned_to_str)), Duration.Inf)
                   assignmentsMap.size
               }
 
-              try {
-                Await.result(db.run(bug_activities +=(bug_id, who, field_id, toPDTDate(historyEntry(1)), historyEntry(3), historyEntry(4))), Duration.Inf)
-              } catch {
-                case e: Exception => logger.error("Encoding iussue ? ", e)
-              }
-            }
+              Await.result(db.run(bugs +=(bug_id, creation_ts, short_desc, bug_status, assign_to, component_id, bug_severity, resolution, delta_ts)), Duration.Inf)
 
-            (longdescsHead zip longdescsBody zip longdescsWho) map {
-              longdesc =>
-
-                val who = assignmentsMap.get(longdesc._2) match {
+              completeHistory map { historyEntry =>
+                val field_id = fieldsMap.get(historyEntry(2)) match {
                   case Some(_id) => _id
-                  case None => assignmentsMap.put(longdesc._2, assignmentsMap.size + 1)
-                    Await.result(db.run(assignments +=(assignmentsMap.size, longdesc._2)), Duration.Inf)
+                  case None => fieldsMap.put(historyEntry(2), fieldsMap.size + 1)
+                    Await.result(db.run(fields +=(fieldsMap.size, historyEntry(2))), Duration.Inf)
+                    fieldsMap.size
+                }
+                val who = assignmentsMap.get(historyEntry(0)) match {
+                  case Some(_id) => _id
+                  case None => assignmentsMap.put(historyEntry(0), assignmentsMap.size + 1)
+                    Await.result(db.run(assignments +=(assignmentsMap.size, historyEntry(0))), Duration.Inf)
                     assignmentsMap.size
                 }
-                try {
-                  Await.result(db.run(longdescs +=(bug_id, who, longdesc._1._1, longdesc._1._2)), Duration.Inf)
-                } catch {
-                  case e: Exception => logger.error("Encoding iussue ? ", e)
-                }
-            }
 
-            duplicateOf map {
-              dupe_of => Await.result(db.run(duplicates +=(bug_id, Integer.valueOf(dupe_of))), Duration.Inf)
+                Await.result(db.run(bug_activities +=(bug_id, who, field_id, toPDTDate(historyEntry(1)), historyEntry(3), historyEntry(4))), Duration.Inf)
+              }
+
+              (longdescsHead zip longdescsBody zip longdescsWho) map {
+                longdesc =>
+
+                  val who = assignmentsMap.get(longdesc._2) match {
+                    case Some(_id) => _id
+                    case None => assignmentsMap.put(longdesc._2, assignmentsMap.size + 1)
+                      Await.result(db.run(assignments +=(assignmentsMap.size, longdesc._2)), Duration.Inf)
+                      assignmentsMap.size
+                  }
+                  Await.result(db.run(longdescs +=(bug_id, who, longdesc._1._1, longdesc._1._2)), Duration.Inf)
+              }
+
+              duplicateOf map {
+                dupe_of => Await.result(db.run(duplicates +=(bug_id, Integer.valueOf(dupe_of))), Duration.Inf)
+              }
+
+            } catch {
+              case e: Exception => logger.error("Encoding issue ? ", e)
             }
 
           }

@@ -15,6 +15,7 @@ import scala.collection.parallel.ForkJoinTaskSupport
 class SVMWithSGDMulticlass(undersample: Boolean, seed: Long) {
 
   def logger = LoggerFactory.getLogger(getClass.getName)
+  val resultsLog = LoggerFactory.getLogger("resultsLog")
 
   /**
     * Train k (one vs. all) SVM models given an RDD of (label, features) pairs. We run a fixed number
@@ -40,7 +41,7 @@ class SVMWithSGDMulticlass(undersample: Boolean, seed: Long) {
     // determine number of classes
     val numberOfClasses = input.map(point => point.label).distinct().count().toInt
 
-    logger.debug(s"Training SVMWithSGDMulticlass for $numberOfClasses distinct classes")
+    resultsLog.info(s"Training SVMWithSGDMulticlass for $numberOfClasses distinct classes")
 
     val binaryModelIds = (0 until numberOfClasses).par
 
