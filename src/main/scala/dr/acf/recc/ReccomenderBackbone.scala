@@ -58,9 +58,11 @@ object ReccomenderBackbone extends SparkOps {
 
     val categoryScalingFactor = conf.getDouble("preprocess.categoryScalingFactor")
     val categoryMultiplier = conf.getInt("preprocess.categoryMultiplier")
+    val includeCategory = conf.getBoolean("preprocess.includeCategory")
 
     val productScalingFactor = conf.getDouble("preprocess.productScalingFactor")
     val productMultiplier = conf.getInt("preprocess.productMultiplier")
+    val includeProduct = conf.getBoolean("preprocess.includeProduct")
 
     val chi2Features = conf.getInt("preprocess.chi2Features")
     val ldaTopics = conf.getInt("preprocess.ldaTopics")
@@ -70,8 +72,6 @@ object ReccomenderBackbone extends SparkOps {
 
     if (preprocess) {
 
-      val includeCategory = conf.getBoolean("preprocess.includeCategory")
-      val includeProduct = conf.getBoolean("preprocess.includeProduct")
       val normalize = conf.getBoolean("preprocess.normalize")
 
       // Integrate more features
@@ -88,8 +88,14 @@ object ReccomenderBackbone extends SparkOps {
         val labeledPoint = if (includeCategory || includeProduct) {
 
           val productSize = prodIds.length * productMultiplier
-          val productIndices = 1 to productMultiplier map (i => prodIds.length * (i - 1) + prodIds.indexOf(product_id))
-          val productScalingArray = 1 to productMultiplier map (i => productScalingFactor)
+          val productIndices = if (includeProduct)
+            1 to productMultiplier map (i => prodIds.length * (i - 1) + prodIds.indexOf(product_id))
+          else
+            Vector.empty
+          val productScalingArray = if (includeProduct)
+            1 to productMultiplier map (i => productScalingFactor)
+          else
+            Vector.empty
 
           val categorySize = compIds.length * categoryMultiplier
           val categoryIndices = 1 to categoryMultiplier map (i => productSize + compIds.length * (i - 1) + compIds.indexOf(component_id))
@@ -323,7 +329,8 @@ object ReccomenderBackbone extends SparkOps {
     val weightedRecall = metrics.weightedRecall
     val weightedFMeasure = metrics.weightedFMeasure
 
-    resultsLog.info("categoryScalingFactor = " + categoryScalingFactor)
+    resultsLog.info(s"withProduct: $includeProduct ; scalingFactor = $productScalingFactor, multiplier $productMultiplier")
+    resultsLog.info(s"withCategory: $includeCategory ; categoryScalingFactor = $categoryScalingFactor, multiplier $categoryMultiplier")
     resultsLog.info("fMeasure = " + fMeasure)
     resultsLog.info("Weighted Precision = " + weightedPrecision)
     resultsLog.info("Weighted Recall = " + weightedRecall)
