@@ -59,41 +59,52 @@ object ReccomenderBackbone extends SparkOps {
     val categoryScalingFactor = conf.getDouble("preprocess.categoryScalingFactor")
     val categoryMultiplier = conf.getInt("preprocess.categoryMultiplier")
 
+    val productScalingFactor = conf.getDouble("preprocess.productScalingFactor")
+    val productMultiplier = conf.getInt("preprocess.productMultiplier")
+
     val chi2Features = conf.getInt("preprocess.chi2Features")
     val ldaTopics = conf.getInt("preprocess.ldaTopics")
     val ldaOptimizer = conf.getString("preprocess.ldaOptimizer")
-
-    // Integrate more features
-    val compIds = rescaledData.select("component_id").map(_.getAs[Int](0)).distinct().collect()
 
     val inputDataSVM = mutable.Map.empty[String, (RDD[LabeledPoint], RDD[LabeledPoint])]
 
     if (preprocess) {
 
       val includeCategory = conf.getBoolean("preprocess.includeCategory")
+      val includeProduct = conf.getBoolean("preprocess.includeProduct")
       val normalize = conf.getBoolean("preprocess.normalize")
+
+      // Integrate more features
+      val compIds = if (includeCategory) rescaledData.select("component_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
+      val prodIds = if (includeProduct) rescaledData.select("product_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
 
       // Function to transform row into labeled points
       def rowToLabeledPoint = (row: Row) => {
         val component_id = row.getAs[Int]("component_id")
+        val product_id = row.getAs[Int]("product_id")
         val features = row.getAs[SparseVector]("features")
         val assignment_class = row.getAs[Double]("assignment_class")
 
-        val labeledPoint = if (includeCategory) {
+        val labeledPoint = if (includeCategory || includeProduct) {
+
+          val productSize = prodIds.length * productMultiplier
+          val productIndices = 1 to productMultiplier map (i => prodIds.length * (i - 1) + prodIds.indexOf(product_id))
+          val productScalingArray = 1 to productMultiplier map (i => productScalingFactor)
 
           val categorySize = compIds.length * categoryMultiplier
-          val categoryIndices = 1 to categoryMultiplier map (i => compIds.length * (i - 1) + compIds.indexOf(component_id))
+          val categoryIndices = 1 to categoryMultiplier map (i => productSize + compIds.length * (i - 1) + compIds.indexOf(component_id))
           val categoryScalingArray = 1 to categoryMultiplier map (i => categoryScalingFactor)
 
           LabeledPoint(
             assignment_class,
             Vectors.sparse(
-              categorySize + features.size,
+              productSize + categorySize + features.size,
               Array.concat(
+                productIndices.toArray,
                 categoryIndices.toArray,
                 features.indices map (i => i + compIds.length)
               ),
-              Array.concat(categoryScalingArray.toArray, features.values)
+              Array.concat(productScalingArray.toArray, categoryScalingArray.toArray, features.values)
             )
           )
         }
@@ -105,7 +116,7 @@ object ReccomenderBackbone extends SparkOps {
         labeledPoint
       }
 
-      val rawData = rescaledData.select("index", "component_id", "features", "assignment_class")
+      val rawData = rescaledData.select("index", "component_id", "product_id", "features", "assignment_class")
         .map(rowToLabeledPoint).zipWithIndex()
       //.filter(_._2 < 100)
 

@@ -119,9 +119,9 @@ object DBExtractor extends SparkOps with MySQLConnector {
     val bugsDataFrame = if (use_assigned_to) mySQLDF(
       "(" +
         "select b.bug_id, b.creation_ts, b.short_desc," +
-        "b.bug_status, b.assigned_to, b.component_id, b.bug_severity, " +
+        "b.bug_status, b.assigned_to, b.product_id, b.component_id, b.bug_severity, " +
         "b.resolution, b.delta_ts, " +
-        "c.name as component_name, c.product_id, " +
+        "c.name as component_name, " +
         "p.name as product_name " +
         "from bugs b " +
         "join components c on b.component_id = c.id " +
@@ -136,9 +136,9 @@ object DBExtractor extends SparkOps with MySQLConnector {
       mySQLDF(
         "(" +
           "select b.bug_id, b.creation_ts, b.short_desc," +
-          "b.bug_status, ba.who as assigned_to, b.component_id, b.bug_severity, " +
+          "b.bug_status, ba.who as assigned_to, b.product_id, b.component_id, b.bug_severity, " +
           "b.resolution, b.delta_ts, " +
-          "c.name as component_name, c.product_id, " +
+          "c.name as component_name, " +
           "p.name as product_name " +
           "from bugs b " +
           "join bugs_activity ba on b.bug_id = ba.bug_id and ba.fieldid = '" +
@@ -189,9 +189,9 @@ object DBExtractor extends SparkOps with MySQLConnector {
 
     // ($bug_id,t$timestamp:: $short_desc)
     val idAndDescRDD = bugsDataFrame.select("bug_id", "short_desc",
-      "bug_status", "assigned_to", "component_id", "bug_severity", "creation_ts").
+      "bug_status", "assigned_to", "product_id", "component_id", "bug_severity", "creation_ts").
       map(row => (row.getInt(0), Row(row.getString(1),
-        row.getString(2), row.getInt(3), row.getInt(4), row.getString(5), row.getTimestamp(6))))
+        row.getString(2), row.getInt(3), row.getInt(4), row.getInt(5), row.getString(6), row.getTimestamp(7))))
 
     // join dataframes
     val bugsRDD = idAndDescRDD.
@@ -209,9 +209,10 @@ object DBExtractor extends SparkOps with MySQLConnector {
               r1.getString(1), // "bug_status"
               r1.getInt(2), // "assigned_to"
               assignments.getOrElse(r1.getInt(2), -1).toDouble,
-              r1.getInt(3), // "component_id"
-              r1.getString(4), // "bug_severity"
-              r1.getTimestamp(5)
+              r1.getInt(3), // "product_id"
+              r1.getInt(4), // "component_id"
+              r1.getString(5), // "bug_severity"
+              r1.getTimestamp(6)
             )
           case None =>
             BugData(
@@ -221,9 +222,10 @@ object DBExtractor extends SparkOps with MySQLConnector {
               r1.getString(1),
               r1.getInt(2),
               assignments.getOrElse(r1.getInt(2), -1).toDouble,
-              r1.getInt(3),
-              r1.getString(4),
-              r1.getTimestamp(5)
+              r1.getInt(3), // "product_id"
+              r1.getInt(4), // "component_id"
+              r1.getString(5), // "bug_severity"
+              r1.getTimestamp(6)
             )
         }
       }
@@ -244,7 +246,7 @@ object DBExtractor extends SparkOps with MySQLConnector {
 
 case class BugData(index: Long, bug_id: Integer, bug_data: String,
                    bug_status: String, assigned_to: Integer,
-                   assignment_class: Double,
+                   assignment_class: Double, product_id: Integer,
                    component_id: Integer, bug_severity: String,
                    creation_ts: Timestamp)
 
