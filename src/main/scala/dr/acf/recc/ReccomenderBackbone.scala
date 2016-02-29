@@ -54,7 +54,7 @@ object ReccomenderBackbone extends SparkOps {
     val wordsData: DataFrame = dataCleansing(cleansing, fsRoot)
 
     // Step 2 - transform to numerical features
-    val rescaledData: DataFrame = dataTransform(transform, fsRoot, wordsData)
+    val scaledData: DataFrame = dataTransform(transform, fsRoot, wordsData)
 
     val categoryScalingFactor = conf.getDouble("preprocess.categoryScalingFactor")
     val categoryMultiplier = conf.getInt("preprocess.categoryMultiplier")
@@ -75,8 +75,8 @@ object ReccomenderBackbone extends SparkOps {
       val normalize = conf.getBoolean("preprocess.normalize")
 
       // Integrate more features
-      val compIds = if (includeCategory) rescaledData.select("component_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
-      val prodIds = if (includeProduct) rescaledData.select("product_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
+      val compIds = if (includeCategory) scaledData.select("component_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
+      val prodIds = if (includeProduct) scaledData.select("product_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
 
       // Function to transform row into labeled points
       def rowToLabeledPoint = (row: Row) => {
@@ -122,7 +122,18 @@ object ReccomenderBackbone extends SparkOps {
         labeledPoint
       }
 
-      val rawData = rescaledData.select("index", "component_id", "product_id", "features", "assignment_class")
+      val minMaxScaling = conf.getBoolean("preprocess.minMaxScaling")
+      val rescaledData = if (minMaxScaling) {
+        val scaler = new MinMaxScaler().setInputCol("features").setOutputCol("scaledFeatures")
+        // Compute summary statistics and generate MinMaxScalerModel
+        val scalerModel = scaler.fit(scaledData)
+        // rescale each feature to range [min, max].
+        scalerModel.transform(scaledData)
+      } else {
+        scaledData
+      }
+
+      val rawData = rescaledData.select("index", "component_id", "product_id", "scaledFeatures", "assignment_class")
         .map(rowToLabeledPoint).zipWithIndex()
       //.filter(_._2 < 100)
 
