@@ -2,8 +2,8 @@ package dr.acf.recc
 
 import com.typesafe.config.ConfigRenderOptions
 import dr.acf.extractors.{BugData, DBExtractor}
-import dr.acf.spark._
 import dr.acf.spark.SparkOps._
+import dr.acf.spark._
 import org.apache.spark.ml.feature._
 import org.apache.spark.mllib.clustering.{DistributedLDAModel, LDA}
 import org.apache.spark.mllib.evaluation.MulticlassMetrics
@@ -12,7 +12,7 @@ import org.apache.spark.mllib.feature.ChiSqSelector
 import org.apache.spark.mllib.linalg._
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.{DataFrame, Row, functions}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
@@ -387,23 +387,36 @@ object ReccomenderBackbone extends SparkOps {
       // thanks case head fix method error line eclipse
       // problem code test project file reply bug attachment patch
       val stopWords = vocabulary
-        .filter(pair => pair._2 > maxDocFreq || pair._2 < minDocFreq)
-        .filter(pair => pair._1.length > 2)
+        .filter(pair => pair._2 > maxDocFreq || pair._2 < minDocFreq || pair._1.length < 2)
         .map(pair => pair._1).collect()
 
       val stopWordsRemover = new StopWordsRemover().setInputCol("words").setOutputCol("filteredwords")
         .setStopWords(stopWords)
       //.setStopWords(Array.empty[String])
 
-      val vocabularySize = vocabulary.count() - stopWords.length
+      val cleanedData = stopWordsRemover.transform(wordsData)
+      val cleanedVocabulary = cleanedData.map(r => r.getAs[mutable.WrappedArray[String]]("filteredwords"))
+        .flatMap(words => words map (word => (word, 1)))
+        .reduceByKey(_ + _)
+
+      val vocabularySize = cleanedVocabulary.distinct().count()
       logger.debug(s"Vocabulary size $vocabularySize")
 
-      val hashingTF = new HashingTF().setInputCol("filteredwords").setOutputCol("rawFeatures")
-        .setNumFeatures(vocabularySize.toInt)
+      val distinctWords = sc.broadcast(cleanedVocabulary.map(_._1).distinct().collect())
 
-      val featurizedData = hashingTF.transform(stopWordsRemover.transform(wordsData)).cache()
+      val tfFunction: ((Iterable[_]) => Vector) = (document: Iterable[_]) => {
+        val distinctWordsValue = distinctWords.value
+        val termFrequencies = mutable.HashMap.empty[Int, Double]
+        document.foreach { term =>
+          val i = distinctWordsValue.indexOf(term)
+          termFrequencies.put(i, termFrequencies.getOrElse(i, 0.0) + 1.0)
+        }
+        Vectors.sparse(distinctWordsValue.length, termFrequencies.toSeq)
+      }
+      val udf_tfFunction = functions.udf(tfFunction)
+      val featurizedData = cleanedData.withColumn("rawFeatures", udf_tfFunction(cleanedData.col("filteredwords"))).cache()
 
-      val idf = new IDF().setMinDocFreq(minDocFreq).setInputCol("rawFeatures").setOutputCol("features")
+      val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
       val idfModel = idf.fit(featurizedData)
 
       val _rescaledData = idfModel.transform(featurizedData)
