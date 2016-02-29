@@ -82,7 +82,7 @@ object ReccomenderBackbone extends SparkOps {
       def rowToLabeledPoint = (row: Row) => {
         val component_id = row.getAs[Int]("component_id")
         val product_id = row.getAs[Int]("product_id")
-        val features = row.getAs[SparseVector]("features")
+        val features = row.getAs[Vector]("features").toSparse
         val assignment_class = row.getAs[Double]("assignment_class")
 
         val labeledPoint = if (includeCategory || includeProduct) {
@@ -123,34 +123,37 @@ object ReccomenderBackbone extends SparkOps {
       }
 
       val minMaxScaling = conf.getBoolean("preprocess.minMaxScaling")
-      val rescaledData = if (minMaxScaling) {
+      val _scaledData = if (minMaxScaling) {
         val scaler = new MinMaxScaler().setInputCol("features").setOutputCol("scaledFeatures")
         // Compute summary statistics and generate MinMaxScalerModel
         val scalerModel = scaler.fit(scaledData)
         // rescale each feature to range [min, max].
-        scalerModel.transform(scaledData)
+        scalerModel.transform(scaledData).drop("features").withColumnRenamed("scaledFeatures", "features")
       } else {
         scaledData
       }
 
-      val rawData = rescaledData.select("index", "component_id", "product_id", "scaledFeatures", "assignment_class")
-        .map(rowToLabeledPoint).zipWithIndex()
-      //.filter(_._2 < 100)
+      val rescaledData = if (normalize) {
+        val scaler = new StandardScaler().setInputCol("features").setOutputCol("scaledFeatures")
+        val scalerModel = scaler.fit(_scaledData)
+        scalerModel.transform(_scaledData).drop("features").withColumnRenamed("scaledFeatures", "features")
+      } else {
+        _scaledData
+      }
 
       // Split data into training (90%) and test (10%).
-      val allDataCount = rawData.count()
+      val allDataCount = rescaledData.count()
       val trainingDataCount = allDataCount / 10 * 9 toInt
+
+      val rawData = rescaledData.select("index", "component_id", "product_id", "features", "assignment_class")
+        .map(rowToLabeledPoint).zipWithIndex()
+      //.filter(_._2 < 100)
 
       resultsLog.info(s"Training data size $trainingDataCount")
       resultsLog.info(s"Test data size ${allDataCount - trainingDataCount}")
 
-      val (rawTrainingData, rawTestData) = if (normalize) {
-        val scaler = new feature.StandardScaler().fit(rawData.map(x => x._1.features))
-        (rawData.filter(_._2 <= trainingDataCount).map(_._1).map(p => p.copy(features = scaler.transform(p.features))),
-          rawData.filter(_._2 > trainingDataCount).map(_._1).map(p => p.copy(features = scaler.transform(p.features))))
-      } else {
-        (rawData.filter(_._2 <= trainingDataCount).map(_._1).cache(), rawData.filter(_._2 > trainingDataCount).map(_._1).cache())
-      }
+      val rawTrainingData = rawData.filter(_._2 <= trainingDataCount).map(_._1).cache()
+      val rawTestData = rawData.filter(_._2 > trainingDataCount).map(_._1).cache()
 
       // Simple model
       if (simple) {
