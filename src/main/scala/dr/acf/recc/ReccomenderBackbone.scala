@@ -216,7 +216,7 @@ object ReccomenderBackbone extends SparkOps {
         val udf_tfFunction = functions.udf(tfFunction)
 
         // Filter the top features from each feature vector
-        val testData = rawTrainingData.withColumn("CHIFeatures", udf_tfFunction(rawTestData.col("features")))
+        val testData = rawTestData.withColumn("CHIFeatures", udf_tfFunction(rawTestData.col("features")))
           .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint)
 
         val trainingData = rawTrainingData.withColumn("CHIFeatures", udf_tfFunction(rawTrainingData.col("features")))
