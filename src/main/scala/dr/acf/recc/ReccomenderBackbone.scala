@@ -437,6 +437,7 @@ object ReccomenderBackbone extends SparkOps {
         val distinctWordsValue = distinctWords.value
         val termFrequencies = mutable.HashMap.empty[Int, Double]
 
+        // 1458950400000L is 26.03.2016 :)
         val scaleFactor = if (timeDecay) Math.log((1458950400000L - timestamp.getTime) / 3600000.0) / 10.0 else 1.0
         document.foreach { term =>
           val i = distinctWordsValue.indexOf(term)
