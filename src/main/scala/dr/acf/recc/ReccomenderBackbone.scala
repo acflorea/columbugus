@@ -1,5 +1,7 @@
 package dr.acf.recc
 
+import java.sql.Timestamp
+
 import com.typesafe.config.ConfigRenderOptions
 import dr.acf.extractors.{BugData, DBExtractor}
 import dr.acf.spark.SparkOps._
@@ -399,6 +401,7 @@ object ReccomenderBackbone extends SparkOps {
       val minDocFreq = conf.getInt("transform.minDocFreq")
       val maxDocFreq = conf.getInt("transform.maxDocFreq")
       val smoothTF = conf.getBoolean("transform.smoothTF")
+      val timeDecay = conf.getBoolean("transform.timeDecay")
 
       val currentTime = System.currentTimeMillis()
 
@@ -430,12 +433,14 @@ object ReccomenderBackbone extends SparkOps {
 
       val distinctWords = sc.broadcast(cleanedVocabulary.map(_._1).distinct().collect())
 
-      val tfFunction: ((Iterable[_]) => Vector) = (document: Iterable[_]) => {
+      val tfFunction: ((Iterable[_], Timestamp) => Vector) = (document: Iterable[_], timestamp: Timestamp) => {
         val distinctWordsValue = distinctWords.value
         val termFrequencies = mutable.HashMap.empty[Int, Double]
+
+        val scaleFactor = if (timeDecay) Math.log((1458950400000L - timestamp.getTime) / 3600000.0) / 10.0 else 1.0
         document.foreach { term =>
           val i = distinctWordsValue.indexOf(term)
-          termFrequencies.put(i, termFrequencies.getOrElse(i, 0.0) + 1.0)
+          termFrequencies.put(i, termFrequencies.getOrElse(i, 0.0) + 1.0 / scaleFactor)
         }
         if (smoothTF) {
           val max = if (termFrequencies.isEmpty) 1.0 else termFrequencies.maxBy(_._2)._2
@@ -446,7 +451,7 @@ object ReccomenderBackbone extends SparkOps {
         }
       }
       val udf_tfFunction = functions.udf(tfFunction)
-      val featurizedData = cleanedData.withColumn("rawFeatures", udf_tfFunction(cleanedData.col("filteredwords"))).cache()
+      val featurizedData = cleanedData.withColumn("rawFeatures", udf_tfFunction(cleanedData.col("filteredwords"), cleanedData.col("creation_ts"))).cache()
 
       val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
       val idfModel = idf.fit(featurizedData)
