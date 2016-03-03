@@ -398,6 +398,7 @@ object ReccomenderBackbone extends SparkOps {
 
       val minDocFreq = conf.getInt("transform.minDocFreq")
       val maxDocFreq = conf.getInt("transform.maxDocFreq")
+      val smoothTF = conf.getBoolean("transform.smoothTF")
 
       val currentTime = System.currentTimeMillis()
 
@@ -436,7 +437,13 @@ object ReccomenderBackbone extends SparkOps {
           val i = distinctWordsValue.indexOf(term)
           termFrequencies.put(i, termFrequencies.getOrElse(i, 0.0) + 1.0)
         }
-        Vectors.sparse(distinctWordsValue.length, termFrequencies.toSeq)
+        if (smoothTF) {
+          val max = if (termFrequencies.isEmpty) 1.0 else termFrequencies.maxBy(_._2)._2
+          termFrequencies.map(freq => (freq._1, 0.5 + freq._2 * 0.5 / max))
+          Vectors.sparse(distinctWordsValue.length, termFrequencies.map(freq => (freq._1, 0.5 + freq._2 * 0.5 / max)).toSeq)
+        } else {
+          Vectors.sparse(distinctWordsValue.length, termFrequencies.toSeq)
+        }
       }
       val udf_tfFunction = functions.udf(tfFunction)
       val featurizedData = cleanedData.withColumn("rawFeatures", udf_tfFunction(cleanedData.col("filteredwords"))).cache()
