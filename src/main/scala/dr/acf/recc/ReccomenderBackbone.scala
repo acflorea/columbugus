@@ -67,7 +67,7 @@ object ReccomenderBackbone extends SparkOps {
     val includeProduct = conf.getBoolean("preprocess.includeProduct")
 
     val chi2Features = conf.getInt("preprocess.chi2Features")
-    val ldaTopics = conf.getInt("preprocess.ldaTopics")
+    val ldaTopics = conf.getString("preprocess.ldaTopics").split(",").map(_.trim.toInt)
     val ldaOptimizer = conf.getString("preprocess.ldaOptimizer")
 
     val inputDataSVM = mutable.Map.empty[String, (RDD[LabeledPoint], RDD[LabeledPoint])]
@@ -233,49 +233,54 @@ object ReccomenderBackbone extends SparkOps {
 
       // LDA
       if (lda) {
-        logger.debug("Training LDA model")
 
-        val alpha = conf.getDouble("preprocess.ldaAlpha")
-        val beta = conf.getDouble("preprocess.ldaBeta")
+        ldaTopics map { ldaTopic =>
 
-        // Index documents with unique IDs
-        val corpus = rawData.select("features").rdd.zipWithIndex()
-          .map { case (row: Row, index: Long) => (index, row.getAs[Vector](0)) }.cache()
+          logger.debug("Training LDA model")
 
-        // Cluster the documents into n topics using LDA
-        val ldaModel = new LDA().setK(ldaTopics)
-          .setCheckpointInterval(30)
-          .setOptimizer(ldaOptimizer)
-          // 50/k +1
-          .setDocConcentration(alpha)
-          // 0.1 + 1 (em); 1.0 / k (online)
-          .setTopicConcentration(beta)
-          .run(corpus)
-          .asInstanceOf[DistributedLDAModel]
+          val alpha = conf.getDouble("preprocess.ldaAlpha")
+          val beta = conf.getDouble("preprocess.ldaBeta")
 
-        corpus.unpersist()
-        // Output topics. Each is a distribution over words (matching word count vectors)
-        resultsLog.info(s"LDA :: Learned $ldaTopics topics (as distributions over vocab of ${ldaModel.vocabSize} words)")
+          // Index documents with unique IDs
+          val corpus = rawData.select("features").rdd.zipWithIndex()
+            .map { case (row: Row, index: Long) => (index, row.getAs[Vector](0)) }.cache()
 
-        val transformed = rawData.rdd.zipWithIndex().map(_.swap).join(ldaModel.topicDistributions).map {
-          point =>
-            val index = point._1
-            val dataPair = point._2
-            val row = dataPair._1
-            val topics = dataPair._2
-            val component_id = row.getAs[Int]("component_id")
-            val product_id = row.getAs[Int]("product_id")
-            val assignment_class = row.getAs[Double]("assignment_class")
-            (index, datasetToLabeledPoint(component_id, product_id, topics.toSparse, assignment_class))
-        }.sortByKey()
+          // Cluster the documents into n topics using LDA
+          val ldaModel = new LDA().setK(ldaTopic)
+            .setCheckpointInterval(30)
+            .setOptimizer(ldaOptimizer)
+            // 50/k +1
+            .setDocConcentration(alpha)
+            // 0.1 + 1 (em); 1.0 / k (online)
+            .setTopicConcentration(beta)
+            .run(corpus)
+            .asInstanceOf[DistributedLDAModel]
 
-        val trainingData = transformed.filter(_._1 <= trainingDataCount).map(_._2)
-        val testData = transformed.filter(_._1 > trainingDataCount).map(_._2)
+          corpus.unpersist()
+          // Output topics. Each is a distribution over words (matching word count vectors)
+          resultsLog.info(s"LDA :: Learned $ldaTopic topics (as distributions over vocab of ${ldaModel.vocabSize} words)")
 
-        trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_LDA_$ldaTopics")
-        testData.saveAsObjectFile(s"$fsRoot/acf_test_data_LDA_$ldaTopics")
+          val transformed = rawData.rdd.zipWithIndex().map(_.swap).join(ldaModel.topicDistributions).map {
+            point =>
+              val index = point._1
+              val dataPair = point._2
+              val row = dataPair._1
+              val topics = dataPair._2
+              val component_id = row.getAs[Int]("component_id")
+              val product_id = row.getAs[Int]("product_id")
+              val assignment_class = row.getAs[Double]("assignment_class")
+              (index, datasetToLabeledPoint(component_id, product_id, topics.toSparse, assignment_class))
+          }.sortByKey()
 
-        inputDataSVM.put("LDA", (trainingData, testData))
+          val trainingData = transformed.filter(_._1 <= trainingDataCount).map(_._2)
+          val testData = transformed.filter(_._1 > trainingDataCount).map(_._2)
+
+          trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_LDA_$ldaTopic")
+          testData.saveAsObjectFile(s"$fsRoot/acf_test_data_LDA_$ldaTopic")
+
+          inputDataSVM.put(s"LDA_$ldaTopic", (trainingData, testData))
+
+        }
       }
 
     } else {
@@ -302,10 +307,13 @@ object ReccomenderBackbone extends SparkOps {
       }
 
       if (lda) {
-        val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_LDA_$ldaTopics")
-        val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_LDA_$ldaTopics")
+        ldaTopics map { ldaTopic =>
 
-        inputDataSVM.put("LDA", (trainingData, testData))
+          val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_LDA_$ldaTopic")
+          val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_LDA_$ldaTopic")
+
+          inputDataSVM.put(s"LDA_$ldaTopic", (trainingData, testData))
+        }
       }
 
     }
