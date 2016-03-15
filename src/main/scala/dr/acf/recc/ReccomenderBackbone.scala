@@ -58,13 +58,13 @@ object ReccomenderBackbone extends SparkOps {
     // Step 2 - transform to numerical features
     val scaledData: DataFrame = dataTransform(transform, fsRoot, wordsData)
 
+    val includeCategory = conf.getBoolean("preprocess.includeCategory")
+    val includeProduct = conf.getBoolean("preprocess.includeProduct")
+
     val categoryScalingFactor = conf.getDouble("preprocess.categoryScalingFactor")
     val categoryMultiplier = conf.getInt("preprocess.categoryMultiplier")
-    val includeCategory = conf.getBoolean("preprocess.includeCategory")
-
     val productScalingFactor = conf.getDouble("preprocess.productScalingFactor")
     val productMultiplier = conf.getInt("preprocess.productMultiplier")
-    val includeProduct = conf.getBoolean("preprocess.includeProduct")
 
     val chi2Features = conf.getInt("preprocess.chi2Features")
     val ldaTopics = conf.getString("preprocess.ldaTopics").split(",").map(_.trim.toInt)
@@ -80,7 +80,7 @@ object ReccomenderBackbone extends SparkOps {
       val compIds = if (includeCategory) scaledData.select("component_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
       val prodIds = if (includeProduct) scaledData.select("product_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
 
-      def datasetToLabeledPoint = (component_id: Int, product_id: Int, features: SparseVector, assignment_class: Double) => {
+      def datasetToLabeledPoint = (featureContext: FeatureContext, component_id: Int, product_id: Int, features: SparseVector, assignment_class: Double) => {
         val labeledPoint = if (includeCategory || includeProduct) {
 
           val productSize = prodIds.length * productMultiplier
@@ -120,13 +120,13 @@ object ReccomenderBackbone extends SparkOps {
 
 
       // Function to transform row into labeled points
-      def rowToLabeledPoint = (row: Row) => {
+      def rowToLabeledPoint = (featureContext: FeatureContext, row: Row) => {
         val component_id = row.getAs[Int]("component_id")
         val product_id = row.getAs[Int]("product_id")
         val features = row.getAs[Vector]("features").toSparse
         val assignment_class = row.getAs[Double]("assignment_class")
 
-        datasetToLabeledPoint(component_id, product_id, features, assignment_class)
+        datasetToLabeledPoint(featureContext, component_id, product_id, features, assignment_class)
       }
 
       val minMaxScaling = conf.getBoolean("preprocess.minMaxScaling")
@@ -166,8 +166,8 @@ object ReccomenderBackbone extends SparkOps {
       if (simple) {
         logger.debug("Training simple model")
 
-        val trainingData = rawTrainingData.map(rowToLabeledPoint)
-        val testData = rawTestData.map(rowToLabeledPoint)
+        val trainingData = rawTrainingData.map(rowToLabeledPoint(FeatureContext(Map.empty[String, (Int, Int)]), _))
+        val testData = rawTestData.map(rowToLabeledPoint(FeatureContext(Map.empty[String, (Int, Int)]), _))
 
         trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_simple")
         testData.saveAsObjectFile(s"$fsRoot/acf_test_data_simple")
@@ -189,9 +189,9 @@ object ReccomenderBackbone extends SparkOps {
 
         // Project vectors to the linear space spanned by the top 10 principal components, keeping the label
         val trainingData = pca.transform(rawTrainingData).drop("features")
-          .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint)
+          .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint(FeatureContext(Map.empty[String, (Int, Int)]), _))
         val testData = pca.transform(rawTestData).drop("features")
-          .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint)
+          .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint(FeatureContext(Map.empty[String, (Int, Int)]), _))
 
         trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_PCA_100")
         testData.saveAsObjectFile(s"$fsRoot/acf_test_data_PCA_100")
@@ -219,10 +219,10 @@ object ReccomenderBackbone extends SparkOps {
 
         // Filter the top features from each feature vector
         val testData = rawTestData.withColumn("CHIFeatures", udf_tfFunction(rawTestData.col("features")))
-          .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint)
+          .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint(FeatureContext(Map.empty[String, (Int, Int)]), _))
 
         val trainingData = rawTrainingData.withColumn("CHIFeatures", udf_tfFunction(rawTrainingData.col("features")))
-          .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint)
+          .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint(FeatureContext(Map.empty[String, (Int, Int)]), _))
 
 
         trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_CHI2_$chi2Features")
@@ -269,7 +269,7 @@ object ReccomenderBackbone extends SparkOps {
               val component_id = row.getAs[Int]("component_id")
               val product_id = row.getAs[Int]("product_id")
               val assignment_class = row.getAs[Double]("assignment_class")
-              (index, datasetToLabeledPoint(component_id, product_id, topics.toSparse, assignment_class))
+              (index, datasetToLabeledPoint(FeatureContext(Map.empty[String, (Int, Int)]), component_id, product_id, topics.toSparse, assignment_class))
           }.sortByKey()
 
           val trainingData = transformed.filter(_._1 <= trainingDataCount).map(_._2)
@@ -538,3 +538,5 @@ object ReccomenderBackbone extends SparkOps {
   }
 
 }
+
+case class FeatureContext(features: Map[String, (Int, Int)])
