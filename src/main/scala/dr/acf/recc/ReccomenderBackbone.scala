@@ -166,17 +166,22 @@ object ReccomenderBackbone extends SparkOps {
       if (simple) {
         logger.debug("Training simple model")
 
-        val trainingData = rawTrainingData.map(rowToLabeledPoint(FeatureContext(Map.empty[String, (Int, Int)]), _))
-        val testData = rawTestData.map(rowToLabeledPoint(FeatureContext(Map.empty[String, (Int, Int)]), _))
+        val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
 
-        trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_simple")
-        testData.saveAsObjectFile(s"$fsRoot/acf_test_data_simple")
+        val trainingData = rawTrainingData.map(rowToLabeledPoint(featureContext, _))
+        val testData = rawTestData.map(rowToLabeledPoint(featureContext, _))
+
+        trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_simple_${featureContext.features.toString}")
+        testData.saveAsObjectFile(s"$fsRoot/acf_test_data_simple_${featureContext.features.toString}")
 
         inputDataSVM.put("simple", (trainingData, testData))
       }
 
       // PCA
       if (pca) {
+
+        // @deprecated
+
         logger.debug("Training PCA model")
 
         /** PCA */
@@ -187,14 +192,16 @@ object ReccomenderBackbone extends SparkOps {
           .setK(100)
           .fit(rawTrainingData)
 
+        val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
+
         // Project vectors to the linear space spanned by the top 10 principal components, keeping the label
         val trainingData = pca.transform(rawTrainingData).drop("features")
-          .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint(FeatureContext(Map.empty[String, (Int, Int)]), _))
+          .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint(featureContext, _))
         val testData = pca.transform(rawTestData).drop("features")
-          .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint(FeatureContext(Map.empty[String, (Int, Int)]), _))
+          .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint(featureContext, _))
 
-        trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_PCA_100")
-        testData.saveAsObjectFile(s"$fsRoot/acf_test_data_PCA_100")
+        trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_PCA_100_${featureContext.features.toString}")
+        testData.saveAsObjectFile(s"$fsRoot/acf_test_data_PCA_100_${featureContext.features.toString}")
 
         inputDataSVM.put("PCA", (trainingData, testData))
       }
@@ -208,7 +215,9 @@ object ReccomenderBackbone extends SparkOps {
         // Create ChiSqSelector model (selecting features)
         val cached = rawTrainingData.select("assignment_class", "features")
           .map { case Row(label: Double, v: Vector) => LabeledPoint(label, v) }.cache()
-        val transformer = sc.broadcast(selector.fit(cached))
+        val model = selector.fit(cached)
+
+        val transformer = sc.broadcast(model)
         cached.unpersist()
 
         val tfFunction: ((Vector) => Vector) = (document: Vector) => {
@@ -217,16 +226,18 @@ object ReccomenderBackbone extends SparkOps {
         }
         val udf_tfFunction = functions.udf(tfFunction)
 
+        val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
+
         // Filter the top features from each feature vector
         val testData = rawTestData.withColumn("CHIFeatures", udf_tfFunction(rawTestData.col("features")))
-          .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint(FeatureContext(Map.empty[String, (Int, Int)]), _))
+          .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint(featureContext, _))
 
         val trainingData = rawTrainingData.withColumn("CHIFeatures", udf_tfFunction(rawTrainingData.col("features")))
-          .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint(FeatureContext(Map.empty[String, (Int, Int)]), _))
+          .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint(featureContext, _))
 
 
-        trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_CHI2_$chi2Features")
-        testData.saveAsObjectFile(s"$fsRoot/acf_test_data_CHI2_$chi2Features")
+        trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_CHI2_${chi2Features}_${featureContext.features.toString}")
+        testData.saveAsObjectFile(s"$fsRoot/acf_test_data_CHI2_${chi2Features}_${featureContext.features.toString}")
 
         inputDataSVM.put("CHI2", (trainingData, testData))
       }
@@ -241,26 +252,40 @@ object ReccomenderBackbone extends SparkOps {
           val alpha = conf.getDouble("preprocess.ldaAlpha")
           val beta = conf.getDouble("preprocess.ldaBeta")
 
+          val indexedData = rawData.rdd.zipWithIndex().map(_.swap).sortByKey()
+
           // Index documents with unique IDs
-          val corpus = rawData.select("features").rdd.zipWithIndex()
-            .map { case (row: Row, index: Long) => (index, row.getAs[Vector](0)) }.cache()
+          val corpus = indexedData.map { case (index: Long, row: Row) => (index, row.getAs[Vector]("features")) }.cache()
+
+          val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
+
+          // check if a model already exists for this combination of features
+          val existingModel = Option(DistributedLDAModel.load(sc, s"$fsRoot/acf_LDAMODEL_${ldaTopic}_${featureContext.features.toString}"))
 
           // Cluster the documents into n topics using LDA
-          val ldaModel = new LDA().setK(ldaTopic)
-            .setCheckpointInterval(30)
-            .setOptimizer(ldaOptimizer)
-            // 50/k +1
-            .setDocConcentration(alpha)
-            // 0.1 + 1 (em); 1.0 / k (online)
-            .setTopicConcentration(beta)
-            .run(corpus)
-            .asInstanceOf[DistributedLDAModel]
+          val ldaModel = if(existingModel.isDefined) existingModel.get else {
 
-          corpus.unpersist()
-          // Output topics. Each is a distribution over words (matching word count vectors)
-          resultsLog.info(s"LDA :: Learned $ldaTopic topics (as distributions over vocab of ${ldaModel.vocabSize} words)")
+            // if there is no existing model, build one, save it an return it
+            val _ldaModel = new LDA().setK(ldaTopic)
+              .setCheckpointInterval(30)
+              .setOptimizer(ldaOptimizer)
+              // 50/k +1
+              .setDocConcentration(alpha)
+              // 0.1 + 1 (em); 1.0 / k (online)
+              .setTopicConcentration(beta)
+              .run(corpus)
+              .asInstanceOf[DistributedLDAModel]
 
-          val transformed = rawData.rdd.zipWithIndex().map(_.swap).join(ldaModel.topicDistributions).map {
+            corpus.unpersist()
+            // Output topics. Each is a distribution over words (matching word count vectors)
+            resultsLog.info(s"LDA :: Learned $ldaTopic topics (as distributions over vocab of ${_ldaModel.vocabSize} words)")
+
+            _ldaModel.save(sc, s"$fsRoot/acf_LDAMODEL_${ldaTopic}_${featureContext.features.toString}")
+            _ldaModel
+          }
+
+          val joinedData = indexedData.join(ldaModel.topicDistributions)
+          val transformed = joinedData.map {
             point =>
               val index = point._1
               val dataPair = point._2
@@ -269,14 +294,14 @@ object ReccomenderBackbone extends SparkOps {
               val component_id = row.getAs[Int]("component_id")
               val product_id = row.getAs[Int]("product_id")
               val assignment_class = row.getAs[Double]("assignment_class")
-              (index, datasetToLabeledPoint(FeatureContext(Map.empty[String, (Int, Int)]), component_id, product_id, topics.toSparse, assignment_class))
+              (index, datasetToLabeledPoint(featureContext, component_id, product_id, topics.toSparse, assignment_class))
           }.sortByKey()
 
           val trainingData = transformed.filter(_._1 <= trainingDataCount).map(_._2)
           val testData = transformed.filter(_._1 > trainingDataCount).map(_._2)
 
-          trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_LDA_$ldaTopic")
-          testData.saveAsObjectFile(s"$fsRoot/acf_test_data_LDA_$ldaTopic")
+          trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_LDA_${ldaTopic}_${featureContext.features.toString}")
+          testData.saveAsObjectFile(s"$fsRoot/acf_test_data_LDA_${ldaTopic}_${featureContext.features.toString}")
 
           inputDataSVM.put(s"LDA_$ldaTopic", (trainingData, testData))
 
@@ -286,22 +311,31 @@ object ReccomenderBackbone extends SparkOps {
     } else {
 
       if (simple) {
-        val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_simple")
-        val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_simple")
+
+        val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
+
+        val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_simple_${featureContext.features.toString}")
+        val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_simple_${featureContext.features.toString}")
 
         inputDataSVM.put("simple", (trainingData, testData))
       }
 
       if (pca) {
-        val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_PCA_100")
-        val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_PCA_100")
+
+        val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
+
+        val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_PCA_100_${featureContext.features.toString}")
+        val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_PCA_100_${featureContext.features.toString}")
 
         inputDataSVM.put("PCA", (trainingData, testData))
       }
 
       if (chi2) {
-        val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_CHI2_$chi2Features")
-        val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_CHI2_$chi2Features")
+
+        val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
+
+        val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_CHI2_${chi2Features}_${featureContext.features.toString}")
+        val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_CHI2_${chi2Features}_${featureContext.features.toString}")
 
         inputDataSVM.put("CHI2", (trainingData, testData))
       }
@@ -309,8 +343,10 @@ object ReccomenderBackbone extends SparkOps {
       if (lda) {
         ldaTopics map { ldaTopic =>
 
-          val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_LDA_$ldaTopic")
-          val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_LDA_$ldaTopic")
+          val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
+
+          val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_LDA_${ldaTopic}_${featureContext.features.toString}")
+          val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_LDA_${ldaTopic}_${featureContext.features.toString}")
 
           inputDataSVM.put(s"LDA_$ldaTopic", (trainingData, testData))
         }
@@ -343,19 +379,41 @@ object ReccomenderBackbone extends SparkOps {
           (elector._2._1, elector._2._2)
         }
 
-        val ldaModels = conf.getInt("preprocess.ldaModels")
-        (1 to ldaModels) map {
+        val modelsNo = conf.getInt("preprocess.modelsNo")
+        (1 to modelsNo) map {
           i =>
             val model = new SVMWithSGDMulticlass(undersample, i * 12345L).train(trainingData, 100, 1, 0.01, 1)
 
             // TestData :: (index,classLabel) -> Seq(prediction)
-            testData.zipWithIndex().map(_.swap).map(data =>
-              ((data._1, data._2.label), Seq(model.predict(data._2.features))))
+            (key, testData.zipWithIndex().map(_.swap).map(data =>
+              ((data._1, data._2.label), Seq(model.predict(data._2.features)))))
         }
     }
 
+    SVMModels map { SVMModel =>
+      // Get evaluation metrics.
+      val _metrics = new MulticlassMetrics(SVMModel._2.map { pl =>
+        val label = pl._1._2
+        val prediction = pl._2.groupBy(identity).maxBy(_._2.size)._1
+        (label, prediction)
+      })
+
+      val _fMeasure = _metrics.fMeasure
+      val _weightedPrecision = _metrics.weightedPrecision
+      val _weightedRecall = _metrics.weightedRecall
+      val _weightedFMeasure = _metrics.weightedFMeasure
+
+      resultsLog.info(s"MODEL -> ${SVMModel._1}")
+      resultsLog.info(s"withProduct: $includeProduct ; scalingFactor = $productScalingFactor, multiplier $productMultiplier")
+      resultsLog.info(s"withCategory: $includeCategory ; categoryScalingFactor = $categoryScalingFactor, multiplier $categoryMultiplier")
+      resultsLog.info("fMeasure = " + _fMeasure)
+      resultsLog.info("Weighted Precision = " + _weightedPrecision)
+      resultsLog.info("Weighted Recall = " + _weightedRecall)
+      resultsLog.info("Weighted fMeasure = " + _weightedFMeasure)
+    }
+
     // Let's vote
-    val predictionAndLabels = SVMModels.reduce((predictions1, predictions2) =>
+    val predictionAndLabels = SVMModels.map(_._2).reduce((predictions1, predictions2) =>
       predictions1.join(predictions2)
         .map { joined =>
           // Combine predictions
@@ -378,6 +436,7 @@ object ReccomenderBackbone extends SparkOps {
     val weightedRecall = metrics.weightedRecall
     val weightedFMeasure = metrics.weightedFMeasure
 
+    resultsLog.info(s"MODEL -> AVERAGED")
     resultsLog.info(s"withProduct: $includeProduct ; scalingFactor = $productScalingFactor, multiplier $productMultiplier")
     resultsLog.info(s"withCategory: $includeCategory ; categoryScalingFactor = $categoryScalingFactor, multiplier $categoryMultiplier")
     resultsLog.info("fMeasure = " + fMeasure)

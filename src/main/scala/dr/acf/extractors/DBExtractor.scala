@@ -116,24 +116,37 @@ object DBExtractor extends SparkOps with MySQLConnector {
     )
 
     // Main bug data
-    val bugsDataFrame = if (use_assigned_to) mySQLDF(
-      "(" +
-        "select b.bug_id, b.creation_ts, b.short_desc," +
-        "b.bug_status, b.assigned_to, b.product_id, b.component_id, b.bug_severity, " +
-        "b.resolution, b.delta_ts, " +
-        "c.name as component_name, " +
-        "p.name as product_name " +
-        "from bugs b " +
-        "join components c on b.component_id = c.id " +
-        "join products p on c.product_id = p.id " +
-        "where " + testFilter("b.bug_id") +
-        " AND " + resolutionFilter("b.") + " " +
-        " AND b.delta_ts > '" + oldestValidDate + "'" +
-        " AND b.bug_id not in (select d.dupe from duplicates d) " +
-        ") as bugslice"
-    )
-    else
-      mySQLDF(
+    val (bugsDataFrame, bugsLongdescsDataFrame) = if (use_assigned_to) {
+      (mySQLDF(
+        "(" +
+          "select b.bug_id, b.creation_ts, b.short_desc," +
+          "b.bug_status, b.assigned_to, b.product_id, b.component_id, b.bug_severity, " +
+          "b.resolution, b.delta_ts, " +
+          "c.name as component_name, " +
+          "p.name as product_name " +
+          "from bugs b " +
+          "join components c on b.component_id = c.id " +
+          "join products p on c.product_id = p.id " +
+          "where " + testFilter("b.bug_id") +
+          " AND " + resolutionFilter("b.") + " " +
+          " AND b.delta_ts > '" + oldestValidDate + "'" +
+          " AND b.bug_id not in (select d.dupe from duplicates d) " +
+          ") as bugslice"
+      ),
+        mySQLDF(
+          "(" +
+            "select l.bug_id, l.bug_when, l.thetext " +
+            "from longdescs l " +
+            "join bugs b on l.bug_id = b.bug_id " +
+            "where " + testFilter("b.bug_id") +
+            " AND " + resolutionFilter("b.") + " " +
+            " AND b.delta_ts > '" + oldestValidDate + "'" +
+            " AND b.bug_id not in (select d.dupe from duplicates d) " +
+            ") as buglongdescsslice"
+        ))
+    }
+    else {
+      (mySQLDF(
         "(" +
           "select b.bug_id, b.creation_ts, b.short_desc," +
           "b.bug_status, ba.who as assigned_to, b.product_id, b.component_id, b.bug_severity, " +
@@ -150,48 +163,36 @@ object DBExtractor extends SparkOps with MySQLConnector {
           " AND b.delta_ts > '" + oldestValidDate + "'" +
           " AND b.bug_id not in (select d.dupe from duplicates d) " +
           ") as bugslice"
-      )
-
-    // The meat of bugzilla -- here is where all user comments are stored!
-    val bugsLongdescsDataFrame = mySQLDF(
-      "(" +
-        "select l.bug_id, l.bug_when, l.thetext " +
-        "from longdescs l " +
-        "where " + testFilter("l.bug_id") +
-        " AND l.bug_id not in (select d.dupe from duplicates d) " +
-        ") as buglongdescsslice"
-    )
-
-    // Bugs fulltext
-    val bugsFulltextDataFrame = mySQLDF(
-      "(" +
-        "select l.bug_id, l.comments " +
-        "from bugs_fulltext l " +
-        "where " + testFilter("l.bug_id") +
-        " AND l.bug_id not in (select d.dupe from duplicates d) " +
-        ") as bugfulltextslice"
-    )
-
-    // ($bug_id,($comment)...)
-    val bugsLongdescsRDD =
-      if (includeComments) {
-        bugsLongdescsDataFrame.
-          map(row => (row.getInt(0), row.getString(2))).
-          reduceByKey((c1, c2) => s"$c1\n$c2").
-          map(row => (row._1, Row(row._2)))
-      }
-      else {
-        bugsFulltextDataFrame.
-          map(row => (row.getInt(0), row.getString(1))).
-          groupByKey().
-          map(row => (row._1, Row(row._2.head)))
-      }
+      ),
+        mySQLDF(
+          "(" +
+            "select l.bug_id, l.bug_when, l.thetext " +
+            "from longdescs l " +
+            "join bugs b on l.bug_id = b.bug_id " +
+            "join bugs_activity ba on b.bug_id = ba.bug_id and ba.fieldid = '" +
+            statusFieldId + "' and ba.added='FIXED' " +
+            "join components c on b.component_id = c.id " +
+            "join products p on c.product_id = p.id " +
+            "where " + testFilter("b.bug_id") +
+            " AND " + resolutionFilter("b.") + " " +
+            " AND b.delta_ts > '" + oldestValidDate + "'" +
+            " AND b.bug_id not in (select d.dupe from duplicates d) " +
+            ") as buglongdescsslice"
+        ))
+    }
 
     // ($bug_id,t$timestamp:: $short_desc)
     val idAndDescRDD = bugsDataFrame.select("bug_id", "short_desc",
       "bug_status", "assigned_to", "product_id", "component_id", "bug_severity", "creation_ts").
       map(row => (row.getInt(0), Row(row.getString(1),
         row.getString(2), row.getInt(3), row.getInt(4), row.getInt(5), row.getString(6), row.getTimestamp(7))))
+
+    // ($bug_id,($comment)...)
+    val bugsLongdescsRDD =
+      bugsLongdescsDataFrame.
+        map(row => (row.getInt(0), row.getString(2))).
+        reduceByKey((c1, c2) => s"$c1\n$c2").
+        map(row => (row._1, Row(row._2)))
 
     // join dataframes
     val bugsRDD = idAndDescRDD.
