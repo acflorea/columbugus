@@ -6,6 +6,7 @@ import com.typesafe.config.ConfigRenderOptions
 import dr.acf.extractors.{BugData, DBExtractor}
 import dr.acf.spark.SparkOps._
 import dr.acf.spark._
+import org.apache.hadoop.mapred.InvalidInputException
 import org.apache.spark.ml.feature._
 import org.apache.spark.mllib.clustering.{DistributedLDAModel, LDA}
 import org.apache.spark.mllib.evaluation.MulticlassMetrics
@@ -260,10 +261,15 @@ object ReccomenderBackbone extends SparkOps {
           val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
 
           // check if a model already exists for this combination of features
-          val existingModel = Option(DistributedLDAModel.load(sc, s"$fsRoot/acf_LDAMODEL_${ldaTopic}_${featureContext.features.toString}"))
+          val existingModel = try {
+            Some(DistributedLDAModel.load(sc, s"$fsRoot/acf_LDAMODEL_$ldaTopic"))
+          } catch {
+            case ex: InvalidInputException => None
+          }
 
           // Cluster the documents into n topics using LDA
-          val ldaModel = if(existingModel.isDefined) existingModel.get else {
+          val ldaModel = if (existingModel.isDefined) existingModel.get
+          else {
 
             // if there is no existing model, build one, save it an return it
             val _ldaModel = new LDA().setK(ldaTopic)
@@ -280,7 +286,7 @@ object ReccomenderBackbone extends SparkOps {
             // Output topics. Each is a distribution over words (matching word count vectors)
             resultsLog.info(s"LDA :: Learned $ldaTopic topics (as distributions over vocab of ${_ldaModel.vocabSize} words)")
 
-            _ldaModel.save(sc, s"$fsRoot/acf_LDAMODEL_${ldaTopic}_${featureContext.features.toString}")
+            _ldaModel.save(sc, s"$fsRoot/acf_LDAMODEL_$ldaTopic")
             _ldaModel
           }
 
@@ -390,7 +396,7 @@ object ReccomenderBackbone extends SparkOps {
         }
     }
 
-    SVMModels map { SVMModel =>
+    SVMModels foreach { SVMModel =>
       // Get evaluation metrics.
       val _metrics = new MulticlassMetrics(SVMModel._2.map { pl =>
         val label = pl._1._2
@@ -413,7 +419,7 @@ object ReccomenderBackbone extends SparkOps {
     }
 
     // Let's vote
-    val predictionAndLabels = SVMModels.map(_._2).reduce((predictions1, predictions2) =>
+    val predictionAndLabels = SVMModels.values.reduce((predictions1, predictions2) =>
       predictions1.join(predictions2)
         .map { joined =>
           // Combine predictions
