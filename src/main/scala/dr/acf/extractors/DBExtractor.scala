@@ -26,7 +26,6 @@ object DBExtractor extends SparkOps with MySQLConnector {
     // Charge configs
     val use_assigned_to = conf.getBoolean("global.use_assigned_to")
     val testMode = conf.getBoolean("global.testMode")
-    val includeComments = conf.getBoolean("global.includeComments")
     val issuesThreshold = conf.getInt("global.issuesThreshold")
     val timeThreshold = conf.getInt("global.timeThreshold")
     val timeIntervals = conf.getInt("global.timeIntervals")
