@@ -401,7 +401,7 @@ object ReccomenderBackbone extends SparkOps {
       val _metrics = new MulticlassMetrics(SVMModel._2.map { pl =>
         val label = pl._1._2
         val prediction = pl._2.groupBy(identity).maxBy(_._2.size)._1
-        (label, prediction)
+        (prediction, label)
       })
 
       val _fMeasure = _metrics.fMeasure
@@ -434,7 +434,7 @@ object ReccomenderBackbone extends SparkOps {
       // if (label != prediction) {
       //  println(s"$label, ($prediction)  ---  ${pl._2.mkString(",")}")
       // }
-      (label, prediction)
+      (prediction, label)
     })
 
     val fMeasure = metrics.fMeasure

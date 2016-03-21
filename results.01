@@ -1,0 +1,1319 @@
+Netbeans - Simple, no category, no product - LDA various topics
+
+INFO - NEW RUN AT :1457778687710
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/netbeans_simple_lda"},"global":{"includeComments":true,"issuesThreshold":3,"minWordSize":4,"statusFieldId":12,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/netbeansbugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":true,"preprocess":true,"transform":true},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":1,"categoryScalingFactor":92,"chi2":false,"chi2Features":1000,"includeCategory":false,"includeProduct":false,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1, 5, 10, 25, 50, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":1,"productScalingFactor":150,"simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8g"},"driver":{"maxResultSize":2048,"memory":"8g"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training data size 5283
+INFO - Test data size 592
+INFO - LDA :: Learned 1 topics (as distributions over vocab of 25022 words)
+INFO - LDA :: Learned 5 topics (as distributions over vocab of 25022 words)
+INFO - LDA :: Learned 10 topics (as distributions over vocab of 25022 words)
+INFO - LDA :: Learned 25 topics (as distributions over vocab of 25022 words)
+INFO - LDA :: Learned 50 topics (as distributions over vocab of 25022 words)
+INFO - LDA :: Learned 100 topics (as distributions over vocab of 25022 words)
+INFO - LDA :: Learned 200 topics (as distributions over vocab of 25022 words)
+INFO - LDA :: Learned 300 topics (as distributions over vocab of 25022 words)
+INFO - LDA :: Learned 400 topics (as distributions over vocab of 25022 words)
+INFO - LDA :: Learned 500 topics (as distributions over vocab of 25022 words)
+INFO - LDA :: Learned 750 topics (as distributions over vocab of 25022 words)
+INFO - LDA :: Learned 1000 topics (as distributions over vocab of 25022 words)
+INFO - LDA :: Learned 1250 topics (as distributions over vocab of 25022 words)
+INFO - LDA :: Learned 1500 topics (as distributions over vocab of 25022 words)
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - MODEL -> LDA_1500
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.4517766497461929
+INFO - Weighted Precision = 0.5643405486963375
+INFO - Weighted Recall = 0.4517766497461929
+INFO - Weighted fMeasure = 0.4567199012524045
+INFO - MODEL -> LDA_200
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.30287648054145516
+INFO - Weighted Precision = 0.48261751751211
+INFO - Weighted Recall = 0.30287648054145516
+INFO - Weighted fMeasure = 0.308672702332529
+INFO - MODEL -> LDA_50
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.1505922165820643
+INFO - Weighted Precision = 0.6660412050207521
+INFO - Weighted Recall = 0.1505922165820643
+INFO - Weighted fMeasure = 0.18495473061711593
+INFO - MODEL -> LDA_500
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.3993231810490694
+INFO - Weighted Precision = 0.5396062707537495
+INFO - Weighted Recall = 0.3993231810490694
+INFO - Weighted fMeasure = 0.4046953561764366
+INFO - MODEL -> LDA_1
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.04568527918781726
+INFO - Weighted Precision = 1.0
+INFO - Weighted Recall = 0.04568527918781726
+INFO - Weighted fMeasure = 0.08737864077669902
+INFO - MODEL -> LDA_1250
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.4433164128595601
+INFO - Weighted Precision = 0.5682683129262687
+INFO - Weighted Recall = 0.4433164128595601
+INFO - Weighted fMeasure = 0.45687283835643544
+INFO - MODEL -> LDA_100
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.1895093062605753
+INFO - Weighted Precision = 0.5912058078604219
+INFO - Weighted Recall = 0.18950930626057527
+INFO - Weighted fMeasure = 0.22356566652151122
+INFO - MODEL -> LDA_25
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.11844331641285956
+INFO - Weighted Precision = 0.8187906482993429
+INFO - Weighted Recall = 0.11844331641285956
+INFO - Weighted fMeasure = 0.1820282759784903
+INFO - MODEL -> LDA_400
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.3942470389170897
+INFO - Weighted Precision = 0.5627074079976625
+INFO - Weighted Recall = 0.39424703891708973
+INFO - Weighted fMeasure = 0.4085992949047408
+INFO - MODEL -> LDA_750
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.494077834179357
+INFO - Weighted Precision = 0.5891262915499966
+INFO - Weighted Recall = 0.4940778341793571
+INFO - Weighted fMeasure = 0.4983978848727059
+INFO - MODEL -> LDA_10
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.09813874788494077
+INFO - Weighted Precision = 0.6124716555567048
+INFO - Weighted Recall = 0.09813874788494079
+INFO - Weighted fMeasure = 0.15631834068178518
+INFO - MODEL -> LDA_300
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.3840947546531303
+INFO - Weighted Precision = 0.5723355665169234
+INFO - Weighted Recall = 0.38409475465313025
+INFO - Weighted fMeasure = 0.39405338039801285
+INFO - MODEL -> LDA_1000
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.4619289340101523
+INFO - Weighted Precision = 0.5760505400621855
+INFO - Weighted Recall = 0.46192893401015234
+INFO - Weighted fMeasure = 0.4709323921277284
+INFO - MODEL -> LDA_5
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.05245346869712352
+INFO - Weighted Precision = 0.4437999176209635
+INFO - Weighted Recall = 0.05245346869712352
+INFO - Weighted fMeasure = 0.08095932205553338
+INFO - MODEL -> AVERAGED
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.4179357021996616
+INFO - Weighted Precision = 0.721648260133404
+INFO - Weighted Recall = 0.4179357021996616
+INFO - Weighted fMeasure = 0.40755820882597715
+
+Eclipse - Simple, no category, no product - LDA various topics
+
+INFO - NEW RUN AT :1457780583384
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/eclipse_simple_lda"},"global":{"includeComments":true,"issuesThreshold":3,"minWordSize":4,"statusFieldId":11,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/eclipsebugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":true,"preprocess":true,"transform":true},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":1,"categoryScalingFactor":92,"chi2":false,"chi2Features":1000,"includeCategory":false,"includeProduct":false,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1, 5, 10, 25, 50, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":1,"productScalingFactor":150,"simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8g"},"driver":{"maxResultSize":2048,"memory":"8g"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - LDA :: Learned 1 topics (as distributions over vocab of 41652 words)
+INFO - LDA :: Learned 5 topics (as distributions over vocab of 41652 words)
+INFO - LDA :: Learned 10 topics (as distributions over vocab of 41652 words)
+INFO - LDA :: Learned 25 topics (as distributions over vocab of 41652 words)
+INFO - LDA :: Learned 50 topics (as distributions over vocab of 41652 words)
+INFO - LDA :: Learned 100 topics (as distributions over vocab of 41652 words)
+INFO - LDA :: Learned 200 topics (as distributions over vocab of 41652 words)
+INFO - LDA :: Learned 300 topics (as distributions over vocab of 41652 words)
+INFO - LDA :: Learned 400 topics (as distributions over vocab of 41652 words)
+INFO - LDA :: Learned 500 topics (as distributions over vocab of 41652 words)
+INFO - LDA :: Learned 750 topics (as distributions over vocab of 41652 words)
+INFO - LDA :: Learned 1000 topics (as distributions over vocab of 41652 words)
+INFO - LDA :: Learned 1250 topics (as distributions over vocab of 41652 words)
+INFO - LDA :: Learned 1500 topics (as distributions over vocab of 41652 words)
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - MODEL -> LDA_1500
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.3501611170784103
+INFO - Weighted Precision = 0.46995226439643684
+INFO - Weighted Recall = 0.3501611170784104
+INFO - Weighted fMeasure = 0.37390321052584663
+INFO - MODEL -> LDA_200
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.2534908700322234
+INFO - Weighted Precision = 0.4261140424860751
+INFO - Weighted Recall = 0.2534908700322234
+INFO - Weighted fMeasure = 0.2929938731235205
+INFO - MODEL -> LDA_50
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.1439312567132116
+INFO - Weighted Precision = 0.32965455039360997
+INFO - Weighted Recall = 0.1439312567132116
+INFO - Weighted fMeasure = 0.1888867142337149
+INFO - MODEL -> LDA_500
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.3394199785177229
+INFO - Weighted Precision = 0.45779954183471505
+INFO - Weighted Recall = 0.3394199785177229
+INFO - Weighted fMeasure = 0.3640225060691239
+INFO - MODEL -> LDA_1
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.007518796992481203
+INFO - Weighted Precision = 1.0
+INFO - Weighted Recall = 0.007518796992481203
+INFO - Weighted fMeasure = 0.014925373134328356
+INFO - MODEL -> LDA_1250
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.34371643394199786
+INFO - Weighted Precision = 0.4764109894121745
+INFO - Weighted Recall = 0.34371643394199786
+INFO - Weighted fMeasure = 0.37043508484095344
+INFO - MODEL -> LDA_100
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.18259935553168635
+INFO - Weighted Precision = 0.36367564832122135
+INFO - Weighted Recall = 0.18259935553168635
+INFO - Weighted fMeasure = 0.2252646891771613
+INFO - MODEL -> LDA_25
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.10204081632653061
+INFO - Weighted Precision = 0.3421924852228723
+INFO - Weighted Recall = 0.1020408163265306
+INFO - Weighted fMeasure = 0.1466890475816778
+INFO - MODEL -> LDA_400
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.3125671321160043
+INFO - Weighted Precision = 0.4441360676720016
+INFO - Weighted Recall = 0.3125671321160043
+INFO - Weighted fMeasure = 0.33976227351094834
+INFO - MODEL -> LDA_750
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.34049409237379163
+INFO - Weighted Precision = 0.4541152721037548
+INFO - Weighted Recall = 0.3404940923737917
+INFO - Weighted fMeasure = 0.3664416920221771
+INFO - MODEL -> LDA_10
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.06874328678839957
+INFO - Weighted Precision = 0.6086762277564745
+INFO - Weighted Recall = 0.06874328678839958
+INFO - Weighted fMeasure = 0.11648469278945973
+INFO - MODEL -> LDA_300
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.23200859291084855
+INFO - Weighted Precision = 0.35795282446513393
+INFO - Weighted Recall = 0.2320085929108484
+INFO - Weighted fMeasure = 0.2630858746525638
+INFO - MODEL -> LDA_1000
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.34801288936627284
+INFO - Weighted Precision = 0.4787373626710041
+INFO - Weighted Recall = 0.3480128893662727
+INFO - Weighted fMeasure = 0.3760266530255001
+INFO - MODEL -> LDA_5
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.01288936627282492
+INFO - Weighted Precision = 0.1566058002148228
+INFO - Weighted Recall = 0.01288936627282492
+INFO - Weighted fMeasure = 0.022370128459050183
+INFO - MODEL -> AVERAGED
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.37056928034371645
+INFO - Weighted Precision = 0.5148073394074256
+INFO - Weighted Recall = 0.3705692803437164
+INFO - Weighted fMeasure = 0.39687966729784946
+
+Firefox (parsed data) - Simple, no category, no product - LDA various topics
+
+INFO - NEW RUN AT :1457784636990
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefox_simple_lda"},"global":{"includeComments":true,"issuesThreshold":3,"minWordSize":4,"statusFieldId":5,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":true},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/firefoxbugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":true,"preprocess":true,"transform":true},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":1,"categoryScalingFactor":92,"chi2":false,"chi2Features":1000,"includeCategory":false,"includeProduct":false,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1, 5, 10, 25, 50, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":1,"productScalingFactor":150,"simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8g"},"driver":{"maxResultSize":2048,"memory":"8g"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training data size 12249
+INFO - Test data size 1368
+INFO - LDA :: Learned 1 topics (as distributions over vocab of 60692 words)
+INFO - LDA :: Learned 5 topics (as distributions over vocab of 60692 words)
+INFO - LDA :: Learned 10 topics (as distributions over vocab of 60692 words)
+INFO - LDA :: Learned 25 topics (as distributions over vocab of 60692 words)
+INFO - LDA :: Learned 50 topics (as distributions over vocab of 60692 words)
+INFO - LDA :: Learned 100 topics (as distributions over vocab of 60692 words)
+INFO - LDA :: Learned 200 topics (as distributions over vocab of 60692 words)
+INFO - LDA :: Learned 300 topics (as distributions over vocab of 60692 words)
+INFO - LDA :: Learned 400 topics (as distributions over vocab of 60692 words)
+INFO - LDA :: Learned 500 topics (as distributions over vocab of 60692 words)
+INFO - LDA :: Learned 750 topics (as distributions over vocab of 60692 words)
+INFO - LDA :: Learned 1000 topics (as distributions over vocab of 60692 words)
+INFO - LDA :: Learned 1250 topics (as distributions over vocab of 60692 words)
+INFO - LDA :: Learned 1500 topics (as distributions over vocab of 60692 words)
+INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+INFO - MODEL -> LDA_1500
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.3108997805413314
+INFO - Weighted Precision = 0.6263376563916351
+INFO - Weighted Recall = 0.31089978054133144
+INFO - Weighted fMeasure = 0.3885226682709021
+INFO - MODEL -> LDA_200
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.2948061448427213
+INFO - Weighted Precision = 0.856144904460123
+INFO - Weighted Recall = 0.29480614484272133
+INFO - Weighted fMeasure = 0.4184868527385056
+INFO - MODEL -> LDA_50
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.27066569129480617
+INFO - Weighted Precision = 0.9891977566447209
+INFO - Weighted Recall = 0.2706656912948062
+INFO - Weighted fMeasure = 0.42266120205620755
+INFO - MODEL -> LDA_500
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.3108997805413314
+INFO - Weighted Precision = 0.7127995408151419
+INFO - Weighted Recall = 0.31089978054133155
+INFO - Weighted fMeasure = 0.41187049871036624
+INFO - MODEL -> LDA_1
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.04316020482809071
+INFO - Weighted Precision = 1.0
+INFO - Weighted Recall = 0.04316020482809071
+INFO - Weighted fMeasure = 0.08274894810659185
+INFO - MODEL -> LDA_1250
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.337966349670812
+INFO - Weighted Precision = 0.6861514513271662
+INFO - Weighted Recall = 0.337966349670812
+INFO - Weighted fMeasure = 0.42089379873576077
+INFO - MODEL -> LDA_100
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.28237015362106804
+INFO - Weighted Precision = 0.9278469608978679
+INFO - Weighted Recall = 0.28237015362106793
+INFO - Weighted fMeasure = 0.4200594701987606
+INFO - MODEL -> LDA_25
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.2677395757132407
+INFO - Weighted Precision = 0.9978054133138259
+INFO - Weighted Recall = 0.2677395757132407
+INFO - Weighted fMeasure = 0.42219281072006964
+INFO - MODEL -> LDA_400
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.2970007315288954
+INFO - Weighted Precision = 0.7505393687554893
+INFO - Weighted Recall = 0.2970007315288955
+INFO - Weighted fMeasure = 0.4078034394135125
+INFO - MODEL -> LDA_750
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.324067300658376
+INFO - Weighted Precision = 0.666538067225395
+INFO - Weighted Recall = 0.3240673006583761
+INFO - Weighted fMeasure = 0.4112126546034881
+INFO - MODEL -> LDA_10
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.24506217995610827
+INFO - Weighted Precision = 0.7935125207937517
+INFO - Weighted Recall = 0.24506217995610832
+INFO - Weighted fMeasure = 0.3726883579683592
+INFO - MODEL -> LDA_300
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.302121433796635
+INFO - Weighted Precision = 0.786276920550054
+INFO - Weighted Recall = 0.30212143379663486
+INFO - Weighted fMeasure = 0.4197513717920541
+INFO - MODEL -> LDA_1000
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.3408924652523775
+INFO - Weighted Precision = 0.6835995519505647
+INFO - Weighted Recall = 0.34089246525237743
+INFO - Weighted fMeasure = 0.42401700086617294
+INFO - MODEL -> LDA_5
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.04242867593269934
+INFO - Weighted Precision = 0.3527777033027903
+INFO - Weighted Recall = 0.04242867593269934
+INFO - Weighted fMeasure = 0.06859920041798542
+INFO - MODEL -> AVERAGED
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.30870519385515727
+INFO - Weighted Precision = 0.8994367346598535
+INFO - Weighted Recall = 0.30870519385515727
+INFO - Weighted fMeasure = 0.43771423032971757
+
+Firefox (official) - Simple, no category, no product - LDA various topics
+
+INetbeans - Simple, no category, no product - LDA various topics
+
+ INFO - NEW RUN AT :1457778687710
+ INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/netbeans_simple_lda"},"global":{"includeComments":true,"issuesThreshold":3,"minWordSize":4,"statusFieldId":12,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/netbeansbugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":true,"preprocess":true,"transform":true},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":1,"categoryScalingFactor":92,"chi2":false,"chi2Features":1000,"includeCategory":false,"includeProduct":false,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1, 5, 10, 25, 50, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":1,"productScalingFactor":150,"simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8g"},"driver":{"maxResultSize":2048,"memory":"8g"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+ INFO - Training data size 5283
+ INFO - Test data size 592
+ INFO - LDA :: Learned 1 topics (as distributions over vocab of 25022 words)
+ INFO - LDA :: Learned 5 topics (as distributions over vocab of 25022 words)
+ INFO - LDA :: Learned 10 topics (as distributions over vocab of 25022 words)
+ INFO - LDA :: Learned 25 topics (as distributions over vocab of 25022 words)
+ INFO - LDA :: Learned 50 topics (as distributions over vocab of 25022 words)
+ INFO - LDA :: Learned 100 topics (as distributions over vocab of 25022 words)
+ INFO - LDA :: Learned 200 topics (as distributions over vocab of 25022 words)
+ INFO - LDA :: Learned 300 topics (as distributions over vocab of 25022 words)
+ INFO - LDA :: Learned 400 topics (as distributions over vocab of 25022 words)
+ INFO - LDA :: Learned 500 topics (as distributions over vocab of 25022 words)
+ INFO - LDA :: Learned 750 topics (as distributions over vocab of 25022 words)
+ INFO - LDA :: Learned 1000 topics (as distributions over vocab of 25022 words)
+ INFO - LDA :: Learned 1250 topics (as distributions over vocab of 25022 words)
+ INFO - LDA :: Learned 1500 topics (as distributions over vocab of 25022 words)
+ INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+ INFO - MODEL -> LDA_1500
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.4517766497461929
+ INFO - Weighted Precision = 0.5643405486963375
+ INFO - Weighted Recall = 0.4517766497461929
+ INFO - Weighted fMeasure = 0.4567199012524045
+ INFO - MODEL -> LDA_200
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.30287648054145516
+ INFO - Weighted Precision = 0.48261751751211
+ INFO - Weighted Recall = 0.30287648054145516
+ INFO - Weighted fMeasure = 0.308672702332529
+ INFO - MODEL -> LDA_50
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.1505922165820643
+ INFO - Weighted Precision = 0.6660412050207521
+ INFO - Weighted Recall = 0.1505922165820643
+ INFO - Weighted fMeasure = 0.18495473061711593
+ INFO - MODEL -> LDA_500
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.3993231810490694
+ INFO - Weighted Precision = 0.5396062707537495
+ INFO - Weighted Recall = 0.3993231810490694
+ INFO - Weighted fMeasure = 0.4046953561764366
+ INFO - MODEL -> LDA_1
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.04568527918781726
+ INFO - Weighted Precision = 1.0
+ INFO - Weighted Recall = 0.04568527918781726
+ INFO - Weighted fMeasure = 0.08737864077669902
+ INFO - MODEL -> LDA_1250
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.4433164128595601
+ INFO - Weighted Precision = 0.5682683129262687
+ INFO - Weighted Recall = 0.4433164128595601
+ INFO - Weighted fMeasure = 0.45687283835643544
+ INFO - MODEL -> LDA_100
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.1895093062605753
+ INFO - Weighted Precision = 0.5912058078604219
+ INFO - Weighted Recall = 0.18950930626057527
+ INFO - Weighted fMeasure = 0.22356566652151122
+ INFO - MODEL -> LDA_25
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.11844331641285956
+ INFO - Weighted Precision = 0.8187906482993429
+ INFO - Weighted Recall = 0.11844331641285956
+ INFO - Weighted fMeasure = 0.1820282759784903
+ INFO - MODEL -> LDA_400
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.3942470389170897
+ INFO - Weighted Precision = 0.5627074079976625
+ INFO - Weighted Recall = 0.39424703891708973
+ INFO - Weighted fMeasure = 0.4085992949047408
+ INFO - MODEL -> LDA_750
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.494077834179357
+ INFO - Weighted Precision = 0.5891262915499966
+ INFO - Weighted Recall = 0.4940778341793571
+ INFO - Weighted fMeasure = 0.4983978848727059
+ INFO - MODEL -> LDA_10
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.09813874788494077
+ INFO - Weighted Precision = 0.6124716555567048
+ INFO - Weighted Recall = 0.09813874788494079
+ INFO - Weighted fMeasure = 0.15631834068178518
+ INFO - MODEL -> LDA_300
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.3840947546531303
+ INFO - Weighted Precision = 0.5723355665169234
+ INFO - Weighted Recall = 0.38409475465313025
+ INFO - Weighted fMeasure = 0.39405338039801285
+ INFO - MODEL -> LDA_1000
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.4619289340101523
+ INFO - Weighted Precision = 0.5760505400621855
+ INFO - Weighted Recall = 0.46192893401015234
+ INFO - Weighted fMeasure = 0.4709323921277284
+ INFO - MODEL -> LDA_5
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.05245346869712352
+ INFO - Weighted Precision = 0.4437999176209635
+ INFO - Weighted Recall = 0.05245346869712352
+ INFO - Weighted fMeasure = 0.08095932205553338
+ INFO - MODEL -> AVERAGED
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.4179357021996616
+ INFO - Weighted Precision = 0.721648260133404
+ INFO - Weighted Recall = 0.4179357021996616
+ INFO - Weighted fMeasure = 0.40755820882597715
+
+ Eclipse - Simple, no category, no product - LDA various topics
+
+ INFO - NEW RUN AT :1457780583384
+ INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/eclipse_simple_lda"},"global":{"includeComments":true,"issuesThreshold":3,"minWordSize":4,"statusFieldId":11,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/eclipsebugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":true,"preprocess":true,"transform":true},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":1,"categoryScalingFactor":92,"chi2":false,"chi2Features":1000,"includeCategory":false,"includeProduct":false,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1, 5, 10, 25, 50, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":1,"productScalingFactor":150,"simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8g"},"driver":{"maxResultSize":2048,"memory":"8g"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+ INFO - Training data size 8379
+ INFO - Test data size 934
+ INFO - LDA :: Learned 1 topics (as distributions over vocab of 41652 words)
+ INFO - LDA :: Learned 5 topics (as distributions over vocab of 41652 words)
+ INFO - LDA :: Learned 10 topics (as distributions over vocab of 41652 words)
+ INFO - LDA :: Learned 25 topics (as distributions over vocab of 41652 words)
+ INFO - LDA :: Learned 50 topics (as distributions over vocab of 41652 words)
+ INFO - LDA :: Learned 100 topics (as distributions over vocab of 41652 words)
+ INFO - LDA :: Learned 200 topics (as distributions over vocab of 41652 words)
+ INFO - LDA :: Learned 300 topics (as distributions over vocab of 41652 words)
+ INFO - LDA :: Learned 400 topics (as distributions over vocab of 41652 words)
+ INFO - LDA :: Learned 500 topics (as distributions over vocab of 41652 words)
+ INFO - LDA :: Learned 750 topics (as distributions over vocab of 41652 words)
+ INFO - LDA :: Learned 1000 topics (as distributions over vocab of 41652 words)
+ INFO - LDA :: Learned 1250 topics (as distributions over vocab of 41652 words)
+ INFO - LDA :: Learned 1500 topics (as distributions over vocab of 41652 words)
+ INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+ INFO - MODEL -> LDA_1500
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.3501611170784103
+ INFO - Weighted Precision = 0.46995226439643684
+ INFO - Weighted Recall = 0.3501611170784104
+ INFO - Weighted fMeasure = 0.37390321052584663
+ INFO - MODEL -> LDA_200
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.2534908700322234
+ INFO - Weighted Precision = 0.4261140424860751
+ INFO - Weighted Recall = 0.2534908700322234
+ INFO - Weighted fMeasure = 0.2929938731235205
+ INFO - MODEL -> LDA_50
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.1439312567132116
+ INFO - Weighted Precision = 0.32965455039360997
+ INFO - Weighted Recall = 0.1439312567132116
+ INFO - Weighted fMeasure = 0.1888867142337149
+ INFO - MODEL -> LDA_500
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.3394199785177229
+ INFO - Weighted Precision = 0.45779954183471505
+ INFO - Weighted Recall = 0.3394199785177229
+ INFO - Weighted fMeasure = 0.3640225060691239
+ INFO - MODEL -> LDA_1
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.007518796992481203
+ INFO - Weighted Precision = 1.0
+ INFO - Weighted Recall = 0.007518796992481203
+ INFO - Weighted fMeasure = 0.014925373134328356
+ INFO - MODEL -> LDA_1250
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.34371643394199786
+ INFO - Weighted Precision = 0.4764109894121745
+ INFO - Weighted Recall = 0.34371643394199786
+ INFO - Weighted fMeasure = 0.37043508484095344
+ INFO - MODEL -> LDA_100
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.18259935553168635
+ INFO - Weighted Precision = 0.36367564832122135
+ INFO - Weighted Recall = 0.18259935553168635
+ INFO - Weighted fMeasure = 0.2252646891771613
+ INFO - MODEL -> LDA_25
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.10204081632653061
+ INFO - Weighted Precision = 0.3421924852228723
+ INFO - Weighted Recall = 0.1020408163265306
+ INFO - Weighted fMeasure = 0.1466890475816778
+ INFO - MODEL -> LDA_400
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.3125671321160043
+ INFO - Weighted Precision = 0.4441360676720016
+ INFO - Weighted Recall = 0.3125671321160043
+ INFO - Weighted fMeasure = 0.33976227351094834
+ INFO - MODEL -> LDA_750
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.34049409237379163
+ INFO - Weighted Precision = 0.4541152721037548
+ INFO - Weighted Recall = 0.3404940923737917
+ INFO - Weighted fMeasure = 0.3664416920221771
+ INFO - MODEL -> LDA_10
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.06874328678839957
+ INFO - Weighted Precision = 0.6086762277564745
+ INFO - Weighted Recall = 0.06874328678839958
+ INFO - Weighted fMeasure = 0.11648469278945973
+ INFO - MODEL -> LDA_300
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.23200859291084855
+ INFO - Weighted Precision = 0.35795282446513393
+ INFO - Weighted Recall = 0.2320085929108484
+ INFO - Weighted fMeasure = 0.2630858746525638
+ INFO - MODEL -> LDA_1000
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.34801288936627284
+ INFO - Weighted Precision = 0.4787373626710041
+ INFO - Weighted Recall = 0.3480128893662727
+ INFO - Weighted fMeasure = 0.3760266530255001
+ INFO - MODEL -> LDA_5
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.01288936627282492
+ INFO - Weighted Precision = 0.1566058002148228
+ INFO - Weighted Recall = 0.01288936627282492
+ INFO - Weighted fMeasure = 0.022370128459050183
+ INFO - MODEL -> AVERAGED
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.37056928034371645
+ INFO - Weighted Precision = 0.5148073394074256
+ INFO - Weighted Recall = 0.3705692803437164
+ INFO - Weighted fMeasure = 0.39687966729784946
+
+ Firefox (parsed data) - Simple, no category, no product - LDA various topics
+
+ INFO - NEW RUN AT :1457784636990
+ INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefox_simple_lda"},"global":{"includeComments":true,"issuesThreshold":3,"minWordSize":4,"statusFieldId":5,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":true},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/firefoxbugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":true,"preprocess":true,"transform":true},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":1,"categoryScalingFactor":92,"chi2":false,"chi2Features":1000,"includeCategory":false,"includeProduct":false,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1, 5, 10, 25, 50, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":1,"productScalingFactor":150,"simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8g"},"driver":{"maxResultSize":2048,"memory":"8g"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+ INFO - Training data size 12249
+ INFO - Test data size 1368
+ INFO - LDA :: Learned 1 topics (as distributions over vocab of 60692 words)
+ INFO - LDA :: Learned 5 topics (as distributions over vocab of 60692 words)
+ INFO - LDA :: Learned 10 topics (as distributions over vocab of 60692 words)
+ INFO - LDA :: Learned 25 topics (as distributions over vocab of 60692 words)
+ INFO - LDA :: Learned 50 topics (as distributions over vocab of 60692 words)
+ INFO - LDA :: Learned 100 topics (as distributions over vocab of 60692 words)
+ INFO - LDA :: Learned 200 topics (as distributions over vocab of 60692 words)
+ INFO - LDA :: Learned 300 topics (as distributions over vocab of 60692 words)
+ INFO - LDA :: Learned 400 topics (as distributions over vocab of 60692 words)
+ INFO - LDA :: Learned 500 topics (as distributions over vocab of 60692 words)
+ INFO - LDA :: Learned 750 topics (as distributions over vocab of 60692 words)
+ INFO - LDA :: Learned 1000 topics (as distributions over vocab of 60692 words)
+ INFO - LDA :: Learned 1250 topics (as distributions over vocab of 60692 words)
+ INFO - LDA :: Learned 1500 topics (as distributions over vocab of 60692 words)
+ INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 106 distinct classes
+ INFO - MODEL -> LDA_1500
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.3108997805413314
+ INFO - Weighted Precision = 0.6263376563916351
+ INFO - Weighted Recall = 0.31089978054133144
+ INFO - Weighted fMeasure = 0.3885226682709021
+ INFO - MODEL -> LDA_200
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.2948061448427213
+ INFO - Weighted Precision = 0.856144904460123
+ INFO - Weighted Recall = 0.29480614484272133
+ INFO - Weighted fMeasure = 0.4184868527385056
+ INFO - MODEL -> LDA_50
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.27066569129480617
+ INFO - Weighted Precision = 0.9891977566447209
+ INFO - Weighted Recall = 0.2706656912948062
+ INFO - Weighted fMeasure = 0.42266120205620755
+ INFO - MODEL -> LDA_500
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.3108997805413314
+ INFO - Weighted Precision = 0.7127995408151419
+ INFO - Weighted Recall = 0.31089978054133155
+ INFO - Weighted fMeasure = 0.41187049871036624
+ INFO - MODEL -> LDA_1
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.04316020482809071
+ INFO - Weighted Precision = 1.0
+ INFO - Weighted Recall = 0.04316020482809071
+ INFO - Weighted fMeasure = 0.08274894810659185
+ INFO - MODEL -> LDA_1250
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.337966349670812
+ INFO - Weighted Precision = 0.6861514513271662
+ INFO - Weighted Recall = 0.337966349670812
+ INFO - Weighted fMeasure = 0.42089379873576077
+ INFO - MODEL -> LDA_100
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.28237015362106804
+ INFO - Weighted Precision = 0.9278469608978679
+ INFO - Weighted Recall = 0.28237015362106793
+ INFO - Weighted fMeasure = 0.4200594701987606
+ INFO - MODEL -> LDA_25
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.2677395757132407
+ INFO - Weighted Precision = 0.9978054133138259
+ INFO - Weighted Recall = 0.2677395757132407
+ INFO - Weighted fMeasure = 0.42219281072006964
+ INFO - MODEL -> LDA_400
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.2970007315288954
+ INFO - Weighted Precision = 0.7505393687554893
+ INFO - Weighted Recall = 0.2970007315288955
+ INFO - Weighted fMeasure = 0.4078034394135125
+ INFO - MODEL -> LDA_750
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.324067300658376
+ INFO - Weighted Precision = 0.666538067225395
+ INFO - Weighted Recall = 0.3240673006583761
+ INFO - Weighted fMeasure = 0.4112126546034881
+ INFO - MODEL -> LDA_10
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.24506217995610827
+ INFO - Weighted Precision = 0.7935125207937517
+ INFO - Weighted Recall = 0.24506217995610832
+ INFO - Weighted fMeasure = 0.3726883579683592
+ INFO - MODEL -> LDA_300
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.302121433796635
+ INFO - Weighted Precision = 0.786276920550054
+ INFO - Weighted Recall = 0.30212143379663486
+ INFO - Weighted fMeasure = 0.4197513717920541
+ INFO - MODEL -> LDA_1000
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.3408924652523775
+ INFO - Weighted Precision = 0.6835995519505647
+ INFO - Weighted Recall = 0.34089246525237743
+ INFO - Weighted fMeasure = 0.42401700086617294
+ INFO - MODEL -> LDA_5
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.04242867593269934
+ INFO - Weighted Precision = 0.3527777033027903
+ INFO - Weighted Recall = 0.04242867593269934
+ INFO - Weighted fMeasure = 0.06859920041798542
+ INFO - MODEL -> AVERAGED
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.30870519385515727
+ INFO - Weighted Precision = 0.8994367346598535
+ INFO - Weighted Recall = 0.30870519385515727
+ INFO - Weighted fMeasure = 0.43771423032971757
+
+ Firefox (official) - Simple, no category, no product - LDA various topics
+
+ INFO - NEW RUN AT :1458559790768
+ INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefoxnew_simple_lda_graph_1"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":30,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/firefoxbugs_new","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":1,"categoryScalingFactor":92,"chi2":false,"chi2Features":1000,"includeCategory":false,"includeProduct":false,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1, 5, 10, 25, 50, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":1,"productScalingFactor":150,"simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"32g"},"driver":{"maxResultSize":2048,"memory":"32g"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+ INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+ INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+ INFO - MODEL -> LDA_1500
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.5017433751743375
+ INFO - Weighted Precision = 0.7356793992171347
+ INFO - Weighted Recall = 0.5017433751743375
+ INFO - Weighted fMeasure = 0.5838185578395985
+ INFO - MODEL -> LDA_200
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.4686192468619247
+ INFO - Weighted Precision = 0.9422064626952669
+ INFO - Weighted Recall = 0.4686192468619248
+ INFO - Weighted fMeasure = 0.6199509573138121
+ INFO - MODEL -> LDA_50
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.46617852161785217
+ INFO - Weighted Precision = 1.0
+ INFO - Weighted Recall = 0.46617852161785217
+ INFO - Weighted fMeasure = 0.6359096313912009
+ INFO - MODEL -> LDA_500
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.4898884239888424
+ INFO - Weighted Precision = 0.8581721752044786
+ INFO - Weighted Recall = 0.48988842398884247
+ INFO - Weighted fMeasure = 0.6133330375192146
+ INFO - MODEL -> LDA_1
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.46617852161785217
+ INFO - Weighted Precision = 1.0
+ INFO - Weighted Recall = 0.46617852161785217
+ INFO - Weighted fMeasure = 0.6359096313912009
+ INFO - MODEL -> LDA_1250
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.4909344490934449
+ INFO - Weighted Precision = 0.741725498838971
+ INFO - Weighted Recall = 0.49093444909344475
+ INFO - Weighted fMeasure = 0.5798405239688657
+ INFO - MODEL -> LDA_100
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.46687587168758715
+ INFO - Weighted Precision = 0.994654970796836
+ INFO - Weighted Recall = 0.46687587168758715
+ INFO - Weighted fMeasure = 0.6354418237757966
+ INFO - MODEL -> LDA_25
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.46617852161785217
+ INFO - Weighted Precision = 1.0
+ INFO - Weighted Recall = 0.46617852161785217
+ INFO - Weighted fMeasure = 0.6359096313912009
+ INFO - MODEL -> LDA_400
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.47384937238493724
+ INFO - Weighted Precision = 0.8680767935900622
+ INFO - Weighted Recall = 0.4738493723849372
+ INFO - Weighted fMeasure = 0.6034128870348244
+ INFO - MODEL -> LDA_750
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.49442119944211993
+ INFO - Weighted Precision = 0.7846754676458211
+ INFO - Weighted Recall = 0.49442119944212
+ INFO - Weighted fMeasure = 0.5938367312960243
+ INFO - MODEL -> LDA_10
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.45676429567642957
+ INFO - Weighted Precision = 0.9508400547836473
+ INFO - Weighted Recall = 0.45676429567642957
+ INFO - Weighted fMeasure = 0.6169320346930997
+ INFO - MODEL -> LDA_300
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.4595536959553696
+ INFO - Weighted Precision = 0.8872257658928787
+ INFO - Weighted Recall = 0.45955369595536966
+ INFO - Weighted fMeasure = 0.5996417486910304
+ INFO - MODEL -> LDA_1000
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.5010460251046025
+ INFO - Weighted Precision = 0.7735439802190988
+ INFO - Weighted Recall = 0.5010460251046025
+ INFO - Weighted fMeasure = 0.5977382095912053
+ INFO - MODEL -> LDA_5
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.32252440725244075
+ INFO - Weighted Precision = 0.5010012722809527
+ INFO - Weighted Recall = 0.3225244072524407
+ INFO - Weighted fMeasure = 0.3843996685762183
+ INFO - MODEL -> AVERAGED
+ INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+ INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+ INFO - fMeasure = 0.4766387726638773
+ INFO - Weighted Precision = 0.9882941355473598
+ INFO - Weighted Recall = 0.4766387726638772
+ INFO - Weighted fMeasure = 0.6369643472508062
+
+ Netbeans - Simple, no category, no product - LDA various topics
+
+INFO - NEW RUN AT :1458585231724
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/netbeans_simple_lda_graph_1"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":12,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/netbeansbugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":true,"preprocess":true,"transform":true},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":1,"categoryScalingFactor":92,"chi2":false,"chi2Features":1000,"includeCategory":false,"includeProduct":false,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1, 5, 10, 25, 50, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":1,"productScalingFactor":150,"simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"32g"},"driver":{"maxResultSize":2048,"memory":"32g"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - NEW RUN AT :1458585268059
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/netbeans_simple_lda_graph_1"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":12,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/netbeansbugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":true,"preprocess":true,"transform":true},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":1,"categoryScalingFactor":92,"chi2":false,"chi2Features":1000,"includeCategory":false,"includeProduct":false,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1, 5, 10, 25, 50, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":1,"productScalingFactor":150,"simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"32g"},"driver":{"maxResultSize":2048,"memory":"32g"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training data size 5283
+INFO - Test data size 592
+INFO - LDA :: Learned 1 topics (as distributions over vocab of 26263 words)
+INFO - LDA :: Learned 5 topics (as distributions over vocab of 26263 words)
+INFO - LDA :: Learned 10 topics (as distributions over vocab of 26263 words)
+INFO - LDA :: Learned 25 topics (as distributions over vocab of 26263 words)
+INFO - LDA :: Learned 50 topics (as distributions over vocab of 26263 words)
+INFO - LDA :: Learned 100 topics (as distributions over vocab of 26263 words)
+INFO - LDA :: Learned 200 topics (as distributions over vocab of 26263 words)
+INFO - LDA :: Learned 300 topics (as distributions over vocab of 26263 words)
+INFO - LDA :: Learned 400 topics (as distributions over vocab of 26263 words)
+INFO - LDA :: Learned 500 topics (as distributions over vocab of 26263 words)
+INFO - LDA :: Learned 750 topics (as distributions over vocab of 26263 words)
+INFO - LDA :: Learned 1000 topics (as distributions over vocab of 26263 words)
+INFO - LDA :: Learned 1250 topics (as distributions over vocab of 26263 words)
+INFO - LDA :: Learned 1500 topics (as distributions over vocab of 26263 words)
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - MODEL -> LDA_1500
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.45685279187817257
+INFO - Weighted Precision = 0.5667238767029446
+INFO - Weighted Recall = 0.45685279187817257
+INFO - Weighted fMeasure = 0.46819223518271325
+INFO - MODEL -> LDA_200
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.2673434856175973
+INFO - Weighted Precision = 0.520571078172039
+INFO - Weighted Recall = 0.2673434856175973
+INFO - Weighted fMeasure = 0.27889391552507925
+INFO - MODEL -> LDA_50
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.09813874788494077
+INFO - Weighted Precision = 0.7105994003038641
+INFO - Weighted Recall = 0.09813874788494079
+INFO - Weighted fMeasure = 0.1471387890483037
+INFO - MODEL -> LDA_500
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.4010152284263959
+INFO - Weighted Precision = 0.5604173234868683
+INFO - Weighted Recall = 0.4010152284263959
+INFO - Weighted fMeasure = 0.41902515559705145
+INFO - MODEL -> LDA_1
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.04568527918781726
+INFO - Weighted Precision = 1.0
+INFO - Weighted Recall = 0.04568527918781726
+INFO - Weighted fMeasure = 0.08737864077669902
+INFO - MODEL -> LDA_1250
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.4602368866328257
+INFO - Weighted Precision = 0.5788338894111761
+INFO - Weighted Recall = 0.4602368866328257
+INFO - Weighted fMeasure = 0.470506172406186
+INFO - MODEL -> LDA_100
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.19458544839255498
+INFO - Weighted Precision = 0.6065314694747718
+INFO - Weighted Recall = 0.19458544839255498
+INFO - Weighted fMeasure = 0.22636443287401467
+INFO - MODEL -> LDA_25
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.09983079526226735
+INFO - Weighted Precision = 0.7514009342649346
+INFO - Weighted Recall = 0.09983079526226735
+INFO - Weighted fMeasure = 0.1507284642664974
+INFO - MODEL -> LDA_400
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.39593908629441626
+INFO - Weighted Precision = 0.550516637782499
+INFO - Weighted Recall = 0.3959390862944162
+INFO - Weighted fMeasure = 0.392760858899045
+INFO - MODEL -> LDA_750
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.4890016920473773
+INFO - Weighted Precision = 0.6099170825648564
+INFO - Weighted Recall = 0.4890016920473774
+INFO - Weighted fMeasure = 0.495298735634485
+INFO - MODEL -> LDA_10
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.09475465313028765
+INFO - Weighted Precision = 0.5747991740644428
+INFO - Weighted Recall = 0.09475465313028765
+INFO - Weighted fMeasure = 0.14882720746769154
+INFO - MODEL -> LDA_300
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.34348561759729274
+INFO - Weighted Precision = 0.5266829808721267
+INFO - Weighted Recall = 0.34348561759729274
+INFO - Weighted fMeasure = 0.350314737688475
+INFO - MODEL -> LDA_1000
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.4703891708967851
+INFO - Weighted Precision = 0.6122738633897643
+INFO - Weighted Recall = 0.470389170896785
+INFO - Weighted fMeasure = 0.47546229041236654
+INFO - MODEL -> LDA_5
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.10321489001692047
+INFO - Weighted Precision = 0.5143735711930435
+INFO - Weighted Recall = 0.10321489001692047
+INFO - Weighted fMeasure = 0.1608330879105574
+INFO - MODEL -> AVERAGED
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.40439932318104904
+INFO - Weighted Precision = 0.7011563049235204
+INFO - Weighted Recall = 0.4043993231810491
+INFO - Weighted fMeasure = 0.38522920026205615
+
+ Eclipse - Simple, no category, no product - LDA various topics
+
+INFO - NEW RUN AT :1458587389786
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/eclipse_simple_lda_graph_1"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":11,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/eclipsebugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":true,"preprocess":true,"transform":true},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":1,"categoryScalingFactor":92,"chi2":false,"chi2Features":1000,"includeCategory":false,"includeProduct":false,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1, 5, 10, 25, 50, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":1,"productScalingFactor":150,"simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"32g"},"driver":{"maxResultSize":2048,"memory":"32g"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - LDA :: Learned 1 topics (as distributions over vocab of 42957 words)
+INFO - LDA :: Learned 5 topics (as distributions over vocab of 42957 words)
+INFO - LDA :: Learned 10 topics (as distributions over vocab of 42957 words)
+INFO - LDA :: Learned 25 topics (as distributions over vocab of 42957 words)
+INFO - LDA :: Learned 50 topics (as distributions over vocab of 42957 words)
+INFO - LDA :: Learned 100 topics (as distributions over vocab of 42957 words)
+INFO - LDA :: Learned 200 topics (as distributions over vocab of 42957 words)
+INFO - LDA :: Learned 300 topics (as distributions over vocab of 42957 words)
+INFO - LDA :: Learned 400 topics (as distributions over vocab of 42957 words)
+INFO - LDA :: Learned 500 topics (as distributions over vocab of 42957 words)
+INFO - LDA :: Learned 750 topics (as distributions over vocab of 42957 words)
+INFO - LDA :: Learned 1000 topics (as distributions over vocab of 42957 words)
+INFO - LDA :: Learned 1250 topics (as distributions over vocab of 42957 words)
+INFO - LDA :: Learned 1500 topics (as distributions over vocab of 42957 words)
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - MODEL -> LDA_1500
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.3333333333333333
+INFO - Weighted Precision = 0.45119193044872985
+INFO - Weighted Recall = 0.33333333333333337
+INFO - Weighted fMeasure = 0.36057501609126086
+INFO - MODEL -> LDA_200
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.24516129032258063
+INFO - Weighted Precision = 0.3735651650406501
+INFO - Weighted Recall = 0.24516129032258058
+INFO - Weighted fMeasure = 0.2734991354516069
+INFO - MODEL -> LDA_50
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.12365591397849462
+INFO - Weighted Precision = 0.34186809501983645
+INFO - Weighted Recall = 0.12365591397849458
+INFO - Weighted fMeasure = 0.16833633912346493
+INFO - MODEL -> LDA_500
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.2903225806451613
+INFO - Weighted Precision = 0.43232008122777543
+INFO - Weighted Recall = 0.29032258064516125
+INFO - Weighted fMeasure = 0.3182704100332992
+INFO - MODEL -> LDA_1
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.007526881720430108
+INFO - Weighted Precision = 1.0
+INFO - Weighted Recall = 0.007526881720430108
+INFO - Weighted fMeasure = 0.014941302027748132
+INFO - MODEL -> LDA_1250
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.3204301075268817
+INFO - Weighted Precision = 0.4425909644297864
+INFO - Weighted Recall = 0.32043010752688167
+INFO - Weighted fMeasure = 0.3393315750906144
+INFO - MODEL -> LDA_100
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.18387096774193548
+INFO - Weighted Precision = 0.37066389527020815
+INFO - Weighted Recall = 0.18387096774193543
+INFO - Weighted fMeasure = 0.23593067281345456
+INFO - MODEL -> LDA_25
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.09462365591397849
+INFO - Weighted Precision = 0.3438659782064324
+INFO - Weighted Recall = 0.09462365591397849
+INFO - Weighted fMeasure = 0.13290682959679456
+INFO - MODEL -> LDA_400
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.2709677419354839
+INFO - Weighted Precision = 0.4193117482971801
+INFO - Weighted Recall = 0.27096774193548373
+INFO - Weighted fMeasure = 0.29984014850070273
+INFO - MODEL -> LDA_750
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.3150537634408602
+INFO - Weighted Precision = 0.4549812329068516
+INFO - Weighted Recall = 0.31505376344086017
+INFO - Weighted fMeasure = 0.34500255202368124
+INFO - MODEL -> LDA_10
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.08279569892473118
+INFO - Weighted Precision = 0.4039056434373812
+INFO - Weighted Recall = 0.08279569892473118
+INFO - Weighted fMeasure = 0.12322169489807239
+INFO - MODEL -> LDA_300
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.25806451612903225
+INFO - Weighted Precision = 0.4038965678290524
+INFO - Weighted Recall = 0.2580645161290322
+INFO - Weighted fMeasure = 0.2854621056765142
+INFO - MODEL -> LDA_1000
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.33225806451612905
+INFO - Weighted Precision = 0.45084134869160164
+INFO - Weighted Recall = 0.33225806451612894
+INFO - Weighted fMeasure = 0.3532917875892172
+INFO - MODEL -> LDA_5
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.02043010752688172
+INFO - Weighted Precision = 0.3558080808080808
+INFO - Weighted Recall = 0.02043010752688172
+INFO - Weighted fMeasure = 0.03718809421544474
+INFO - MODEL -> AVERAGED
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.35268817204301073
+INFO - Weighted Precision = 0.49707235721717163
+INFO - Weighted Recall = 0.3526881720430107
+INFO - Weighted fMeasure = 0.378489777996209
+
+INFO - NEW RUN AT :1458592578269
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/eclipse_simple_lda_graph_1"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":11,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/eclipsebugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":1,"categoryScalingFactor":92,"chi2":false,"chi2Features":1000,"includeCategory":false,"includeProduct":false,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":1,"productScalingFactor":150,"simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"32g"},"driver":{"maxResultSize":2048,"memory":"32g"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - MODEL -> LDA_1
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.007526881720430108
+INFO - Weighted Precision = 1.0
+INFO - Weighted Recall = 0.007526881720430108
+INFO - Weighted fMeasure = 0.014941302027748132
+INFO - MODEL -> AVERAGED
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.007526881720430108
+INFO - Weighted Precision = 1.0
+INFO - Weighted Recall = 0.007526881720430108
+INFO - Weighted fMeasure = 0.014941302027748132
+INFO - NEW RUN AT :1458592629064
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/eclipse_simple_lda_graph_1"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":11,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/eclipsebugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":1,"categoryScalingFactor":92,"chi2":false,"chi2Features":1000,"includeCategory":false,"includeProduct":false,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":1,"productScalingFactor":150,"simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"32g"},"driver":{"maxResultSize":2048,"memory":"32g"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - MODEL -> LDA_1
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.007526881720430108
+INFO - Weighted Precision = 1.0
+INFO - Weighted Recall = 0.007526881720430108
+INFO - Weighted fMeasure = 0.014941302027748132
+INFO - MODEL -> AVERAGED
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.007526881720430108
+INFO - Weighted Precision = 1.0
+INFO - Weighted Recall = 0.007526881720430108
+INFO - Weighted fMeasure = 0.014941302027748132
+INFO - NEW RUN AT :1458592797304
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/eclipse_simple_lda_graph_1"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":11,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/eclipsebugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":1,"categoryScalingFactor":92,"chi2":false,"chi2Features":1000,"includeCategory":false,"includeProduct":false,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":1,"productScalingFactor":150,"simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"32g"},"driver":{"maxResultSize":2048,"memory":"32g"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - NEW RUN AT :1458593021062
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/eclipse_simple_lda_graph_1"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":11,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/eclipsebugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":1,"categoryScalingFactor":92,"chi2":false,"chi2Features":1000,"includeCategory":false,"includeProduct":false,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":1,"productScalingFactor":150,"simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"32g"},"driver":{"maxResultSize":2048,"memory":"32g"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - MODEL -> LDA_1
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.007526881720430108
+INFO - Weighted Precision = 5.6653948433344896E-5
+INFO - Weighted Recall = 0.007526881720430108
+INFO - Weighted fMeasure = 1.1246141311208272E-4
+INFO - MODEL -> AVERAGED
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.007526881720430108
+INFO - Weighted Precision = 5.6653948433344896E-5
+INFO - Weighted Recall = 0.007526881720430108
+INFO - Weighted fMeasure = 1.1246141311208272E-4
+INFO - NEW RUN AT :1458593133560
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/eclipse_simple_lda_graph_1"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":11,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/eclipsebugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":1,"categoryScalingFactor":92,"chi2":false,"chi2Features":1000,"includeCategory":false,"includeProduct":false,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":1,"productScalingFactor":150,"simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"32g"},"driver":{"maxResultSize":2048,"memory":"32g"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - MODEL -> LDA_1000
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.33225806451612905
+INFO - Weighted Precision = 0.3583998229253808
+INFO - Weighted Recall = 0.33225806451612894
+INFO - Weighted fMeasure = 0.3112243414430409
+INFO - MODEL -> AVERAGED
+INFO - withProduct: false ; scalingFactor = 150.0, multiplier 1
+INFO - withCategory: false ; categoryScalingFactor = 92.0, multiplier 1
+INFO - fMeasure = 0.33225806451612905
+INFO - Weighted Precision = 0.3583998229253808
+INFO - Weighted Recall = 0.33225806451612894
+INFO - Weighted fMeasure = 0.3112243414430409
