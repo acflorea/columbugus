@@ -68,15 +68,15 @@ object ReccomenderBackbone extends SparkOps {
 
     val inputDataSVM = mutable.Map.empty[String, (RDD[LabeledPoint], RDD[LabeledPoint])]
 
-    val categorySFSize = if (includeCategory) conf.getString("preprocess.categoryScalingFactor").split(",").size else 1
-    val categoryMSize = if (includeCategory) conf.getString("preprocess.categoryMultiplier").split(",").size else 1
-    val productSFSize = if (includeProduct) conf.getString("preprocess.productScalingFactor").split(",").size else 1
-    val productMSize = if (includeProduct) conf.getString("preprocess.productMultiplier").split(",").size else 1
+    val categorySFSize = if (includeCategory) conf.getString("preprocess.categoryScalingFactor").split(",").size - 1 else 0
+    val categoryMSize = if (includeCategory) conf.getString("preprocess.categoryMultiplier").split(",").size - 1 else 0
+    val productSFSize = if (includeProduct) conf.getString("preprocess.productScalingFactor").split(",").size - 1 else 0
+    val productMSize = if (includeProduct) conf.getString("preprocess.productMultiplier").split(",").size - 1 else 0
 
-    for {categorySFIndex <- 1 to categorySFSize
-         categoryMIndex <- 1 to categoryMSize
-         productSFIndex <- 1 to productSFSize
-         productMIndex <- 1 to productMSize
+    for {categorySFIndex <- 0 to categorySFSize
+         categoryMIndex <- 0 to categoryMSize
+         productSFIndex <- 0 to productSFSize
+         productMIndex <- 0 to productMSize
     } {
 
       if (preprocess) {
@@ -95,7 +95,7 @@ object ReccomenderBackbone extends SparkOps {
           val labeledPoint = if (_includeCategory || _includeProduct) {
 
             val (_productScalingFactor, _productMultiplier) =
-              if (_includeProduct) featureContext.features.get("product").get else (0.0, 0)
+              if (_includeProduct) featureContext.features.get("product").get else (0, 0)
 
             val productSize = prodIds.length * _productMultiplier
             val productIndices = if (_includeProduct)
@@ -103,16 +103,16 @@ object ReccomenderBackbone extends SparkOps {
             else
               Vector.empty
             val productScalingArray = if (_includeProduct)
-              1 to _productMultiplier map (i => _productScalingFactor)
+              1 to _productMultiplier map (i => _productScalingFactor.toDouble)
             else
               Vector.empty
 
             val (_categoryScalingFactor, _categoryMultiplier) =
-              if (_includeCategory) featureContext.features.get("category").get else (0.0, 0)
+              if (_includeCategory) featureContext.features.get("category").get else (0, 0)
 
             val categorySize = compIds.length * _categoryMultiplier
             val categoryIndices = 1 to _categoryMultiplier map (i => productSize + compIds.length * (i - 1) + compIds.indexOf(component_id))
-            val categoryScalingArray = 1 to _categoryMultiplier map (i => _categoryScalingFactor)
+            val categoryScalingArray = 1 to _categoryMultiplier map (i => _categoryScalingFactor.toDouble)
 
             LabeledPoint(
               assignment_class,
@@ -180,7 +180,7 @@ object ReccomenderBackbone extends SparkOps {
         if (simple) {
           logger.debug("Training simple model")
 
-          val featureContext: FeatureContext = getFeatureContext()
+          val featureContext: FeatureContext = getFeatureContext(categorySFIndex, categoryMIndex, productSFIndex, productMIndex)
 
           val trainingData = rawTrainingData.map(rowToLabeledPoint(featureContext, _))
           val testData = rawTestData.map(rowToLabeledPoint(featureContext, _))
@@ -206,7 +206,7 @@ object ReccomenderBackbone extends SparkOps {
             .setK(100)
             .fit(rawTrainingData)
 
-          val featureContext: FeatureContext = getFeatureContext()
+          val featureContext: FeatureContext = getFeatureContext(categorySFIndex, categoryMIndex, productSFIndex, productMIndex)
 
           // Project vectors to the linear space spanned by the top 10 principal components, keeping the label
           val trainingData = pca.transform(rawTrainingData).drop("features")
@@ -240,7 +240,7 @@ object ReccomenderBackbone extends SparkOps {
           }
           val udf_tfFunction = functions.udf(tfFunction)
 
-          val featureContext: FeatureContext = getFeatureContext()
+          val featureContext: FeatureContext = getFeatureContext(categorySFIndex, categoryMIndex, productSFIndex, productMIndex)
 
           // Filter the top features from each feature vector
           val testData = rawTestData.withColumn("CHIFeatures", udf_tfFunction(rawTestData.col("features")))
@@ -492,9 +492,9 @@ object ReccomenderBackbone extends SparkOps {
     val includeCategory = conf.getBoolean("preprocess.includeCategory")
     val includeProduct = conf.getBoolean("preprocess.includeProduct")
 
-    val categoryScalingFactor = conf.getString("preprocess.categoryScalingFactor").split(",").map(_.trim.toDouble)
+    val categoryScalingFactor = conf.getString("preprocess.categoryScalingFactor").split(",").map(_.trim.toInt)
     val categoryMultiplier = conf.getString("preprocess.categoryMultiplier").split(",").map(_.trim.toInt)
-    val productScalingFactor = conf.getString("preprocess.productScalingFactor").split(",").map(_.trim.toDouble)
+    val productScalingFactor = conf.getString("preprocess.productScalingFactor").split(",").map(_.trim.toInt)
     val productMultiplier = conf.getString("preprocess.productMultiplier").split(",").map(_.trim.toInt)
 
     val features = Seq(includeCategory ->("category", categoryScalingFactor(categorySFIndex), categoryMultiplier(categoryMIndex)),
@@ -639,4 +639,4 @@ object ReccomenderBackbone extends SparkOps {
 
 }
 
-case class FeatureContext(features: Map[String, (Double, Int)])
+case class FeatureContext(features: Map[String, (Int, Int)])
