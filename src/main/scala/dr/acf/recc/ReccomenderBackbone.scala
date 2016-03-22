@@ -95,24 +95,20 @@ object ReccomenderBackbone extends SparkOps {
           val labeledPoint = if (_includeCategory || _includeProduct) {
 
             val (_productScalingFactor, _productMultiplier) =
-              if (_includeProduct) featureContext.features.get("product").get
-              else
-                (0.0, 0)
+              if (_includeProduct) featureContext.features.get("product").get else (0.0, 0)
 
             val productSize = prodIds.length * _productMultiplier
-            val productIndices = if (includeProduct)
+            val productIndices = if (_includeProduct)
               1 to _productMultiplier map (i => prodIds.length * (i - 1) + prodIds.indexOf(product_id))
             else
               Vector.empty
-            val productScalingArray = if (includeProduct)
+            val productScalingArray = if (_includeProduct)
               1 to _productMultiplier map (i => _productScalingFactor)
             else
               Vector.empty
 
             val (_categoryScalingFactor, _categoryMultiplier) =
-              if (_includeCategory) featureContext.features.get("category").get
-              else
-                (0.0, 0)
+              if (_includeCategory) featureContext.features.get("category").get else (0.0, 0)
 
             val categorySize = compIds.length * _categoryMultiplier
             val categoryIndices = 1 to _categoryMultiplier map (i => productSize + compIds.length * (i - 1) + compIds.indexOf(component_id))
@@ -138,7 +134,6 @@ object ReccomenderBackbone extends SparkOps {
             )
           labeledPoint
         }
-
 
         // Function to transform row into labeled points
         def rowToLabeledPoint = (featureContext: FeatureContext, row: Row) => {
@@ -174,8 +169,6 @@ object ReccomenderBackbone extends SparkOps {
         val trainingDataCount = allDataCount / 10 * 9 toInt
 
         val rawData = rescaledData.select("index", "component_id", "product_id", "features", "assignment_class")
-        //  .map(identity).zipWithIndex().cache()
-        //.filter(_._2 < 100)
 
         resultsLog.info(s"Training data size $trainingDataCount")
         resultsLog.info(s"Test data size ${allDataCount - trainingDataCount}")
@@ -195,7 +188,7 @@ object ReccomenderBackbone extends SparkOps {
           trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_simple_${FileFriendly(featureContext.features.toString)}")
           testData.saveAsObjectFile(s"$fsRoot/acf_test_data_simple_${FileFriendly(featureContext.features.toString)}")
 
-          inputDataSVM.put("simple", (trainingData, testData))
+          inputDataSVM.put(s"simple ${featureContext.features.toString}", (trainingData, testData))
         }
 
         // PCA
@@ -224,7 +217,7 @@ object ReccomenderBackbone extends SparkOps {
           trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
           testData.saveAsObjectFile(s"$fsRoot/acf_test_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
 
-          inputDataSVM.put("PCA", (trainingData, testData))
+          inputDataSVM.put(s"PCA ${featureContext.features.toString}", (trainingData, testData))
         }
 
         // CHI2
@@ -260,7 +253,7 @@ object ReccomenderBackbone extends SparkOps {
           trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_CHI2_${chi2Features}_${FileFriendly(featureContext.features.toString)}")
           testData.saveAsObjectFile(s"$fsRoot/acf_test_data_CHI2_${chi2Features}_${FileFriendly(featureContext.features.toString)}")
 
-          inputDataSVM.put("CHI2", (trainingData, testData))
+          inputDataSVM.put(s"CHI2 ${featureContext.features.toString}", (trainingData, testData))
         }
 
         // LDA
@@ -329,7 +322,7 @@ object ReccomenderBackbone extends SparkOps {
             trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
             testData.saveAsObjectFile(s"$fsRoot/acf_test_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
 
-            inputDataSVM.put(s"LDA_$ldaTopic", (trainingData, testData))
+            inputDataSVM.put(s"LDA_$ldaTopic ${featureContext.features.toString}", (trainingData, testData))
 
           }
         }
@@ -343,7 +336,7 @@ object ReccomenderBackbone extends SparkOps {
           val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_simple_${FileFriendly(featureContext.features.toString)}")
           val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_simple_${FileFriendly(featureContext.features.toString)}")
 
-          inputDataSVM.put("simple", (trainingData, testData))
+          inputDataSVM.put(s"simple ${featureContext.features.toString}", (trainingData, testData))
         }
 
         if (pca) {
@@ -353,7 +346,7 @@ object ReccomenderBackbone extends SparkOps {
           val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
           val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
 
-          inputDataSVM.put("PCA", (trainingData, testData))
+          inputDataSVM.put(s"PCA ${featureContext.features.toString}", (trainingData, testData))
         }
 
         if (chi2) {
@@ -363,7 +356,7 @@ object ReccomenderBackbone extends SparkOps {
           val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_CHI2_${chi2Features}_${FileFriendly(featureContext.features.toString)}")
           val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_CHI2_${chi2Features}_${FileFriendly(featureContext.features.toString)}")
 
-          inputDataSVM.put("CHI2", (trainingData, testData))
+          inputDataSVM.put(s"CHI2 ${featureContext.features.toString}", (trainingData, testData))
         }
 
         if (lda) {
@@ -374,7 +367,7 @@ object ReccomenderBackbone extends SparkOps {
             val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
             val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
 
-            inputDataSVM.put(s"LDA_$ldaTopic", (trainingData, testData))
+            inputDataSVM.put(s"LDA_$ldaTopic ${featureContext.features.toString}", (trainingData, testData))
           }
         }
 
