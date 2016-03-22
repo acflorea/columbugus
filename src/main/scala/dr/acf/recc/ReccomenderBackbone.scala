@@ -82,21 +82,33 @@ object ReccomenderBackbone extends SparkOps {
       val prodIds = if (includeProduct) scaledData.select("product_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
 
       def datasetToLabeledPoint = (featureContext: FeatureContext, component_id: Int, product_id: Int, features: SparseVector, assignment_class: Double) => {
-        val labeledPoint = if (includeCategory || includeProduct) {
 
-          val productSize = prodIds.length * productMultiplier
+        val _includeCategory = featureContext.features.get("category").isDefined
+        val _includeProduct = featureContext.features.get("product").isDefined
+
+        val labeledPoint = if (_includeCategory || _includeProduct) {
+
+          val (_productScalingFactor, _productMultiplier) =
+            if(_includeProduct) featureContext.features.get("product").get else
+              (0.0, 0)
+
+          val productSize = prodIds.length * _productMultiplier
           val productIndices = if (includeProduct)
-            1 to productMultiplier map (i => prodIds.length * (i - 1) + prodIds.indexOf(product_id))
+            1 to _productMultiplier map (i => prodIds.length * (i - 1) + prodIds.indexOf(product_id))
           else
             Vector.empty
           val productScalingArray = if (includeProduct)
-            1 to productMultiplier map (i => productScalingFactor)
+            1 to _productMultiplier map (i => _productScalingFactor)
           else
             Vector.empty
 
-          val categorySize = compIds.length * categoryMultiplier
-          val categoryIndices = 1 to categoryMultiplier map (i => productSize + compIds.length * (i - 1) + compIds.indexOf(component_id))
-          val categoryScalingArray = 1 to categoryMultiplier map (i => categoryScalingFactor)
+          val (_categoryScalingFactor, _categoryMultiplier) =
+            if(_includeCategory) featureContext.features.get("category").get else
+              (0.0, 0)
+
+          val categorySize = compIds.length * _categoryMultiplier
+          val categoryIndices = 1 to _categoryMultiplier map (i => productSize + compIds.length * (i - 1) + compIds.indexOf(component_id))
+          val categoryScalingArray = 1 to _categoryMultiplier map (i => _categoryScalingFactor)
 
           LabeledPoint(
             assignment_class,
@@ -167,7 +179,7 @@ object ReccomenderBackbone extends SparkOps {
       if (simple) {
         logger.debug("Training simple model")
 
-        val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
+        val featureContext: FeatureContext = getFeatureContext
 
         val trainingData = rawTrainingData.map(rowToLabeledPoint(featureContext, _))
         val testData = rawTestData.map(rowToLabeledPoint(featureContext, _))
@@ -193,7 +205,7 @@ object ReccomenderBackbone extends SparkOps {
           .setK(100)
           .fit(rawTrainingData)
 
-        val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
+        val featureContext: FeatureContext = getFeatureContext
 
         // Project vectors to the linear space spanned by the top 10 principal components, keeping the label
         val trainingData = pca.transform(rawTrainingData).drop("features")
@@ -227,7 +239,7 @@ object ReccomenderBackbone extends SparkOps {
         }
         val udf_tfFunction = functions.udf(tfFunction)
 
-        val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
+        val featureContext: FeatureContext = getFeatureContext
 
         // Filter the top features from each feature vector
         val testData = rawTestData.withColumn("CHIFeatures", udf_tfFunction(rawTestData.col("features")))
@@ -258,7 +270,7 @@ object ReccomenderBackbone extends SparkOps {
           // Index documents with unique IDs
           val corpus = indexedData.map { case (index: Long, row: Row) => (index, row.getAs[Vector]("features")) }.cache()
 
-          val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
+          val featureContext: FeatureContext = getFeatureContext
 
           // check if a model already exists for this combination of features
           val existingModel = try {
@@ -318,7 +330,7 @@ object ReccomenderBackbone extends SparkOps {
 
       if (simple) {
 
-        val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
+        val featureContext: FeatureContext = getFeatureContext
 
         val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_simple_${featureContext.features.toString}")
         val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_simple_${featureContext.features.toString}")
@@ -328,7 +340,7 @@ object ReccomenderBackbone extends SparkOps {
 
       if (pca) {
 
-        val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
+        val featureContext: FeatureContext = getFeatureContext
 
         val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_PCA_100_${featureContext.features.toString}")
         val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_PCA_100_${featureContext.features.toString}")
@@ -338,7 +350,7 @@ object ReccomenderBackbone extends SparkOps {
 
       if (chi2) {
 
-        val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
+        val featureContext: FeatureContext = getFeatureContext
 
         val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_CHI2_${chi2Features}_${featureContext.features.toString}")
         val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_CHI2_${chi2Features}_${featureContext.features.toString}")
@@ -349,7 +361,7 @@ object ReccomenderBackbone extends SparkOps {
       if (lda) {
         ldaTopics map { ldaTopic =>
 
-          val featureContext = FeatureContext(Map.empty[String, (Int, Int)]) // FeatureContext(Map("category" ->(1, 1), "product" ->(1, 1)))
+          val featureContext: FeatureContext = getFeatureContext
 
           val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_LDA_${ldaTopic}_${featureContext.features.toString}")
           val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_LDA_${ldaTopic}_${featureContext.features.toString}")
@@ -458,6 +470,28 @@ object ReccomenderBackbone extends SparkOps {
     logger.debug(s"We're done in ${(System.currentTimeMillis() - startTime) / 1000} seconds!")
   }
 
+  /**
+    * Retrieves current features context (values for category, product...)
+    * @return
+    */
+  def getFeatureContext: FeatureContext = {
+
+    val includeCategory = conf.getBoolean("preprocess.includeCategory")
+    val includeProduct = conf.getBoolean("preprocess.includeProduct")
+
+    val categoryScalingFactor = conf.getDouble("preprocess.categoryScalingFactor")
+    val categoryMultiplier = conf.getInt("preprocess.categoryMultiplier")
+    val productScalingFactor = conf.getDouble("preprocess.productScalingFactor")
+    val productMultiplier = conf.getInt("preprocess.productMultiplier")
+
+    val features = Seq(includeCategory ->("category", categoryScalingFactor, categoryMultiplier),
+      includeProduct ->("product", productScalingFactor, productMultiplier)).collect {
+      case pair if pair._1 => pair._2._1 ->(pair._2._2, pair._2._3)
+    }.toMap
+
+    val featureContext = FeatureContext(features)
+    featureContext
+  }
 
   /**
     * If transform : TF/IDF, FREQUENCY-FILTERING, SAVE DATAFRAME else : LOAD DATAFRAME
@@ -604,4 +638,4 @@ object ReccomenderBackbone extends SparkOps {
 
 }
 
-case class FeatureContext(features: Map[String, (Int, Int)])
+case class FeatureContext(features: Map[String, (Double, Int)])
