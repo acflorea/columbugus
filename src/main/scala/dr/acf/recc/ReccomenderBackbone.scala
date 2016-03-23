@@ -68,10 +68,10 @@ object ReccomenderBackbone extends SparkOps {
 
     val inputDataSVM = mutable.Map.empty[String, (RDD[LabeledPoint], RDD[LabeledPoint])]
 
-    val categorySFSize = if (includeCategory) conf.getString("preprocess.categoryScalingFactor").split(",").size - 1 else 0
-    val categoryMSize = if (includeCategory) conf.getString("preprocess.categoryMultiplier").split(",").size - 1 else 0
-    val productSFSize = if (includeProduct) conf.getString("preprocess.productScalingFactor").split(",").size - 1 else 0
-    val productMSize = if (includeProduct) conf.getString("preprocess.productMultiplier").split(",").size - 1 else 0
+    val categorySFSize = if (includeCategory) conf.getString("preprocess.categoryScalingFactor").split(",").length - 1 else 0
+    val categoryMSize = if (includeCategory) conf.getString("preprocess.categoryMultiplier").split(",").length - 1 else 0
+    val productSFSize = if (includeProduct) conf.getString("preprocess.productScalingFactor").split(",").length - 1 else 0
+    val productMSize = if (includeProduct) conf.getString("preprocess.productMultiplier").split(",").length - 1 else 0
 
     for {categorySFIndex <- 0 to categorySFSize
          categoryMIndex <- 0 to categoryMSize
@@ -268,9 +268,6 @@ object ReccomenderBackbone extends SparkOps {
 
             val indexedData = rawData.rdd.zipWithIndex().map(_.swap).sortByKey()
 
-            // Index documents with unique IDs
-            val corpus = indexedData.map { case (index: Long, row: Row) => (index, row.getAs[Vector]("features")) }.cache()
-
             val featureContext: FeatureContext = getFeatureContext(categorySFIndex, categoryMIndex, productSFIndex, productMIndex)
 
             // check if a model already exists for this combination of features
@@ -283,6 +280,9 @@ object ReccomenderBackbone extends SparkOps {
             // Cluster the documents into n topics using LDA
             val ldaModel = if (existingModel.isDefined) existingModel.get
             else {
+
+              // Index documents with unique IDs
+              val corpus = indexedData.map { case (index: Long, row: Row) => (index, row.getAs[Vector]("features")) }.cache()
 
               // if there is no existing model, build one, save it an return it
               val _ldaModel = new LDA().setK(ldaTopic)
