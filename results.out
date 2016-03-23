@@ -1690,3 +1690,660 @@ INFO - Weighted Recall = 0.6788702928870295
 INFO - Weighted fMeasure = 0.6048373358991037
 
 Eclipse - grid for category / product
+
+INFO - NEW RUN AT :1458754860435
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/eclipse_simple_lda_graph_1"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":11,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":true,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"1, 5, 10, 25, 50, 75, 100, 125, 150","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"1, 5, 10, 25, 50, 75, 100, 125, 150","simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - Training SVMWithSGDMulticlass for 82 distinct classes
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (125,1))
+INFO - fMeasure = 0.6473118279569893
+INFO - Weighted Precision = 0.6718737197469491
+INFO - Weighted Recall = 0.6473118279569893
+INFO - Weighted fMeasure = 0.6184802877540159
+INFO - MODEL -> LDA_1000 Map(category -> (1,1), product -> (1,1))
+INFO - fMeasure = 0.5946236559139785
+INFO - Weighted Precision = 0.5483377565276291
+INFO - Weighted Recall = 0.5946236559139785
+INFO - Weighted fMeasure = 0.5233903146857241
+INFO - MODEL -> LDA_1000 Map(category -> (25,1), product -> (75,1))
+INFO - fMeasure = 0.6881720430107527
+INFO - Weighted Precision = 0.7063063796124689
+INFO - Weighted Recall = 0.6881720430107527
+INFO - Weighted fMeasure = 0.6530419669295036
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (75,1))
+INFO - fMeasure = 0.6365591397849463
+INFO - Weighted Precision = 0.6461860915978631
+INFO - Weighted Recall = 0.6365591397849462
+INFO - Weighted fMeasure = 0.598866527477644
+INFO - MODEL -> LDA_1000 Map(category -> (1,1), product -> (150,1))
+INFO - fMeasure = 0.40860215053763443
+INFO - Weighted Precision = 0.3280536796107355
+INFO - Weighted Recall = 0.40860215053763443
+INFO - Weighted fMeasure = 0.3166538085638173
+INFO - MODEL -> LDA_1000 Map(category -> (10,1), product -> (50,1))
+INFO - fMeasure = 0.6634408602150538
+INFO - Weighted Precision = 0.6674291296809025
+INFO - Weighted Recall = 0.6634408602150536
+INFO - Weighted fMeasure = 0.6246370937235289
+INFO - MODEL -> LDA_1000 Map(category -> (75,1), product -> (125,1))
+INFO - fMeasure = 0.6774193548387096
+INFO - Weighted Precision = 0.6897251104720049
+INFO - Weighted Recall = 0.6774193548387099
+INFO - Weighted fMeasure = 0.6405205083445717
+INFO - MODEL -> LDA_1000 Map(category -> (75,1), product -> (10,1))
+INFO - fMeasure = 0.6774193548387096
+INFO - Weighted Precision = 0.7000120359646763
+INFO - Weighted Recall = 0.6774193548387097
+INFO - Weighted fMeasure = 0.6458621616682384
+INFO - MODEL -> LDA_1000 Map(category -> (5,1), product -> (125,1))
+INFO - fMeasure = 0.43655913978494626
+INFO - Weighted Precision = 0.3900869921708826
+INFO - Weighted Recall = 0.43655913978494626
+INFO - Weighted fMeasure = 0.3761454281885716
+INFO - MODEL -> LDA_1000 Map(category -> (1,1), product -> (100,1))
+INFO - fMeasure = 0.44946236559139785
+INFO - Weighted Precision = 0.3913068923486372
+INFO - Weighted Recall = 0.44946236559139785
+INFO - Weighted fMeasure = 0.36782216558521086
+INFO - MODEL -> LDA_1000 Map(category -> (25,1), product -> (25,1))
+INFO - fMeasure = 0.6913978494623656
+INFO - Weighted Precision = 0.7163250890915299
+INFO - Weighted Recall = 0.6913978494623657
+INFO - Weighted fMeasure = 0.6578547857331507
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (25,1))
+INFO - fMeasure = 0.6870967741935484
+INFO - Weighted Precision = 0.6954664224433396
+INFO - Weighted Recall = 0.6870967741935483
+INFO - Weighted fMeasure = 0.6520779716901779
+INFO - MODEL -> LDA_1000 Map(category -> (1,1), product -> (5,1))
+INFO - fMeasure = 0.6021505376344086
+INFO - Weighted Precision = 0.6146824796067555
+INFO - Weighted Recall = 0.6021505376344086
+INFO - Weighted fMeasure = 0.550239074095481
+INFO - MODEL -> LDA_1000 Map(category -> (125,1), product -> (50,1))
+INFO - fMeasure = 0.6516129032258065
+INFO - Weighted Precision = 0.6796878034594831
+INFO - Weighted Recall = 0.6516129032258063
+INFO - Weighted fMeasure = 0.6257113866213019
+INFO - MODEL -> LDA_1000 Map(category -> (100,1), product -> (75,1))
+INFO - fMeasure = 0.6720430107526881
+INFO - Weighted Precision = 0.6797272119366473
+INFO - Weighted Recall = 0.6720430107526881
+INFO - Weighted fMeasure = 0.6308332647110382
+INFO - MODEL -> LDA_1000 Map(category -> (150,1), product -> (50,1))
+INFO - fMeasure = 0.6946236559139785
+INFO - Weighted Precision = 0.7047316011214738
+INFO - Weighted Recall = 0.6946236559139785
+INFO - Weighted fMeasure = 0.6603720462136087
+INFO - MODEL -> LDA_1000 Map(category -> (5,1), product -> (75,1))
+INFO - fMeasure = 0.4720430107526882
+INFO - Weighted Precision = 0.4300768749823109
+INFO - Weighted Recall = 0.47204301075268823
+INFO - Weighted fMeasure = 0.41439215568744137
+INFO - MODEL -> LDA_1000 Map(category -> (100,1), product -> (25,1))
+INFO - fMeasure = 0.6526881720430108
+INFO - Weighted Precision = 0.6827575948081911
+INFO - Weighted Recall = 0.6526881720430108
+INFO - Weighted fMeasure = 0.6293529740862657
+INFO - MODEL -> LDA_1000 Map(category -> (25,1), product -> (125,1))
+INFO - fMeasure = 0.6344086021505376
+INFO - Weighted Precision = 0.6524405441397075
+INFO - Weighted Recall = 0.6344086021505377
+INFO - Weighted fMeasure = 0.6053285451626972
+INFO - MODEL -> LDA_1000 Map(category -> (150,1), product -> (1,1))
+INFO - fMeasure = 0.6602150537634408
+INFO - Weighted Precision = 0.6734199753767655
+INFO - Weighted Recall = 0.6602150537634408
+INFO - Weighted fMeasure = 0.6282924836567985
+INFO - MODEL -> LDA_1000 Map(category -> (75,1), product -> (150,1))
+INFO - fMeasure = 0.6537634408602151
+INFO - Weighted Precision = 0.7001924153409047
+INFO - Weighted Recall = 0.653763440860215
+INFO - Weighted fMeasure = 0.6203221453527974
+INFO - MODEL -> LDA_1000 Map(category -> (150,1), product -> (5,1))
+INFO - fMeasure = 0.6849462365591398
+INFO - Weighted Precision = 0.6863246885900558
+INFO - Weighted Recall = 0.6849462365591397
+INFO - Weighted fMeasure = 0.649863577995069
+INFO - MODEL -> LDA_1000 Map(category -> (100,1), product -> (1,1))
+INFO - fMeasure = 0.6666666666666666
+INFO - Weighted Precision = 0.687953033907457
+INFO - Weighted Recall = 0.6666666666666665
+INFO - Weighted fMeasure = 0.6428381424822743
+INFO - MODEL -> LDA_1000 Map(category -> (5,1), product -> (25,1))
+INFO - fMeasure = 0.6397849462365591
+INFO - Weighted Precision = 0.6311526095884431
+INFO - Weighted Recall = 0.639784946236559
+INFO - Weighted fMeasure = 0.595312075724778
+INFO - MODEL -> LDA_1000 Map(category -> (10,1), product -> (1,1))
+INFO - fMeasure = 0.6645161290322581
+INFO - Weighted Precision = 0.677307490225534
+INFO - Weighted Recall = 0.6645161290322581
+INFO - Weighted fMeasure = 0.6339117455145492
+INFO - MODEL -> LDA_1000 Map(category -> (25,1), product -> (50,1))
+INFO - fMeasure = 0.6698924731182796
+INFO - Weighted Precision = 0.6795898832413514
+INFO - Weighted Recall = 0.6698924731182796
+INFO - Weighted fMeasure = 0.6389304129071093
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (50,1))
+INFO - fMeasure = 0.6612903225806451
+INFO - Weighted Precision = 0.6648894563049284
+INFO - Weighted Recall = 0.6612903225806451
+INFO - Weighted fMeasure = 0.6246726893830874
+INFO - MODEL -> LDA_1000 Map(category -> (10,1), product -> (10,1))
+INFO - fMeasure = 0.6913978494623656
+INFO - Weighted Precision = 0.7165343849371485
+INFO - Weighted Recall = 0.6913978494623655
+INFO - Weighted fMeasure = 0.6575864044041791
+INFO - MODEL -> LDA_1000 Map(category -> (1,1), product -> (10,1))
+INFO - fMeasure = 0.5161290322580645
+INFO - Weighted Precision = 0.49022426244466527
+INFO - Weighted Recall = 0.5161290322580645
+INFO - Weighted fMeasure = 0.44090313209383486
+INFO - MODEL -> LDA_1000 Map(category -> (10,1), product -> (5,1))
+INFO - fMeasure = 0.6526881720430108
+INFO - Weighted Precision = 0.6882404329675499
+INFO - Weighted Recall = 0.6526881720430108
+INFO - Weighted fMeasure = 0.6357063997053892
+INFO - MODEL -> LDA_1000 Map(category -> (75,1), product -> (1,1))
+INFO - fMeasure = 0.6698924731182796
+INFO - Weighted Precision = 0.6803459122199741
+INFO - Weighted Recall = 0.6698924731182796
+INFO - Weighted fMeasure = 0.6392952035433765
+INFO - MODEL -> LDA_1000 Map(category -> (100,1), product -> (5,1))
+INFO - fMeasure = 0.6806451612903226
+INFO - Weighted Precision = 0.6955771300777454
+INFO - Weighted Recall = 0.6806451612903226
+INFO - Weighted fMeasure = 0.6445896913998094
+INFO - MODEL -> LDA_1000 Map(category -> (100,1), product -> (125,1))
+INFO - fMeasure = 0.6720430107526881
+INFO - Weighted Precision = 0.6884433899791089
+INFO - Weighted Recall = 0.6720430107526881
+INFO - Weighted fMeasure = 0.6402834681234814
+INFO - MODEL -> LDA_1000 Map(category -> (25,1), product -> (150,1))
+INFO - fMeasure = 0.6473118279569893
+INFO - Weighted Precision = 0.6210455622793846
+INFO - Weighted Recall = 0.6473118279569892
+INFO - Weighted fMeasure = 0.6066853204659812
+INFO - MODEL -> LDA_1000 Map(category -> (150,1), product -> (10,1))
+INFO - fMeasure = 0.689247311827957
+INFO - Weighted Precision = 0.6910626504475373
+INFO - Weighted Recall = 0.6892473118279568
+INFO - Weighted fMeasure = 0.6555452575353283
+INFO - MODEL -> LDA_1000 Map(category -> (100,1), product -> (50,1))
+INFO - fMeasure = 0.7118279569892473
+INFO - Weighted Precision = 0.7152862919596287
+INFO - Weighted Recall = 0.7118279569892474
+INFO - Weighted fMeasure = 0.6770625237332355
+INFO - MODEL -> LDA_1000 Map(category -> (25,1), product -> (1,1))
+INFO - fMeasure = 0.6924731182795699
+INFO - Weighted Precision = 0.7056558720255787
+INFO - Weighted Recall = 0.6924731182795699
+INFO - Weighted fMeasure = 0.656797125453435
+INFO - MODEL -> LDA_1000 Map(category -> (10,1), product -> (125,1))
+INFO - fMeasure = 0.5440860215053763
+INFO - Weighted Precision = 0.5238848046376827
+INFO - Weighted Recall = 0.5440860215053764
+INFO - Weighted fMeasure = 0.48574535113143036
+INFO - MODEL -> LDA_1000 Map(category -> (75,1), product -> (5,1))
+INFO - fMeasure = 0.6806451612903226
+INFO - Weighted Precision = 0.685865354194127
+INFO - Weighted Recall = 0.6806451612903226
+INFO - Weighted fMeasure = 0.6515764098732083
+INFO - MODEL -> LDA_1000 Map(category -> (125,1), product -> (10,1))
+INFO - fMeasure = 0.6795698924731183
+INFO - Weighted Precision = 0.7055593954840806
+INFO - Weighted Recall = 0.6795698924731182
+INFO - Weighted fMeasure = 0.6570541863535442
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (150,1))
+INFO - fMeasure = 0.6408602150537634
+INFO - Weighted Precision = 0.6499875498137829
+INFO - Weighted Recall = 0.6408602150537633
+INFO - Weighted fMeasure = 0.5900415679954315
+INFO - MODEL -> LDA_1000 Map(category -> (125,1), product -> (125,1))
+INFO - fMeasure = 0.6559139784946236
+INFO - Weighted Precision = 0.6779382733734605
+INFO - Weighted Recall = 0.6559139784946237
+INFO - Weighted fMeasure = 0.61763284934016
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (100,1))
+INFO - fMeasure = 0.6827956989247311
+INFO - Weighted Precision = 0.6975197276976965
+INFO - Weighted Recall = 0.6827956989247311
+INFO - Weighted fMeasure = 0.6497293576997627
+INFO - MODEL -> LDA_1000 Map(category -> (5,1), product -> (50,1))
+INFO - fMeasure = 0.578494623655914
+INFO - Weighted Precision = 0.5606539634620393
+INFO - Weighted Recall = 0.5784946236559139
+INFO - Weighted fMeasure = 0.5270951386919802
+INFO - MODEL -> LDA_1000 Map(category -> (25,1), product -> (100,1))
+INFO - fMeasure = 0.6591397849462366
+INFO - Weighted Precision = 0.6598905199044889
+INFO - Weighted Recall = 0.6591397849462366
+INFO - Weighted fMeasure = 0.6170427465075252
+INFO - MODEL -> LDA_1000 Map(category -> (25,1), product -> (5,1))
+INFO - fMeasure = 0.6580645161290323
+INFO - Weighted Precision = 0.687787119201268
+INFO - Weighted Recall = 0.6580645161290323
+INFO - Weighted fMeasure = 0.6319246471067995
+INFO - MODEL -> LDA_1000 Map(category -> (150,1), product -> (125,1))
+INFO - fMeasure = 0.6698924731182796
+INFO - Weighted Precision = 0.7081936008580866
+INFO - Weighted Recall = 0.6698924731182795
+INFO - Weighted fMeasure = 0.6501374886441351
+INFO - MODEL -> LDA_1000 Map(category -> (5,1), product -> (150,1))
+INFO - fMeasure = 0.44516129032258067
+INFO - Weighted Precision = 0.38969433329534986
+INFO - Weighted Recall = 0.44516129032258067
+INFO - Weighted fMeasure = 0.36836789430411426
+INFO - MODEL -> LDA_1000 Map(category -> (25,1), product -> (10,1))
+INFO - fMeasure = 0.6903225806451613
+INFO - Weighted Precision = 0.7022862759330223
+INFO - Weighted Recall = 0.6903225806451613
+INFO - Weighted fMeasure = 0.6555903656434408
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (10,1))
+INFO - fMeasure = 0.6548387096774193
+INFO - Weighted Precision = 0.669514751094984
+INFO - Weighted Recall = 0.6548387096774194
+INFO - Weighted fMeasure = 0.6244708663254519
+INFO - MODEL -> LDA_1000 Map(category -> (5,1), product -> (100,1))
+INFO - fMeasure = 0.4258064516129032
+INFO - Weighted Precision = 0.37806841146055675
+INFO - Weighted Recall = 0.4258064516129032
+INFO - Weighted fMeasure = 0.34955086826650866
+INFO - MODEL -> LDA_1000 Map(category -> (75,1), product -> (100,1))
+INFO - fMeasure = 0.667741935483871
+INFO - Weighted Precision = 0.6806937336274237
+INFO - Weighted Recall = 0.6677419354838711
+INFO - Weighted fMeasure = 0.6249683695160219
+INFO - MODEL -> LDA_1000 Map(category -> (10,1), product -> (150,1))
+INFO - fMeasure = 0.46774193548387094
+INFO - Weighted Precision = 0.4723727185778127
+INFO - Weighted Recall = 0.4677419354838709
+INFO - Weighted fMeasure = 0.4084267761856243
+INFO - MODEL -> LDA_1000 Map(category -> (1,1), product -> (75,1))
+INFO - fMeasure = 0.42795698924731185
+INFO - Weighted Precision = 0.3752429911635041
+INFO - Weighted Recall = 0.4279569892473119
+INFO - Weighted fMeasure = 0.35872956879842555
+INFO - MODEL -> LDA_1000 Map(category -> (75,1), product -> (75,1))
+INFO - fMeasure = 0.6580645161290323
+INFO - Weighted Precision = 0.690130672581873
+INFO - Weighted Recall = 0.6580645161290322
+INFO - Weighted fMeasure = 0.6311603366976263
+INFO - MODEL -> LDA_1000 Map(category -> (10,1), product -> (75,1))
+INFO - fMeasure = 0.567741935483871
+INFO - Weighted Precision = 0.5435178638214693
+INFO - Weighted Recall = 0.5677419354838711
+INFO - Weighted fMeasure = 0.5171734003059353
+INFO - MODEL -> LDA_1000 Map(category -> (100,1), product -> (10,1))
+INFO - fMeasure = 0.6763440860215054
+INFO - Weighted Precision = 0.7007487577787059
+INFO - Weighted Recall = 0.6763440860215052
+INFO - Weighted fMeasure = 0.6544928267427835
+INFO - MODEL -> LDA_1000 Map(category -> (125,1), product -> (150,1))
+INFO - fMeasure = 0.6795698924731183
+INFO - Weighted Precision = 0.6925709493176934
+INFO - Weighted Recall = 0.6795698924731182
+INFO - Weighted fMeasure = 0.6476563469712782
+INFO - MODEL -> LDA_1000 Map(category -> (150,1), product -> (150,1))
+INFO - fMeasure = 0.6548387096774193
+INFO - Weighted Precision = 0.6523523367937196
+INFO - Weighted Recall = 0.6548387096774194
+INFO - Weighted fMeasure = 0.6134779715512213
+INFO - MODEL -> LDA_1000 Map(category -> (10,1), product -> (25,1))
+INFO - fMeasure = 0.6903225806451613
+INFO - Weighted Precision = 0.7060597818745099
+INFO - Weighted Recall = 0.6903225806451612
+INFO - Weighted fMeasure = 0.6565358452177301
+INFO - MODEL -> LDA_1000 Map(category -> (1,1), product -> (25,1))
+INFO - fMeasure = 0.45161290322580644
+INFO - Weighted Precision = 0.37682943631845967
+INFO - Weighted Recall = 0.45161290322580644
+INFO - Weighted fMeasure = 0.36473316430547287
+INFO - MODEL -> LDA_1000 Map(category -> (10,1), product -> (100,1))
+INFO - fMeasure = 0.5516129032258065
+INFO - Weighted Precision = 0.5413392069168762
+INFO - Weighted Recall = 0.5516129032258065
+INFO - Weighted fMeasure = 0.5040987029507735
+INFO - MODEL -> LDA_1000 Map(category -> (75,1), product -> (25,1))
+INFO - fMeasure = 0.6913978494623656
+INFO - Weighted Precision = 0.6836451356299426
+INFO - Weighted Recall = 0.6913978494623656
+INFO - Weighted fMeasure = 0.6559333106655617
+INFO - MODEL -> LDA_1000 Map(category -> (5,1), product -> (10,1))
+INFO - fMeasure = 0.6548387096774193
+INFO - Weighted Precision = 0.6774543448407492
+INFO - Weighted Recall = 0.6548387096774193
+INFO - Weighted fMeasure = 0.6249656866167742
+INFO - MODEL -> LDA_1000 Map(category -> (125,1), product -> (1,1))
+INFO - fMeasure = 0.689247311827957
+INFO - Weighted Precision = 0.7094287801123894
+INFO - Weighted Recall = 0.6892473118279568
+INFO - Weighted fMeasure = 0.6598956190006228
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (1,1))
+INFO - fMeasure = 0.6623655913978495
+INFO - Weighted Precision = 0.6870598489899672
+INFO - Weighted Recall = 0.6623655913978496
+INFO - Weighted fMeasure = 0.6386035830728267
+INFO - MODEL -> LDA_1000 Map(category -> (125,1), product -> (75,1))
+INFO - fMeasure = 0.6763440860215054
+INFO - Weighted Precision = 0.6805896421363969
+INFO - Weighted Recall = 0.6763440860215055
+INFO - Weighted fMeasure = 0.6375439591024273
+INFO - MODEL -> LDA_1000 Map(category -> (150,1), product -> (75,1))
+INFO - fMeasure = 0.6655913978494624
+INFO - Weighted Precision = 0.6878923039192733
+INFO - Weighted Recall = 0.6655913978494624
+INFO - Weighted fMeasure = 0.6371059555980176
+INFO - MODEL -> LDA_1000 Map(category -> (150,1), product -> (100,1))
+INFO - fMeasure = 0.6795698924731183
+INFO - Weighted Precision = 0.6806445157011088
+INFO - Weighted Recall = 0.6795698924731182
+INFO - Weighted fMeasure = 0.6350657581997694
+INFO - MODEL -> LDA_1000 Map(category -> (100,1), product -> (150,1))
+INFO - fMeasure = 0.6451612903225806
+INFO - Weighted Precision = 0.6189419224230502
+INFO - Weighted Recall = 0.6451612903225808
+INFO - Weighted fMeasure = 0.5936186453946827
+INFO - MODEL -> LDA_1000 Map(category -> (125,1), product -> (25,1))
+INFO - fMeasure = 0.6623655913978495
+INFO - Weighted Precision = 0.6952087785970739
+INFO - Weighted Recall = 0.6623655913978495
+INFO - Weighted fMeasure = 0.6477200825539177
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (5,1))
+INFO - fMeasure = 0.6978494623655914
+INFO - Weighted Precision = 0.7088914370590563
+INFO - Weighted Recall = 0.6978494623655913
+INFO - Weighted fMeasure = 0.6654506398360813
+INFO - MODEL -> LDA_1000 Map(category -> (125,1), product -> (5,1))
+INFO - fMeasure = 0.6602150537634408
+INFO - Weighted Precision = 0.6779339347340957
+INFO - Weighted Recall = 0.6602150537634409
+INFO - Weighted fMeasure = 0.6283016995577582
+INFO - MODEL -> LDA_1000 Map(category -> (150,1), product -> (25,1))
+INFO - fMeasure = 0.6870967741935484
+INFO - Weighted Precision = 0.6936865232739717
+INFO - Weighted Recall = 0.6870967741935484
+INFO - Weighted fMeasure = 0.6524672251320105
+INFO - MODEL -> LDA_1000 Map(category -> (1,1), product -> (125,1))
+INFO - fMeasure = 0.4397849462365591
+INFO - Weighted Precision = 0.36525542853989157
+INFO - Weighted Recall = 0.4397849462365591
+INFO - Weighted fMeasure = 0.3608050950507951
+INFO - MODEL -> LDA_1000 Map(category -> (1,1), product -> (50,1))
+INFO - fMeasure = 0.43010752688172044
+INFO - Weighted Precision = 0.35324468437270434
+INFO - Weighted Recall = 0.43010752688172044
+INFO - Weighted fMeasure = 0.3436825222359474
+INFO - MODEL -> LDA_1000 Map(category -> (5,1), product -> (1,1))
+INFO - fMeasure = 0.7053763440860215
+INFO - Weighted Precision = 0.7183977107269729
+INFO - Weighted Recall = 0.7053763440860215
+INFO - Weighted fMeasure = 0.6730661227390059
+INFO - MODEL -> LDA_1000 Map(category -> (75,1), product -> (50,1))
+INFO - fMeasure = 0.6881720430107527
+INFO - Weighted Precision = 0.7039154996611675
+INFO - Weighted Recall = 0.6881720430107526
+INFO - Weighted fMeasure = 0.6580581232346006
+INFO - MODEL -> LDA_1000 Map(category -> (100,1), product -> (100,1))
+INFO - fMeasure = 0.6881720430107527
+INFO - Weighted Precision = 0.719666015412632
+INFO - Weighted Recall = 0.6881720430107526
+INFO - Weighted fMeasure = 0.6526531083314637
+INFO - MODEL -> LDA_1000 Map(category -> (125,1), product -> (100,1))
+INFO - fMeasure = 0.6408602150537634
+INFO - Weighted Precision = 0.673877971463697
+INFO - Weighted Recall = 0.6408602150537633
+INFO - Weighted fMeasure = 0.6152903154001147
+INFO - MODEL -> LDA_1000 Map(category -> (5,1), product -> (5,1))
+INFO - fMeasure = 0.6935483870967742
+INFO - Weighted Precision = 0.7019002683674285
+INFO - Weighted Recall = 0.6935483870967741
+INFO - Weighted fMeasure = 0.6579715911310935
+INFO - MODEL -> AVERAGED
+INFO - fMeasure = 0.6978494623655914
+INFO - Weighted Precision = 0.7142896278766019
+INFO - Weighted Recall = 0.6978494623655913
+INFO - Weighted fMeasure = 0.6643313493879642
+
