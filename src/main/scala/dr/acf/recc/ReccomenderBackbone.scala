@@ -87,7 +87,7 @@ object ReccomenderBackbone extends SparkOps {
         val compIds = if (includeCategory) scaledData.select("component_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
         val prodIds = if (includeProduct) scaledData.select("product_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
 
-        def datasetToLabeledPoint = (featureContext: FeatureContext, component_id: Int, product_id: Int, features: SparseVector, assignment_class: Double) => {
+        def datasetToLabeledPoint = (featureContext: FeatureContext, component_id: Int, product_id: Int, features: Vector, assignment_class: Double) => {
 
           val _includeCategory = featureContext.features.get("category").isDefined
           val _includeProduct = featureContext.features.get("product").isDefined
@@ -96,36 +96,54 @@ object ReccomenderBackbone extends SparkOps {
 
             val (_productScalingFactor, _productMultiplier) =
               if (_includeProduct) featureContext.features.get("product").get else (0, 0)
-
-            val productSize = prodIds.length * _productMultiplier
-            val productIndices = if (_includeProduct)
-              1 to _productMultiplier map (i => prodIds.length * (i - 1) + prodIds.indexOf(product_id))
-            else
-              Vector.empty
-            val productScalingArray = if (_includeProduct)
-              1 to _productMultiplier map (i => _productScalingFactor.toDouble)
-            else
-              Vector.empty
-
             val (_categoryScalingFactor, _categoryMultiplier) =
               if (_includeCategory) featureContext.features.get("category").get else (0, 0)
 
-            val categorySize = compIds.length * _categoryMultiplier
-            val categoryIndices = 1 to _categoryMultiplier map (i => productSize + compIds.length * (i - 1) + compIds.indexOf(component_id))
-            val categoryScalingArray = 1 to _categoryMultiplier map (i => _categoryScalingFactor.toDouble)
+            features match {
+              case sparse: SparseVector =>
 
-            LabeledPoint(
-              assignment_class,
-              Vectors.sparse(
-                productSize + categorySize + features.size,
-                Array.concat(
-                  productIndices.toArray,
-                  categoryIndices.toArray,
-                  features.indices map (i => i + compIds.length)
-                ),
-                Array.concat(productScalingArray.toArray, categoryScalingArray.toArray, features.values)
-              )
-            )
+                val productSize = prodIds.length * _productMultiplier
+                val productIndices = if (_includeProduct)
+                  1 to _productMultiplier map (i => prodIds.length * (i - 1) + prodIds.indexOf(product_id))
+                else
+                  Vector.empty
+                val productScalingArray = if (_includeProduct)
+                  1 to _productMultiplier map (i => _productScalingFactor.toDouble)
+                else
+                  Vector.empty
+
+                val categorySize = compIds.length * _categoryMultiplier
+                val categoryIndices = 1 to _categoryMultiplier map (i => productSize + compIds.length * (i - 1) + compIds.indexOf(component_id))
+                val categoryScalingArray = 1 to _categoryMultiplier map (i => _categoryScalingFactor.toDouble)
+
+                LabeledPoint(
+                  assignment_class,
+                  Vectors.sparse(
+                    productSize + categorySize + features.size,
+                    Array.concat(
+                      productIndices.toArray,
+                      categoryIndices.toArray,
+                      sparse.indices map (i => i + compIds.length)
+                    ),
+                    Array.concat(productScalingArray.toArray, categoryScalingArray.toArray, sparse.values)
+                  )
+                )
+
+              case dense: DenseVector =>
+
+                val oneCategorySeries = compIds.map(i => if(i == compIds.indexOf(component_id)) _categoryScalingFactor.toDouble else 0.0)
+                val oneProductSeries = prodIds.map(i => if(i == prodIds.indexOf(product_id)) _productScalingFactor.toDouble else 0.0)
+
+                val categorySeries = Seq.fill(_categoryMultiplier)(oneCategorySeries).flatten.toArray
+                val productSeries = Seq.fill(_productMultiplier)(oneProductSeries).flatten.toArray
+
+                LabeledPoint(
+                  assignment_class,
+                  Vectors.dense(Array.concat(categorySeries, productSeries, dense.toArray))
+                )
+
+            }
+
           }
           else
             LabeledPoint(
@@ -139,7 +157,7 @@ object ReccomenderBackbone extends SparkOps {
         def rowToLabeledPoint = (featureContext: FeatureContext, row: Row) => {
           val component_id = row.getAs[Int]("component_id")
           val product_id = row.getAs[Int]("product_id")
-          val features = row.getAs[Vector]("features").toSparse
+          val features = row.getAs[Vector]("features")
           val assignment_class = row.getAs[Double]("assignment_class")
 
           datasetToLabeledPoint(featureContext, component_id, product_id, features, assignment_class)
@@ -424,8 +442,6 @@ object ReccomenderBackbone extends SparkOps {
       val _weightedFMeasure = _metrics.weightedFMeasure
 
       resultsLog.info(s"MODEL -> ${SVMModel._1}")
-      // resultsLog.info(s"withProduct: $includeProduct ; scalingFactor = $productScalingFactor, multiplier $productMultiplier")
-      // resultsLog.info(s"withCategory: $includeCategory ; categoryScalingFactor = $categoryScalingFactor, multiplier $categoryMultiplier")
       resultsLog.info("fMeasure = " + _fMeasure)
       resultsLog.info("Weighted Precision = " + _weightedPrecision)
       resultsLog.info("Weighted Recall = " + _weightedRecall)
@@ -445,9 +461,6 @@ object ReccomenderBackbone extends SparkOps {
     val metrics = new MulticlassMetrics(predictionAndLabels.map { pl =>
       val label = pl._1._2
       val prediction = pl._2.groupBy(identity).maxBy(_._2.size)._1
-      // if (label != prediction) {
-      //  println(s"$label, ($prediction)  ---  ${pl._2.mkString(",")}")
-      // }
       (prediction, label)
     })
 
@@ -457,13 +470,10 @@ object ReccomenderBackbone extends SparkOps {
     val weightedFMeasure = metrics.weightedFMeasure
 
     resultsLog.info(s"MODEL -> AVERAGED")
-    // resultsLog.info(s"withProduct: $includeProduct ; scalingFactor = $productScalingFactor, multiplier $productMultiplier")
-    // resultsLog.info(s"withCategory: $includeCategory ; categoryScalingFactor = $categoryScalingFactor, multiplier $categoryMultiplier")
     resultsLog.info("fMeasure = " + fMeasure)
     resultsLog.info("Weighted Precision = " + weightedPrecision)
     resultsLog.info("Weighted Recall = " + weightedRecall)
     resultsLog.info("Weighted fMeasure = " + weightedFMeasure)
-    // println("Confusion Matrix = " + metrics.confusionMatrix.toString(500, 10000))
 
     // Step 3...Infinity - TDB
 
