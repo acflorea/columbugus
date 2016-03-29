@@ -19,6 +19,9 @@ import org.apache.spark.sql.{DataFrame, Row, functions}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
+import org.apache.spark.sql.functions._
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs._
 
 /**
   * The main algorithm behind the Reccomender System
@@ -87,6 +90,11 @@ object ReccomenderBackbone extends SparkOps {
         val compIds = if (includeCategory) scaledData.select("component_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
         val prodIds = if (includeProduct) scaledData.select("product_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
 
+        val stats = scaledData.groupBy("component_id", "product_id").agg(count("*"), countDistinct("assignment_class"))
+        stats.collect() foreach println
+        stats.repartition(1).write.format("com.databricks.spark.csv").save(s"$fsRoot/stats_tmp.csv")
+        merge(s"$fsRoot/stats_tmp.csv", s"$fsRoot/stats.csv")
+
         def datasetToLabeledPoint = (featureContext: FeatureContext, component_id: Int, product_id: Int, features: Vector, assignment_class: Double) => {
 
           val _includeCategory = featureContext.features.get("category").isDefined
@@ -131,8 +139,8 @@ object ReccomenderBackbone extends SparkOps {
 
               case dense: DenseVector =>
 
-                val oneCategorySeries = compIds.map(i => if(i == compIds.indexOf(component_id)) _categoryScalingFactor.toDouble else 0.0)
-                val oneProductSeries = prodIds.map(i => if(i == prodIds.indexOf(product_id)) _productScalingFactor.toDouble else 0.0)
+                val oneCategorySeries = compIds.map(i => if (i == compIds.indexOf(component_id)) _categoryScalingFactor.toDouble else 0.0)
+                val oneProductSeries = prodIds.map(i => if (i == prodIds.indexOf(product_id)) _productScalingFactor.toDouble else 0.0)
 
                 val categorySeries = Seq.fill(_categoryMultiplier)(oneCategorySeries).flatten.toArray
                 val productSeries = Seq.fill(_productMultiplier)(oneProductSeries).flatten.toArray
@@ -480,6 +488,17 @@ object ReccomenderBackbone extends SparkOps {
     val stopHere = true
 
     logger.debug(s"We're done in ${(System.currentTimeMillis() - startTime) / 1000} seconds!")
+  }
+
+  /**
+    * Hdfs files merger
+    * @param srcPath
+    * @param dstPath
+    */
+  def merge(srcPath: String, dstPath: String): Unit =  {
+    val hadoopConfig = new Configuration()
+    val hdfs = FileSystem.get(hadoopConfig)
+    FileUtil.copyMerge(hdfs, new Path(srcPath), hdfs, new Path(dstPath), false, hadoopConfig, null)
   }
 
   /**

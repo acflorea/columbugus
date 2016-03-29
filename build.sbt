@@ -9,9 +9,12 @@ resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/release
 resolvers += "Maven2 repository" at "http://repo1.maven.org/maven2/"
 resolvers += "Maven repository" at "http://mvnrepository.com/artifact/"
 
-libraryDependencies ++= Seq("org.apache.spark" %% "spark-core" % "1.5.2" % "provided"
-  , "org.apache.spark" %% "spark-sql" % "1.5.2" % "provided"
-  , "org.apache.spark" %% "spark-mllib" % "1.5.2" % "provided"
+libraryDependencies ++= Seq("org.apache.spark" %% "spark-core" % "1.5.2" // % "provided"
+  , "org.apache.spark" %% "spark-sql" % "1.5.2" // % "provided"
+  , "org.apache.spark" %% "spark-mllib" % "1.5.2" // % "provided"
+  , "com.databricks" %% "spark-csv" % "1.4.0"
+  , "org.apache.hadoop" % "hadoop-common" % "2.5.2" excludeAll ExclusionRule(organization = "javax.servlet")
+  , "org.apache.hadoop" % "hadoop-hdfs" % "2.5.2" excludeAll ExclusionRule(organization = "javax.servlet")
   , "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.6.1"
   , "com.typesafe" % "config" % "1.3.0"
   , "mysql" % "mysql-connector-java" % "5.1.37"
