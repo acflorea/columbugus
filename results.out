@@ -2706,3 +2706,65 @@ INFO - fMeasure = 0.6579497907949791
 INFO - Weighted Precision = 0.597018163268915
 INFO - Weighted Recall = 0.657949790794979
 INFO - Weighted fMeasure = 0.6055262931462306
+
+Netbeans final
+
+INFO - NEW RUN AT :1459435097336
+INFO - {"filesystem":{"root":"/home/aflorea/data/columbugus/netbeans_final"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":12,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/netbeansbugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":true,"preprocess":true,"transform":true},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"75","chi2":true,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"10","simple":true,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training data size 5283
+INFO - Test data size 592
+INFO - LDA :: Learned 1000 topics (as distributions over vocab of 26263 words)
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - MODEL -> LDA_1000 Map(category -> (75,1), product -> (10,1))
+INFO - fMeasure = 0.8138747884940778
+INFO - Weighted Precision = 0.84445150377064
+INFO - Weighted Recall = 0.8138747884940779
+INFO - Weighted fMeasure = 0.8064768887285679
+INFO - MODEL -> simple Map(category -> (75,1), product -> (10,1))
+INFO - fMeasure = 0.7945472249269717
+INFO - Weighted Precision = 0.8218278246220658
+INFO - Weighted Recall = 0.7945472249269718
+INFO - Weighted fMeasure = 0.7884845859128033
+INFO - MODEL -> CHI2 Map(category -> (75,1), product -> (10,1))
+INFO - fMeasure = 0.8107757221681272
+INFO - Weighted Precision = 0.827729127421874
+INFO - Weighted Recall = 0.8107757221681273
+INFO - Weighted fMeasure = 0.8032380433642158
+INFO - MODEL -> AVERAGED
+INFO - fMeasure = 0.6666666666666666
+INFO - Weighted Precision = 0.8095238095238095
+INFO - Weighted Recall = 0.6666666666666665
+INFO - Weighted fMeasure = 0.7206349206349207
+
+Netbeans final - normalized
+
+INFO - NEW RUN AT :1459436321376
+INFO - {"filesystem":{"root":"/home/aflorea/data/columbugus/netbeans_final_norm"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":12,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/netbeansbugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":true,"preprocess":true,"transform":true},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"75","chi2":true,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":true,"pca":false,"productMultiplier":"1","productScalingFactor":"10","simple":true,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training data size 5283
+INFO - Test data size 592
+INFO - LDA :: Learned 1000 topics (as distributions over vocab of 26263 words)
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - Training SVMWithSGDMulticlass for 31 distinct classes
+INFO - MODEL -> LDA_1000 Map(category -> (75,1), product -> (10,1))
+INFO - fMeasure = 0.8324873096446701
+INFO - Weighted Precision = 0.85510992619447
+INFO - Weighted Recall = 0.8324873096446701
+INFO - Weighted fMeasure = 0.8277310460842395
+INFO - MODEL -> simple Map(category -> (75,1), product -> (10,1))
+INFO - fMeasure = 0.7961700746510874
+INFO - Weighted Precision = 0.8209018434639703
+INFO - Weighted Recall = 0.7961700746510874
+INFO - Weighted fMeasure = 0.7908906126782159
+INFO - MODEL -> CHI2 Map(category -> (75,1), product -> (10,1))
+INFO - fMeasure = 0.8357676079195067
+INFO - Weighted Precision = 0.8563689192862242
+INFO - Weighted Recall = 0.8357676079195065
+INFO - Weighted fMeasure = 0.829635826356928
+INFO - MODEL -> AVERAGED
+INFO - fMeasure = 0.7619047619047619
+INFO - Weighted Precision = 0.9206349206349205
+INFO - Weighted Recall = 0.7619047619047619
+INFO - Weighted fMeasure = 0.801360544217687
