@@ -9,18 +9,18 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Row
 
 /**
-  * Database extractor
-  * Created by aflorea on 13.01.2016.
-  */
+ * Database extractor
+ * Created by aflorea on 13.01.2016.
+ */
 object DBExtractor extends SparkOps with MySQLConnector {
 
   /**
-    * Returns an RDD containing (bug_id, bug_details) type of data
-    * The details are in the form t<timestamp>:: info
-    * (the description and comments are included)
-    *
-    * @return
-    */
+   * Returns an RDD containing (bug_id, bug_details) type of data
+   * The details are in the form t<timestamp>:: info
+   * (the description and comments are included)
+   *
+   * @return
+   */
   def buildBugsRDD: RDD[BugData] = {
 
     // Charge configs
@@ -141,6 +141,15 @@ object DBExtractor extends SparkOps with MySQLConnector {
             " AND " + resolutionFilter("b.") + " " +
             " AND b.delta_ts > '" + oldestValidDate + "'" +
             " AND b.bug_id not in (select d.dupe from duplicates d) " +
+            " union " +
+            "select o.bug_id, l.bug_when, l.thetext " +
+            "from longdescs l " +
+            "join bugs b on l.bug_id = b.bug_id " +
+            "join duplicates d on d.dupe = b.bug_id " +
+            "join bugs o on o.bug_id = d.dupe_of " +
+            "where " + testFilter("o.bug_id") +
+            " AND " + resolutionFilter("o.") + " " +
+            " AND o.delta_ts > '" + oldestValidDate + "'" +
             ") as buglongdescsslice"
         ))
     }
@@ -170,12 +179,21 @@ object DBExtractor extends SparkOps with MySQLConnector {
             "join bugs b on l.bug_id = b.bug_id " +
             "join bugs_activity ba on b.bug_id = ba.bug_id and ba.fieldid = '" +
             statusFieldId + "' and ba.added='FIXED' " +
-            "join components c on b.component_id = c.id " +
-            "join products p on c.product_id = p.id " +
             "where " + testFilter("b.bug_id") +
             " AND " + resolutionFilter("b.") + " " +
             " AND b.delta_ts > '" + oldestValidDate + "'" +
             " AND b.bug_id not in (select d.dupe from duplicates d) " +
+            " union " +
+            "select o.bug_id, l.bug_when, l.thetext " +
+            "from longdescs l " +
+            "join bugs b on l.bug_id = b.bug_id " +
+            "join duplicates d on d.dupe = b.bug_id " +
+            "join bugs o on o.bug_id = d.dupe_of " +
+            "join bugs_activity ba on o.bug_id = ba.bug_id and ba.fieldid = '" +
+            statusFieldId + "' and ba.added='FIXED' " +
+            "where " + testFilter("o.bug_id") +
+            " AND " + resolutionFilter("o.") + " " +
+            " AND o.delta_ts > '" + oldestValidDate + "'" +
             ") as buglongdescsslice"
         ))
     }

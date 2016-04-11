@@ -91,7 +91,8 @@ object ReccomenderBackbone extends SparkOps {
         val prodIds = if (includeProduct) scaledData.select("product_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
 
 
-        //val stats = scaledData.groupBy("component_id", "product_id").agg(count("*"), countDistinct("assignment_class"))
+        //
+        // val stats = scaledData.groupBy("component_id", "product_id").agg(count("*"), countDistinct("assignment_class"))
         //stats.collect() foreach println
         //stats.repartition(1).write.format("com.databricks.spark.csv").save(s"$fsRoot/stats_tmp.csv")
         //merge(s"$fsRoot/stats_tmp.csv", s"$fsRoot/stats.csv")
