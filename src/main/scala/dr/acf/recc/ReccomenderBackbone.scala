@@ -6,6 +6,7 @@ import com.typesafe.config.ConfigRenderOptions
 import dr.acf.extractors.{BugData, DBExtractor}
 import dr.acf.spark.SparkOps._
 import dr.acf.spark._
+import dr.acf.spark.evaluation.MulticlassMultilabelMetrics
 import org.apache.hadoop.mapred.InvalidInputException
 import org.apache.spark.ml.feature._
 import org.apache.spark.mllib.clustering.{DistributedLDAModel, LDA}
@@ -24,9 +25,9 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs._
 
 /**
-  * The main algorithm behind the Reccomender System
-  * Created by aflorea on 18.11.2015.
-  */
+ * The main algorithm behind the Reccomender System
+ * Created by aflorea on 18.11.2015.
+ */
 object ReccomenderBackbone extends SparkOps {
 
   // this is used to implicitly convert an RDD to a DataFrame.
@@ -440,22 +441,13 @@ object ReccomenderBackbone extends SparkOps {
 
     SVMModels foreach { SVMModel =>
       // Get evaluation metrics.
-      val _metrics = new MulticlassMetrics(SVMModel._2.map { pl =>
+      val _metrics = new MulticlassMultilabelMetrics(SVMModel._2.map { pl =>
         val label = pl._1._2
         val prediction = pl._2.groupBy(identity).maxBy(_._2.size)._1
-        (prediction, label)
+        (Seq(prediction), label)
       })
 
-      val _fMeasure = _metrics.fMeasure
-      val _weightedPrecision = _metrics.weightedPrecision
-      val _weightedRecall = _metrics.weightedRecall
-      val _weightedFMeasure = _metrics.weightedFMeasure
-
-      resultsLog.info(s"MODEL -> ${SVMModel._1}")
-      resultsLog.info("fMeasure = " + _fMeasure)
-      resultsLog.info("Weighted Precision = " + _weightedPrecision)
-      resultsLog.info("Weighted Recall = " + _weightedRecall)
-      resultsLog.info("Weighted fMeasure = " + _weightedFMeasure)
+      logQualityMeasurements(SVMModel._1, _metrics)
     }
 
     // Let's vote
@@ -468,22 +460,13 @@ object ReccomenderBackbone extends SparkOps {
     )
 
     // Get evaluation metrics.
-    val metrics = new MulticlassMetrics(predictionAndLabels.map { pl =>
+    val metrics = new MulticlassMultilabelMetrics(predictionAndLabels.map { pl =>
       val label = pl._1._2
       val prediction = pl._2.groupBy(identity).maxBy(_._2.size)._1
-      (prediction, label)
+      (Seq(prediction), label)
     })
 
-    val fMeasure = metrics.fMeasure
-    val weightedPrecision = metrics.weightedPrecision
-    val weightedRecall = metrics.weightedRecall
-    val weightedFMeasure = metrics.weightedFMeasure
-
-    resultsLog.info(s"MODEL -> AVERAGED")
-    resultsLog.info("fMeasure = " + fMeasure)
-    resultsLog.info("Weighted Precision = " + weightedPrecision)
-    resultsLog.info("Weighted Recall = " + weightedRecall)
-    resultsLog.info("Weighted fMeasure = " + weightedFMeasure)
+    logQualityMeasurements("AVERAGED", metrics)
 
     // Step 3...Infinity - TDB
 
@@ -493,31 +476,59 @@ object ReccomenderBackbone extends SparkOps {
   }
 
   /**
-    * Hdfs files merger
-    * @param srcPath
-    * @param dstPath
-    */
-  def merge(srcPath: String, dstPath: String): Unit =  {
+   * Utility method for logging quality metrics
+   *
+   * @param modelName
+   * @param _metrics
+   */
+  private def logQualityMeasurements(modelName: String, _metrics: MulticlassMultilabelMetrics): Unit = {
+    val _fMeasure = _metrics.fMeasure
+    val _weightedPrecision = _metrics.weightedPrecision
+    val _weightedRecall = _metrics.weightedRecall
+    val _weightedFMeasure = _metrics.weightedFMeasure
+    val _averagedPrecision = _metrics.averagedPrecision
+    val _averagedRecall = _metrics.averagedRecall
+    val _averagedFMeasure = _metrics.averagedFMeasure
+    val _averagedAccuracy = _metrics.averagedAccuracy
+
+    resultsLog.info(s"MODEL -> $modelName")
+    resultsLog.info("fMeasure = " + _fMeasure)
+    resultsLog.info("Weighted Precision = " + _weightedPrecision)
+    resultsLog.info("Weighted Recall = " + _weightedRecall)
+    resultsLog.info("Weighted fMeasure = " + _weightedFMeasure)
+    resultsLog.info("Averaged Precision = " + _averagedPrecision)
+    resultsLog.info("Averaged Recall = " + _averagedRecall)
+    resultsLog.info("Averaged fMeasure = " + _averagedFMeasure)
+    resultsLog.info("Averaged Accuracy = " + _averagedAccuracy)
+  }
+
+  /**
+   * Hdfs files merger
+   *
+   * @param srcPath
+   * @param dstPath
+   */
+  def merge(srcPath: String, dstPath: String): Unit = {
     val hadoopConfig = new Configuration()
     val hdfs = FileSystem.get(hadoopConfig)
     FileUtil.copyMerge(hdfs, new Path(srcPath), hdfs, new Path(dstPath), false, hadoopConfig, null)
   }
 
   /**
-    * A more reasonable file name candidate
-    *
-    * @param input - input name it it's raw form
-    * @return - a more reasonable file name candidate
-    */
+   * A more reasonable file name candidate
+   *
+   * @param input - input name it it's raw form
+   * @return - a more reasonable file name candidate
+   */
   def FileFriendly(input: String): String = {
     input.replace(".", "-").replace(",", "-")
   }
 
   /**
-    * Retrieves current features context (values for category, product...)
-    *
-    * @return
-    */
+   * Retrieves current features context (values for category, product...)
+   *
+   * @return
+   */
   def getFeatureContext(categorySFIndex: Int = 0, categoryMIndex: Int = 0, productSFIndex: Int = 0, productMIndex: Int = 0): FeatureContext = {
 
     val includeCategory = conf.getBoolean("preprocess.includeCategory")
@@ -538,13 +549,13 @@ object ReccomenderBackbone extends SparkOps {
   }
 
   /**
-    * If transform : TF/IDF, FREQUENCY-FILTERING, SAVE DATAFRAME else : LOAD DATAFRAME
-    *
-    * @param transform
-    * @param fsRoot - file system root
-    * @param wordsData
-    * @return - transformed dataframe
-    */
+   * If transform : TF/IDF, FREQUENCY-FILTERING, SAVE DATAFRAME else : LOAD DATAFRAME
+   *
+   * @param transform
+   * @param fsRoot - file system root
+   * @param wordsData
+   * @return - transformed dataframe
+   */
   private def dataTransform(transform: Boolean, fsRoot: String, wordsData: DataFrame): DataFrame = {
     val rescaledData = if (transform) {
       logger.debug("TRANSFORM :: Start!")
@@ -623,12 +634,12 @@ object ReccomenderBackbone extends SparkOps {
   }
 
   /**
-    * If cleansing : LOAD, FILTER, TOKENIZE, SAVE DATAFRAME - else LOAD DATAFRAME
-    *
-    * @param cleansing
-    * @param fsRoot - file system root
-    * @return - cleaned dataframe
-    */
+   * If cleansing : LOAD, FILTER, TOKENIZE, SAVE DATAFRAME - else LOAD DATAFRAME
+   *
+   * @param cleansing
+   * @param fsRoot - file system root
+   * @return - cleaned dataframe
+   */
   private def dataCleansing(cleansing: Boolean, fsRoot: String): DataFrame = {
     val wordsData = if (cleansing) {
       logger.debug("CLEANSING :: Start!")
