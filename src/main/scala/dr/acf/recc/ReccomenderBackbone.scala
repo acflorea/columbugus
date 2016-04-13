@@ -650,10 +650,7 @@ object ReccomenderBackbone extends SparkOps {
 
       val currentTime = System.currentTimeMillis()
 
-      val bugInfoRDD: RDD[BugData] = DBExtractor.buildBugsRDD
-
-      // We only care about the "valid" users (#validUsersFilter)
-      val bugInfoDF = bugInfoRDD.filter(bugData => bugData.assignment_class >= 0).toDF()
+      val bugInfoDF = DBExtractor.buildBugsRDD.toDF()
 
       // Step 2 - extract features
       val tokenizer = tokenizerType match {

@@ -247,6 +247,8 @@ object DBExtractor extends SparkOps with MySQLConnector {
             )
         }
       }
+      // Filter assignment classes not matching the restrictions
+      .filter(bugData => bugData.assignment_class >= 0)
       // Sort by creation time
       .sortBy(bugData => bugData.creation_ts.getTime)
       // Add index
