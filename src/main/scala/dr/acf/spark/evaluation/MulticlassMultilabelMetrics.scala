@@ -137,6 +137,41 @@ class MulticlassMultilabelMetrics(predictionAndLabels: RDD[(Seq[Double], Double)
   }
 
   /**
+   * Returns sensitivity for a given label (category)
+   * TP / (TP + FN)
+   *
+   * @param label the label.
+   */
+  def sensitivity(label: Double): Double = {
+    val tp = tpByClass(label)
+    val fn = fnByClass(label)
+    if (tp + fn == 0) 0 else tp.toDouble / (tp + fn)
+  }
+
+
+  /**
+   * Returns specificity for a given label (category)
+   * TN / (TN + FP)
+   *
+   * @param label the label.
+   */
+  def specificity(label: Double): Double = {
+    val fp = fpByClass.getOrElse(label, 0)
+    val tn = tnByClass.getOrElse(label, 0)
+    if (fp + tn == 0) 0 else tn.toDouble / (tn + fp)
+  }
+
+
+  /**
+   * Returns balanced accuracy for a given label (category)
+   *
+   * @param label the label.
+   */
+  def balancedAccuracy(label: Double): Double = {
+    (sensitivity(label) + specificity(label)) / 2
+  }
+
+  /**
    * Returns recall for a given label (category)
    *
    * @param label the label.
