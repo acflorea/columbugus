@@ -428,8 +428,12 @@ object ReccomenderBackbone extends SparkOps {
           (elector._2._1, elector._2._2)
         }
 
-        val threshold = trainingData.count.toDouble / 25
-        val filteredClasses = trainingData.map(_.label).countByValue.filter(p => p._2 < threshold)
+        // Filter everything above mean plus std
+        val dataPerclass = trainingData.map(_.label).countByValue
+        val classesRDD = sc.parallelize(dataPerclass.values.toList)
+        val threshold = classesRDD.stdev() + classesRDD.mean()
+
+        val filteredClasses = dataPerclass.filter(p => p._2 < threshold)
         val filteredTrainingData = trainingData.filter(point => filteredClasses.contains(point.label))
         val filteredTestData = testData.filter(point => filteredClasses.contains(point.label))
 
