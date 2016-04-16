@@ -428,13 +428,18 @@ object ReccomenderBackbone extends SparkOps {
           (elector._2._1, elector._2._2)
         }
 
+        val threshold = trainingData.count.toDouble / 25
+        val filteredClasses = trainingData.map(_.label).countByValue.filter(p => p._2 < threshold)
+        val filteredTrainingData = trainingData.filter(point => filteredClasses.contains(point.label))
+        val filteredTestData = testData.filter(point => filteredClasses.contains(point.label))
+
         val modelsNo = conf.getInt("preprocess.modelsNo")
         (1 to modelsNo) map {
           i =>
-            val model = new SVMWithSGDMulticlass(undersample, i * 12345L).train(trainingData, 100, 1, 0.01, 1)
+            val model = new SVMWithSGDMulticlass(undersample, i * 12345L).train(filteredTrainingData, 100, 1, 0.01, 1)
 
             // TestData :: (index,classLabel) -> Seq(prediction)
-            (key, testData.zipWithIndex().map(_.swap).map(data =>
+            (key, filteredTestData.zipWithIndex().map(_.swap).map(data =>
               ((data._1, data._2.label), Seq(model.predict(data._2.features)))))
         }
     }
@@ -492,10 +497,10 @@ object ReccomenderBackbone extends SparkOps {
     val _averagedAccuracy = _metrics.averagedAccuracy
 
     resultsLog.info(s"MODEL -> $modelName")
-    resultsLog.info("fMeasure = " + _fMeasure)
-    resultsLog.info("Weighted Precision = " + _weightedPrecision)
-    resultsLog.info("Weighted Recall = " + _weightedRecall)
-    resultsLog.info("Weighted fMeasure = " + _weightedFMeasure)
+    // resultsLog.info("fMeasure = " + _fMeasure)
+    // resultsLog.info("Weighted Precision = " + _weightedPrecision)
+    // resultsLog.info("Weighted Recall = " + _weightedRecall)
+    // resultsLog.info("Weighted fMeasure = " + _weightedFMeasure)
     resultsLog.info("Averaged Precision = " + _averagedPrecision)
     resultsLog.info("Averaged Recall = " + _averagedRecall)
     resultsLog.info("Averaged fMeasure = " + _averagedFMeasure)

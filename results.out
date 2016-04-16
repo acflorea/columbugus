@@ -526,3 +526,198 @@ INFO - Averaged Precision = 0.4881548272988685
 INFO - Averaged Recall = 0.4680640569344521
 INFO - Averaged fMeasure = 0.43214513157260454
 INFO - Averaged Accuracy = 0.987440935683668
+INFO - NEW RUN AT :1460792750144
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefox_final"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":30,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/firefoxbugs_new","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"25","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":false,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"5","simple":true,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - MODEL -> simple Map(category -> (25,1), product -> (5,1))
+INFO - fMeasure = 0.5961472308221534
+INFO - Weighted Precision = 0.6109036253527436
+INFO - Weighted Recall = 0.5961472308221537
+INFO - Weighted fMeasure = 0.5853554900489943
+INFO - Averaged Precision = 0.5758725506998525
+INFO - Averaged Recall = 0.46548083874954
+INFO - Averaged fMeasure = 0.47551298825523286
+INFO - Averaged Accuracy = 0.98893554057047
+INFO - MODEL -> AVERAGED
+INFO - fMeasure = 0.5961472308221534
+INFO - Weighted Precision = 0.6109036253527436
+INFO - Weighted Recall = 0.5961472308221537
+INFO - Weighted fMeasure = 0.5853554900489943
+INFO - Averaged Precision = 0.5758725506998525
+INFO - Averaged Recall = 0.46548083874954
+INFO - Averaged fMeasure = 0.47551298825523286
+INFO - Averaged Accuracy = 0.98893554057047
+INFO - NEW RUN AT :1460793666605
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefox_final"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":30,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/firefoxbugs_new","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"1, 5, 25, 50","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":false,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"1, 5, 25, 50","simple":true,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - NEW RUN AT :1460793754189
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefox_final"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":30,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/firefoxbugs_new","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":true,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"1, 5, 25, 50","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":false,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"1, 5, 25, 50","simple":true,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - NEW RUN AT :1460793776812
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefox_final"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":30,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/firefoxbugs_new","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":true,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"1, 5, 25, 50","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"1, 5, 25, 50","simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - Training SVMWithSGDMulticlass for 73 distinct classes
+INFO - MODEL -> LDA_1000 Map(category -> (1,1), product -> (1,1))
+INFO - Averaged Precision = 0.2776472386126385
+INFO - Averaged Recall = 0.3062165740155188
+INFO - Averaged fMeasure = 0.2582275048861041
+INFO - Averaged Accuracy = 0.9900824397198288
+INFO - MODEL -> LDA_1000 Map(category -> (25,1), product -> (25,1))
+INFO - Averaged Precision = 0.44844099211237876
+INFO - Averaged Recall = 0.4355277873535532
+INFO - Averaged fMeasure = 0.3971253274053838
+INFO - Averaged Accuracy = 0.9862584573425703
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (25,1))
+INFO - Averaged Precision = 0.47517850578660004
+INFO - Averaged Recall = 0.45920746751590713
+INFO - Averaged fMeasure = 0.42276743686197377
+INFO - Averaged Accuracy = 0.9888808891474236
+INFO - MODEL -> LDA_1000 Map(category -> (1,1), product -> (5,1))
+INFO - Averaged Precision = 0.3541859832568639
+INFO - Averaged Recall = 0.38941324522715176
+INFO - Averaged fMeasure = 0.3304453076414272
+INFO - Averaged Accuracy = 0.9907499678156093
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (50,1))
+INFO - Averaged Precision = 0.4564777587724689
+INFO - Averaged Recall = 0.4556840878853442
+INFO - Averaged fMeasure = 0.4173943646805191
+INFO - Averaged Accuracy = 0.9820053497608817
+INFO - MODEL -> LDA_1000 Map(category -> (5,1), product -> (25,1))
+INFO - Averaged Precision = 0.3737976630006653
+INFO - Averaged Recall = 0.389443869109151
+INFO - Averaged fMeasure = 0.3317998060649073
+INFO - Averaged Accuracy = 0.9885089806369171
+INFO - MODEL -> LDA_1000 Map(category -> (25,1), product -> (50,1))
+INFO - Averaged Precision = 0.4476604302590436
+INFO - Averaged Recall = 0.44325383490806897
+INFO - Averaged fMeasure = 0.39776734327843644
+INFO - Averaged Accuracy = 0.9873646467584355
+INFO - MODEL -> LDA_1000 Map(category -> (25,1), product -> (1,1))
+INFO - Averaged Precision = 0.49067544069105007
+INFO - Averaged Recall = 0.4838916810920917
+INFO - Averaged fMeasure = 0.4387371170413174
+INFO - Averaged Accuracy = 0.9890143947665797
+INFO - MODEL -> LDA_1000 Map(category -> (5,1), product -> (50,1))
+INFO - Averaged Precision = 0.2997404584338409
+INFO - Averaged Recall = 0.3466954452747145
+INFO - Averaged fMeasure = 0.27581682222092596
+INFO - Averaged Accuracy = 0.9867638714722331
+INFO - MODEL -> LDA_1000 Map(category -> (25,1), product -> (5,1))
+INFO - Averaged Precision = 0.4881548272988685
+INFO - Averaged Recall = 0.4680640569344521
+INFO - Averaged fMeasure = 0.43214513157260454
+INFO - Averaged Accuracy = 0.987440935683668
+INFO - MODEL -> LDA_1000 Map(category -> (1,1), product -> (25,1))
+INFO - Averaged Precision = 0.22320128049930274
+INFO - Averaged Recall = 0.26932930663134774
+INFO - Averaged fMeasure = 0.21032576555523474
+INFO - Averaged Accuracy = 0.9885948056778031
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (1,1))
+INFO - Averaged Precision = 0.4784229177341779
+INFO - Averaged Recall = 0.45659265846408154
+INFO - Averaged fMeasure = 0.42502441767199833
+INFO - Averaged Accuracy = 0.9878128441941744
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (5,1))
+INFO - Averaged Precision = 0.486215153858219
+INFO - Averaged Recall = 0.4885672319671603
+INFO - Averaged fMeasure = 0.4481255093939698
+INFO - Averaged Accuracy = 0.9870118104792376
+INFO - MODEL -> LDA_1000 Map(category -> (5,1), product -> (1,1))
+INFO - Averaged Precision = 0.481858308181112
+INFO - Averaged Recall = 0.45318300944066486
+INFO - Averaged fMeasure = 0.4215474590136236
+INFO - Averaged Accuracy = 0.990206409223331
+INFO - MODEL -> LDA_1000 Map(category -> (1,1), product -> (50,1))
+INFO - Averaged Precision = 0.19321250265985318
+INFO - Averaged Recall = 0.2649393473982005
+INFO - Averaged fMeasure = 0.18205051394267133
+INFO - Averaged Accuracy = 0.9878319164254823
+INFO - MODEL -> LDA_1000 Map(category -> (5,1), product -> (5,1))
+INFO - Averaged Precision = 0.47097924244763556
+INFO - Averaged Recall = 0.48642041142080683
+INFO - Averaged fMeasure = 0.43220107638507166
+INFO - Averaged Accuracy = 0.9905306371555672
+INFO - MODEL -> AVERAGED
+INFO - Averaged Precision = 0.4944705870427099
+INFO - Averaged Recall = 0.4670249635056288
+INFO - Averaged fMeasure = 0.4312751702903113
+INFO - Averaged Accuracy = 0.9914556403740064
+INFO - NEW RUN AT :1460802639207
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefox_final"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":30,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/firefoxbugs_new","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":true,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"50","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"5","simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training data size 26118
+INFO - Test data size 2908
+INFO - NEW RUN AT :1460802675739
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefox_final"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":30,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/firefoxbugs_new","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"50","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"5","simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training SVMWithSGDMulticlass for 70 distinct classes
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (5,1))
+INFO - Averaged Precision = 0.4848514365951084
+INFO - Averaged Recall = 0.5239757685912243
+INFO - Averaged fMeasure = 0.4671516549053463
+INFO - Averaged Accuracy = 0.9916803503010402
+INFO - MODEL -> AVERAGED
+INFO - Averaged Precision = 0.4848514365951084
+INFO - Averaged Recall = 0.5239757685912243
+INFO - Averaged fMeasure = 0.4671516549053463
+INFO - Averaged Accuracy = 0.9916803503010402
+INFO - NEW RUN AT :1460803219583
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefox_final"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":30,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/firefoxbugs_new","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"50","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"5","simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training SVMWithSGDMulticlass for 68 distinct classes
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (5,1))
+INFO - Averaged Precision = 0.5266235592627334
+INFO - Averaged Recall = 0.5435021909706512
+INFO - Averaged fMeasure = 0.5010785562430512
+INFO - Averaged Accuracy = 0.9893106317608651
+INFO - MODEL -> AVERAGED
+INFO - Averaged Precision = 0.5266235592627334
+INFO - Averaged Recall = 0.5435021909706512
+INFO - Averaged fMeasure = 0.5010785562430512
+INFO - Averaged Accuracy = 0.9893106317608651
+INFO - NEW RUN AT :1460803554322
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefox_final"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":30,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/firefoxbugs_new","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"50","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"5","simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training SVMWithSGDMulticlass for 68 distinct classes

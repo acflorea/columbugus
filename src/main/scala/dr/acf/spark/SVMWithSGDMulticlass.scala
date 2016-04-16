@@ -39,11 +39,12 @@ class SVMWithSGDMulticlass(undersample: Boolean, seed: Long) {
              miniBatchFraction: Double): SVMMultiModel = {
 
     // determine number of classes
-    val numberOfClasses = input.map(point => point.label).distinct().count().toInt
+    val classes = input.map(point => point.label).distinct().collect()
+    val numberOfClasses = classes.length
 
     resultsLog.info(s"Training SVMWithSGDMulticlass for $numberOfClasses distinct classes")
 
-    val binaryModelIds = (0 until numberOfClasses).par
+    val binaryModelIds = classes.par
 
     binaryModelIds.tasksupport =
       new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(10))
