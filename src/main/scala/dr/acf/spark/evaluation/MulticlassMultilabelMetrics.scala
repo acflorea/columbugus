@@ -241,7 +241,7 @@ class MulticlassMultilabelMetrics(predictionAndLabels: RDD[(Seq[Double], Double)
   /**
    * Returns averaged (non weighted) recall
    */
-  lazy val averagedRecall: Double = labelCountByClass.map { case (category, count) =>
+  lazy val averagedRecall: Double = labels.map { category =>
     recall(category)
   }.sum / labels.length
 
@@ -255,14 +255,14 @@ class MulticlassMultilabelMetrics(predictionAndLabels: RDD[(Seq[Double], Double)
   /**
    * Returns averaged / non weighted precision
    */
-  lazy val averagedPrecision: Double = labelCountByClass.map { case (category, count) =>
+  lazy val averagedPrecision: Double = labels.map { category =>
     precision(category)
   }.sum / labels.length
 
   /**
    * Returns averaged (non weighted) accuracy
    */
-  lazy val averagedAccuracy: Double = labelCountByClass.map { case (category, count) =>
+  lazy val averagedAccuracy: Double = labels.map { category =>
     accuracy(category)
   }.sum / labels.length
 
@@ -280,14 +280,14 @@ class MulticlassMultilabelMetrics(predictionAndLabels: RDD[(Seq[Double], Double)
    *
    * @param beta the beta parameter.
    */
-  def averagedFMeasure(beta: Double): Double = labelCountByClass.map { case (category, count) =>
+  def averagedFMeasure(beta: Double): Double = labels.map { category =>
     fMeasure(category, beta)
   }.sum / labels.length
 
   /**
    * Returns averaged (non weighted) f1-measure
    */
-  lazy val averagedFMeasure: Double = labelCountByClass.map { case (category, count) =>
+  lazy val averagedFMeasure: Double = labels.map { category =>
     fMeasure(category, 1.0)
   }.sum / labels.length
 
