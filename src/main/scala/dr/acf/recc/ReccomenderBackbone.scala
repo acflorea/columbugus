@@ -433,7 +433,12 @@ object ReccomenderBackbone extends SparkOps {
         val classesRDD = sc.parallelize(dataPerclass.values.toList)
         val threshold = classesRDD.stdev() + classesRDD.mean()
 
+        resultsLog.info(s"Compute class threshlod ${classesRDD.stdev()} + ${classesRDD.mean()}")
+
         val filteredClasses = dataPerclass.filter(p => p._2 < threshold)
+
+        resultsLog.info(s"Keeping ${filteredClasses.size} out of ${dataPerclass.size} classes")
+
         val filteredTrainingData = trainingData.filter(point => filteredClasses.contains(point.label))
         val filteredTestData = testData.filter(point => filteredClasses.contains(point.label))
 
@@ -508,7 +513,7 @@ object ReccomenderBackbone extends SparkOps {
     resultsLog.info("Averaged Precision = " + _averagedPrecision)
     resultsLog.info("Averaged Recall = " + _averagedRecall)
     resultsLog.info("Averaged fMeasure = " + _averagedFMeasure)
-    resultsLog.info("Averaged Accuracy = " + _averagedAccuracy)
+    // resultsLog.info("Averaged Accuracy = " + _averagedAccuracy)
   }
 
   /**

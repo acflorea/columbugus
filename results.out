@@ -754,3 +754,196 @@ INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefox_final"
 INFO - NEW RUN AT :1460805860231
 INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefox_final"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":30,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/firefoxbugs_new","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"50","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"5","simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
 INFO - Training SVMWithSGDMulticlass for 69 distinct classes
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (5,1))
+INFO - Averaged Precision = 0.5528208678984963
+INFO - Averaged Recall = 0.5391785681872768
+INFO - Averaged fMeasure = 0.5046421477809292
+INFO - Averaged Accuracy = 0.9901230410931997
+INFO - MODEL -> AVERAGED
+INFO - Averaged Precision = 0.5528208678984963
+INFO - Averaged Recall = 0.5391785681872768
+INFO - Averaged fMeasure = 0.5046421477809292
+INFO - Averaged Accuracy = 0.9901230410931997
+INFO - NEW RUN AT :1460806299103
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/netbeans_final_3"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":12,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/netbeansbugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"75","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"10","simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training SVMWithSGDMulticlass for 30 distinct classes
+INFO - MODEL -> LDA_1000 Map(category -> (75,1), product -> (10,1))
+INFO - Averaged Precision = 0.8284632554679817
+INFO - Averaged Recall = 0.8115740031553274
+INFO - Averaged fMeasure = 0.7928852959031827
+INFO - MODEL -> AVERAGED
+INFO - Averaged Precision = 0.8284632554679817
+INFO - Averaged Recall = 0.8115740031553274
+INFO - Averaged fMeasure = 0.7928852959031827
+INFO - NEW RUN AT :1460806388367
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/eclipse_final_3"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":11,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/eclipsebugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":true,"preprocess":true,"transform":true},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"100","chi2":true,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1, 5, 10, 25, 50, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"50","simple":true,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Training data size 8379
+INFO - Test data size 934
+INFO - LDA :: Learned 1 topics (as distributions over vocab of 45128 words)
+INFO - LDA :: Learned 5 topics (as distributions over vocab of 45128 words)
+INFO - LDA :: Learned 10 topics (as distributions over vocab of 45128 words)
+INFO - LDA :: Learned 25 topics (as distributions over vocab of 45128 words)
+INFO - LDA :: Learned 50 topics (as distributions over vocab of 45128 words)
+INFO - LDA :: Learned 100 topics (as distributions over vocab of 45128 words)
+INFO - LDA :: Learned 200 topics (as distributions over vocab of 45128 words)
+INFO - LDA :: Learned 300 topics (as distributions over vocab of 45128 words)
+INFO - LDA :: Learned 400 topics (as distributions over vocab of 45128 words)
+INFO - LDA :: Learned 500 topics (as distributions over vocab of 45128 words)
+INFO - LDA :: Learned 750 topics (as distributions over vocab of 45128 words)
+INFO - LDA :: Learned 1000 topics (as distributions over vocab of 45128 words)
+INFO - LDA :: Learned 1250 topics (as distributions over vocab of 45128 words)
+INFO - LDA :: Learned 1500 topics (as distributions over vocab of 45128 words)
+INFO - Training SVMWithSGDMulticlass for 66 distinct classes
+INFO - Training SVMWithSGDMulticlass for 66 distinct classes
+INFO - Training SVMWithSGDMulticlass for 66 distinct classes
+INFO - Training SVMWithSGDMulticlass for 66 distinct classes
+INFO - Training SVMWithSGDMulticlass for 66 distinct classes
+INFO - Training SVMWithSGDMulticlass for 66 distinct classes
+INFO - Training SVMWithSGDMulticlass for 66 distinct classes
+INFO - Training SVMWithSGDMulticlass for 66 distinct classes
+INFO - Training SVMWithSGDMulticlass for 66 distinct classes
+INFO - Training SVMWithSGDMulticlass for 66 distinct classes
+INFO - Training SVMWithSGDMulticlass for 66 distinct classes
+INFO - Training SVMWithSGDMulticlass for 66 distinct classes
+INFO - Training SVMWithSGDMulticlass for 66 distinct classes
+INFO - Training SVMWithSGDMulticlass for 67 distinct classes
+INFO - Training SVMWithSGDMulticlass for 67 distinct classes
+INFO - Training SVMWithSGDMulticlass for 66 distinct classes
+INFO - MODEL -> LDA_1500 Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.6806758258563228
+INFO - Averaged Recall = 0.7205550616123738
+INFO - Averaged fMeasure = 0.6672260046149742
+INFO - MODEL -> LDA_300 Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.6657190286069653
+INFO - Averaged Recall = 0.683007760428709
+INFO - Averaged fMeasure = 0.6414250722546984
+INFO - MODEL -> LDA_1250 Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.6652190692116233
+INFO - Averaged Recall = 0.6911132912615126
+INFO - Averaged fMeasure = 0.6375844045150529
+INFO - MODEL -> LDA_1 Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.684362264937147
+INFO - Averaged Recall = 0.7024884060457183
+INFO - Averaged fMeasure = 0.6547205000108324
+INFO - MODEL -> LDA_400 Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.7097082474887988
+INFO - Averaged Recall = 0.7237126363608576
+INFO - Averaged fMeasure = 0.6750946513808247
+INFO - MODEL -> LDA_100 Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.7105837969971727
+INFO - Averaged Recall = 0.7171535608294501
+INFO - Averaged fMeasure = 0.6848719590162878
+INFO - MODEL -> LDA_750 Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.6525136878007692
+INFO - Averaged Recall = 0.6811332460541946
+INFO - Averaged fMeasure = 0.6301914058979174
+INFO - MODEL -> LDA_1000 Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.698373104927441
+INFO - Averaged Recall = 0.7282888682098168
+INFO - Averaged fMeasure = 0.6819568181195491
+INFO - MODEL -> LDA_25 Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.69992800261939
+INFO - Averaged Recall = 0.7239557013766501
+INFO - Averaged fMeasure = 0.6786670498957873
+INFO - MODEL -> LDA_5 Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.6832923140507123
+INFO - Averaged Recall = 0.6881862940163336
+INFO - Averaged fMeasure = 0.6369687842300246
+INFO - MODEL -> LDA_500 Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.7037506613678317
+INFO - Averaged Recall = 0.7095144607990459
+INFO - Averaged fMeasure = 0.6639986869137089
+INFO - MODEL -> LDA_50 Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.7016160875110447
+INFO - Averaged Recall = 0.7231267323658629
+INFO - Averaged fMeasure = 0.6653679247884979
+INFO - MODEL -> LDA_200 Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.7284360899886511
+INFO - Averaged Recall = 0.7366692504538354
+INFO - Averaged fMeasure = 0.6837043586099181
+INFO - MODEL -> CHI2 Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.7815610218968427
+INFO - Averaged Recall = 0.7795642024714056
+INFO - Averaged fMeasure = 0.7464220552174597
+INFO - MODEL -> LDA_10 Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.7236565881971173
+INFO - Averaged Recall = 0.7375582604337545
+INFO - Averaged fMeasure = 0.6874733936456203
+INFO - MODEL -> simple Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.7723932188409702
+INFO - Averaged Recall = 0.7878860189129498
+INFO - Averaged fMeasure = 0.75787189575207
+INFO - MODEL -> AVERAGED
+INFO - Averaged Precision = 0.8809523809523809
+INFO - Averaged Recall = 0.8730158730158731
+INFO - Averaged fMeasure = 0.8476190476190476
+INFO - NEW RUN AT :1460890526860
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/netbeans_final_3"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":12,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/netbeansbugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"75","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"10","simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Compute class threshlod 166.35307160639508 + 170.4516129032258
+INFO - Keeping 30 out of 31 classes
+INFO - Training SVMWithSGDMulticlass for 30 distinct classes
+INFO - MODEL -> LDA_1000 Map(category -> (75,1), product -> (10,1))
+INFO - Averaged Precision = 0.8284632554679817
+INFO - Averaged Recall = 0.8115740031553274
+INFO - Averaged fMeasure = 0.7928852959031827
+INFO - MODEL -> AVERAGED
+INFO - Averaged Precision = 0.8284632554679817
+INFO - Averaged Recall = 0.8115740031553274
+INFO - Averaged fMeasure = 0.7928852959031827
+INFO - NEW RUN AT :1460890616800
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/eclipse_final_3"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":11,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/eclipsebugs","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"100","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"50","simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Compute class threshlod 60.806610924990906 + 102.08536585365853
+INFO - Keeping 66 out of 82 classes
+INFO - Training SVMWithSGDMulticlass for 66 distinct classes
+INFO - MODEL -> LDA_1000 Map(category -> (100,1), product -> (50,1))
+INFO - Averaged Precision = 0.698373104927441
+INFO - Averaged Recall = 0.7282888682098168
+INFO - Averaged fMeasure = 0.6819568181195491
+INFO - MODEL -> AVERAGED
+INFO - Averaged Precision = 0.698373104927441
+INFO - Averaged Recall = 0.7282888682098168
+INFO - Averaged fMeasure = 0.6819568181195491
+INFO - NEW RUN AT :1460890752873
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefox_final"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":30,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/firefoxbugs_new","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"50","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"5","simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Compute class threshlod 1008.325312497339 + 354.808219178082
+INFO - Keeping 69 out of 73 classes
+INFO - Training SVMWithSGDMulticlass for 69 distinct classes
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (5,1))
+INFO - Averaged Precision = 0.5528208678984963
+INFO - Averaged Recall = 0.5391785681872768
+INFO - Averaged fMeasure = 0.5046421477809292
+INFO - MODEL -> AVERAGED
+INFO - Averaged Precision = 0.5528208678984963
+INFO - Averaged Recall = 0.5391785681872768
+INFO - Averaged fMeasure = 0.5046421477809292
+INFO - NEW RUN AT :1460891173498
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefox_final"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":30,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/firefoxbugs_new","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"50","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"5","simple":false,"undersample":true,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Compute class threshlod 1008.325312497339 + 354.808219178082
+INFO - Keeping 69 out of 73 classes
+INFO - Training SVMWithSGDMulticlass for 69 distinct classes
+INFO - NEW RUN AT :1460891420059
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefox_final"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":30,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/firefoxbugs_new","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"50","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"5","simple":false,"undersampling":true},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Compute class threshlod 1008.325312497339 + 354.808219178082
+INFO - Keeping 69 out of 73 classes
+INFO - Training SVMWithSGDMulticlass for 69 distinct classes
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (5,1))
+INFO - Averaged Precision = 0.5464011653816307
+INFO - Averaged Recall = 0.5437832661797005
+INFO - Averaged fMeasure = 0.49620812781638235
+INFO - MODEL -> AVERAGED
+INFO - Averaged Precision = 0.5464011653816307
+INFO - Averaged Recall = 0.5437832661797005
+INFO - Averaged fMeasure = 0.49620812781638235
+INFO - NEW RUN AT :1460892300373
+INFO - {"filesystem":{"root":"/Users/acflorea/phd/columbugus_data/firefox_final"},"global":{"issuesThreshold":3,"minWordSize":4,"statusFieldId":30,"testMode":false,"timeIntervals":3,"timeThreshold":30,"timeThresholdForTraining":240,"tokenizerType":3,"use_assigned_to":false},"mySQL":{"password":"mysql","url":"jdbc:mysql://localhost:3306/firefoxbugs_new","username":"root"},"mySQLBugsDB":{"autoCommit":true,"connectionPool":"disabled","driver":"com.mysql.jdbc.Driver","keepAliveConnection":true,"password":"mysql","slick":{"driver":"scala.slick.driver.MySQLDriver"},"url":"jdbc:mysql://localhost:3306/firefoxbugs?characterEncoding=UTF-8","user":"root"},"phases":{"cleansing":false,"preprocess":false,"transform":false},"postprocess":{"normalize":false},"preprocess":{"categoryMultiplier":"1","categoryScalingFactor":"50","chi2":false,"chi2Features":1000,"includeCategory":true,"includeProduct":true,"lda":true,"ldaAlpha":-1,"ldaBeta":-1,"ldaOptimizer":"em","ldaTopics":"1000","minMaxScaling":false,"modelsNo":1,"normalize":false,"pca":false,"productMultiplier":"1","productScalingFactor":"5","simple":false,"undersampling":false},"spark":{"appName":"Columb(ug)us","client":{"memory":"8G"},"driver":{"maxResultSize":2048,"memory":"8G"},"master":"local"},"transform":{"maxDocFreq":1000,"minDocFreq":2,"smoothTF":false,"timeDecay":false}}
+INFO - Compute class threshlod 1008.325312497339 + 354.808219178082
+INFO - Keeping 70 out of 73 classes
+INFO - Training SVMWithSGDMulticlass for 70 distinct classes
+INFO - MODEL -> LDA_1000 Map(category -> (50,1), product -> (5,1))
+INFO - Averaged Precision = 0.5106011782166987
+INFO - Averaged Recall = 0.5322694193848752
+INFO - Averaged fMeasure = 0.4821973085219029
+INFO - MODEL -> AVERAGED
+INFO - Averaged Precision = 0.5106011782166987
+INFO - Averaged Recall = 0.5322694193848752
+INFO - Averaged fMeasure = 0.4821973085219029
