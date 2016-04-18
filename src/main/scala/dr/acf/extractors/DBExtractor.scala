@@ -147,7 +147,7 @@ object DBExtractor extends SparkOps with MySQLConnector {
             "join bugs b on l.bug_id = b.bug_id " +
             "join duplicates d on d.dupe = b.bug_id " +
             "join bugs o on o.bug_id = d.dupe_of " +
-            "where " + testFilter("o.bug_id") +
+            "where 1 = 0 and " + testFilter("o.bug_id") +
             " AND " + resolutionFilter("o.") + " " +
             " AND o.delta_ts > '" + oldestValidDate + "'" +
             ") as buglongdescsslice"
@@ -191,7 +191,7 @@ object DBExtractor extends SparkOps with MySQLConnector {
             "join bugs o on o.bug_id = d.dupe_of " +
             "join bugs_activity ba on o.bug_id = ba.bug_id and ba.fieldid = '" +
             statusFieldId + "' and ba.added='FIXED' " +
-            "where " + testFilter("o.bug_id") +
+            "where 1 = 0 and " + testFilter("o.bug_id") +
             " AND " + resolutionFilter("o.") + " " +
             " AND o.delta_ts > '" + oldestValidDate + "'" +
             ") as buglongdescsslice"
