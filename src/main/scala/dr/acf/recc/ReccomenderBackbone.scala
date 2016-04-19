@@ -23,6 +23,7 @@ import scala.collection.mutable
 import org.apache.spark.sql.functions._
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs._
+import org.apache.spark.ml.clustering
 
 /**
  * The main algorithm behind the Reccomender System
@@ -90,13 +91,6 @@ object ReccomenderBackbone extends SparkOps {
         // Integrate more features
         val compIds = if (includeCategory) scaledData.select("component_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
         val prodIds = if (includeProduct) scaledData.select("product_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
-
-
-        //
-        // val stats = scaledData.groupBy("component_id", "product_id").agg(count("*"), countDistinct("assignment_class"))
-        //stats.collect() foreach println
-        //stats.repartition(1).write.format("com.databricks.spark.csv").save(s"$fsRoot/stats_tmp.csv")
-        //merge(s"$fsRoot/stats_tmp.csv", s"$fsRoot/stats.csv")
 
         def datasetToLabeledPoint = (featureContext: FeatureContext, component_id: Int, product_id: Int, features: Vector, assignment_class: Double) => {
 
@@ -202,8 +196,8 @@ object ReccomenderBackbone extends SparkOps {
         resultsLog.info(s"Training data size $trainingDataCount")
         resultsLog.info(s"Test data size ${allDataCount - trainingDataCount}")
 
-        val rawTestData = rescaledData.filter(s"index > $trainingDataCount")
-        val rawTrainingData = rescaledData.filter(s"index <= $trainingDataCount")
+        val rawTestData = rescaledData.filter(s"index > $trainingDataCount").cache()
+        val rawTrainingData = rescaledData.filter(s"index <= $trainingDataCount").cache()
 
         // Simple model
         if (simple) {
@@ -301,7 +295,7 @@ object ReccomenderBackbone extends SparkOps {
 
             // check if a model already exists for this combination of features
             val existingModel = try {
-              Some(DistributedLDAModel.load(sc, s"$fsRoot/acf_LDAMODEL_$ldaTopic"))
+              Some(clustering.DistributedLDAModel.load(s"$fsRoot/acf_LDAMODEL_$ldaTopic"))
             } catch {
               case ex: InvalidInputException => None
             }
@@ -310,43 +304,40 @@ object ReccomenderBackbone extends SparkOps {
             val ldaModel = if (existingModel.isDefined) existingModel.get
             else {
 
-              // Index documents with unique IDs
-              val corpus = indexedData.map { case (index: Long, row: Row) => (index, row.getAs[Vector]("features")) }.cache()
+              val lda = new clustering.LDA()
+                .setOptimizer("em")
+                .setFeaturesCol("features")
+                .setK(ldaTopic)
+                .setCheckpointInterval(10)
+                .setTopicDistributionCol("LDAfeatures")
+              val _ldaModel = lda.fit(rawTrainingData)
 
-              // if there is no existing model, build one, save it an return it
-              val _ldaModel = new LDA().setK(ldaTopic)
-                .setCheckpointInterval(30)
-                .setOptimizer(ldaOptimizer)
-                // 50/k +1
-                .setDocConcentration(alpha)
-                // 0.1 + 1 (em); 1.0 / k (online)
-                .setTopicConcentration(beta)
-                .run(corpus)
-                .asInstanceOf[DistributedLDAModel]
-
-              corpus.unpersist()
               // Output topics. Each is a distribution over words (matching word count vectors)
               resultsLog.info(s"LDA :: Learned $ldaTopic topics (as distributions over vocab of ${_ldaModel.vocabSize} words)")
 
-              _ldaModel.save(sc, s"$fsRoot/acf_LDAMODEL_$ldaTopic")
+              _ldaModel.save(s"$fsRoot/acf_LDAMODEL_$ldaTopic")
               _ldaModel
             }
 
-            val joinedData = indexedData.join(ldaModel.topicDistributions)
-            val transformed = joinedData.map {
-              point =>
-                val index = point._1
-                val dataPair = point._2
-                val row = dataPair._1
-                val topics = dataPair._2
+            val trainingData = ldaModel.transform(rawTrainingData)
+              .rdd.map {
+              row =>
+                val topics = row.getAs[Vector]("LDAfeatures")
                 val component_id = row.getAs[Int]("component_id")
                 val product_id = row.getAs[Int]("product_id")
                 val assignment_class = row.getAs[Double]("assignment_class")
-                (index, datasetToLabeledPoint(featureContext, component_id, product_id, topics.toSparse, assignment_class))
-            }.sortByKey()
+                datasetToLabeledPoint(featureContext, component_id, product_id, topics.toSparse, assignment_class)
+            }.cache()
 
-            val trainingData = transformed.filter(_._1 <= trainingDataCount).map(_._2)
-            val testData = transformed.filter(_._1 > trainingDataCount).map(_._2)
+            val testData = ldaModel.transform(rawTestData)
+              .rdd.map {
+              row =>
+                val topics = row.getAs[Vector]("LDAfeatures")
+                val component_id = row.getAs[Int]("component_id")
+                val product_id = row.getAs[Int]("product_id")
+                val assignment_class = row.getAs[Double]("assignment_class")
+                datasetToLabeledPoint(featureContext, component_id, product_id, topics.toSparse, assignment_class)
+            }.cache()
 
             trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
             testData.saveAsObjectFile(s"$fsRoot/acf_test_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
