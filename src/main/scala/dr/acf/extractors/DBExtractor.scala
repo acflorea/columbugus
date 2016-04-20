@@ -105,25 +105,25 @@ object DBExtractor extends SparkOps with MySQLConnector {
     val bugAssignmentData = bugAssignmentDataFrame.map(row =>
       BugAssignmentData(row.getInt(0), (1 to timeIntervals map (i => row.getLong(i))).sum))
 
-    val _assignments = bugAssignmentData.collect.
-      zipWithIndex.map(elem => elem._1.assigned_to -> elem._2).toMap
-
     val removeOutliers = conf.getBoolean("preprocess.removeOutliers")
-    val assignments = if (removeOutliers) {
+    val assignmentDataMap = if (removeOutliers) {
+      val _assignmentDataMap = bugAssignmentData.collect
       // Filter everything above mean plus 2 * std
-      val classesRDD = sc.parallelize(_assignments.values.toList)
+      val classesRDD = sc.parallelize(_assignmentDataMap.map(bad => bad.no).toList)
       val threshold = classesRDD.stdev() * 2 + classesRDD.mean()
 
-      resultsLog.info(s"Compute class threshold std:${classesRDD.stdev()} + avg:${classesRDD.mean()}")
+      resultsLog.info(s"Compute class threshold std:${classesRDD.stdev()} + avg:${classesRDD.mean()} as $threshold")
 
-      val filteredClasses = _assignments.filter(p => p._2 < threshold)
+      val filteredClasses = _assignmentDataMap.filter(bad => bad.no < threshold)
 
-      resultsLog.info(s"Keeping ${filteredClasses.size} out of ${_assignments.size} classes")
+      resultsLog.info(s"Keeping ${filteredClasses.length} out of ${_assignmentDataMap.length} classes")
 
       filteredClasses
     } else {
-      _assignments
+      bugAssignmentData.collect
     }
+
+    val assignments = assignmentDataMap.zipWithIndex.map(elem => elem._1.assigned_to -> elem._2).toMap
 
     // Duplicates -- Which bugs are duplicates of which other bugs.
     val bugsDuplicatesDataFrame = mySQLDF(
