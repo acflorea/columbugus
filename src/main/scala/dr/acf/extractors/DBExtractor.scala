@@ -7,20 +7,23 @@ import dr.acf.spark.SparkOps
 import dr.acf.spark.SparkOps._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Row
+import org.slf4j.LoggerFactory
 
 /**
- * Database extractor
- * Created by aflorea on 13.01.2016.
- */
+  * Database extractor
+  * Created by aflorea on 13.01.2016.
+  */
 object DBExtractor extends SparkOps with MySQLConnector {
 
+  val resultsLog = LoggerFactory.getLogger("resultsLog")
+
   /**
-   * Returns an RDD containing (bug_id, bug_details) type of data
-   * The details are in the form t<timestamp>:: info
-   * (the description and comments are included)
-   *
-   * @return
-   */
+    * Returns an RDD containing (bug_id, bug_details) type of data
+    * The details are in the form t<timestamp>:: info
+    * (the description and comments are included)
+    *
+    * @return
+    */
   def buildBugsRDD: RDD[BugData] = {
 
     // Charge configs
@@ -102,8 +105,25 @@ object DBExtractor extends SparkOps with MySQLConnector {
     val bugAssignmentData = bugAssignmentDataFrame.map(row =>
       BugAssignmentData(row.getInt(0), (1 to timeIntervals map (i => row.getLong(i))).sum))
 
-    val assignments = bugAssignmentData.collect.
+    val _assignments = bugAssignmentData.collect.
       zipWithIndex.map(elem => elem._1.assigned_to -> elem._2).toMap
+
+    val removeOutliers = conf.getBoolean("preprocess.removeOutliers")
+    val assignments = if (removeOutliers) {
+      // Filter everything above mean plus 2 * std
+      val classesRDD = sc.parallelize(_assignments.values.toList)
+      val threshold = classesRDD.stdev() * 2 + classesRDD.mean()
+
+      resultsLog.info(s"Compute class threshold std:${classesRDD.stdev()} + avg:${classesRDD.mean()}")
+
+      val filteredClasses = _assignments.filter(p => p._2 < threshold)
+
+      resultsLog.info(s"Keeping ${filteredClasses.size} out of ${_assignments.size} classes")
+
+      filteredClasses
+    } else {
+      _assignments
+    }
 
     // Duplicates -- Which bugs are duplicates of which other bugs.
     val bugsDuplicatesDataFrame = mySQLDF(
