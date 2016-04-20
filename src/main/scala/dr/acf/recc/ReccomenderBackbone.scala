@@ -3,14 +3,12 @@ package dr.acf.recc
 import java.sql.Timestamp
 
 import com.typesafe.config.ConfigRenderOptions
-import dr.acf.extractors.{BugData, DBExtractor}
+import dr.acf.extractors.DBExtractor
 import dr.acf.spark.SparkOps._
 import dr.acf.spark._
 import dr.acf.spark.evaluation.MulticlassMultilabelMetrics
 import org.apache.hadoop.mapred.InvalidInputException
 import org.apache.spark.ml.feature._
-import org.apache.spark.mllib.clustering.{DistributedLDAModel, LDA}
-import org.apache.spark.mllib.evaluation.MulticlassMetrics
 import org.apache.spark.mllib.feature
 import org.apache.spark.mllib.feature.ChiSqSelector
 import org.apache.spark.mllib.linalg._
@@ -20,7 +18,6 @@ import org.apache.spark.sql.{DataFrame, Row, functions}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
-import org.apache.spark.sql.functions._
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs._
 import org.apache.spark.ml.clustering
@@ -406,6 +403,7 @@ object ReccomenderBackbone extends SparkOps {
         // Train an SVM model for this elector
 
         val normalize = conf.getBoolean("postprocess.normalize")
+        val removeOutliers = conf.getBoolean("postprocess.removeOutliers")
 
         val (trainingData, testData) = if (normalize) {
           val _trainingData = elector._2._1
@@ -419,19 +417,24 @@ object ReccomenderBackbone extends SparkOps {
           (elector._2._1, elector._2._2)
         }
 
-        // Filter everything above mean plus 2 * std
-        val dataPerclass = trainingData.map(_.label).countByValue
-        val classesRDD = sc.parallelize(dataPerclass.values.toList)
-        val threshold = classesRDD.stdev() * 2 + classesRDD.mean()
+        val (filteredTrainingData, filteredTestData) = if (removeOutliers) {
 
-        resultsLog.info(s"Compute class threshold ${classesRDD.stdev()} + ${classesRDD.mean()}")
+          // Filter everything above mean plus 2 * std
+          val dataPerclass = trainingData.map(_.label).countByValue
+          val classesRDD = sc.parallelize(dataPerclass.values.toList)
+          val threshold = classesRDD.stdev() * 2 + classesRDD.mean()
 
-        val filteredClasses = dataPerclass.filter(p => p._2 < threshold)
+          resultsLog.info(s"Compute class threshold std:${classesRDD.stdev()} + avg:${classesRDD.mean()}")
 
-        resultsLog.info(s"Keeping ${filteredClasses.size} out of ${dataPerclass.size} classes")
+          val filteredClasses = dataPerclass.filter(p => p._2 < threshold)
 
-        val filteredTrainingData = trainingData.filter(point => filteredClasses.contains(point.label))
-        val filteredTestData = testData.filter(point => filteredClasses.contains(point.label))
+          resultsLog.info(s"Keeping ${filteredClasses.size} out of ${dataPerclass.size} classes")
+
+          (trainingData.filter(point => filteredClasses.contains(point.label))
+            , testData.filter(point => filteredClasses.contains(point.label)))
+        } else {
+          (trainingData, testData)
+        }
 
         val modelsNo = conf.getInt("preprocess.modelsNo")
         (1 to modelsNo) map {
