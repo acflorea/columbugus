@@ -3,7 +3,9 @@ package dr.acf.experiments
 import dr.acf.recc.{FeatureContext, ReccomenderBackbone}
 import dr.acf.spark.SparkOps
 import dr.acf.spark.SparkOps._
-import org.apache.spark.mllib.linalg.Vector
+import org.apache.spark.mllib.linalg.{SparseVector, Vector}
+import org.apache.spark.sql.types
+import org.apache.spark.sql.types.DataType
 import org.slf4j.LoggerFactory
 
 /**
@@ -40,10 +42,14 @@ object ParquetToWEKA extends SparkOps {
 
       val numericalData = sqlContext.read.parquet(s"$fsRoot/acf_numerical_data")
 
-      val selectedData = numericalData.select("assignment_class", "product_id", "component_id", "features")
+      val selectedData = numericalData.select("features", "assignment_class", "product_id", "component_id")
 
-      val toSave = selectedData.map { row =>
-        (row.getDouble(0).toString, row.getInt(1), row.getInt(2), row.getAs[Vector](3).toDense)
+      val sample = selectedData.take(1).head
+      val indexes = (0 until sample.size).toSeq.scan(0) { (x, y) =>
+        x + (sample.get(x) match {
+          case vector: SparseVector => vector.size
+          case _ => 1
+        })
       }
 
       import java.io._
@@ -63,7 +69,7 @@ object ParquetToWEKA extends SparkOps {
 
       // Attributes
       selectedData.schema.map { column =>
-        bw.write(s"@ATTRIBUTE ${column.name} NUMERIC\n")
+        bw.write(s"@ATTRIBUTE ${column.name} ${arffType(column.dataType)}\n")
       }
       bw.write(s"\n")
 
@@ -74,6 +80,16 @@ object ParquetToWEKA extends SparkOps {
       bw.close()
 
       logger.debug("Yey")
+    }
+  }
+
+
+  def arffType(dataType: DataType): String = {
+    dataType.typeName match {
+      case "double" => "NUMERIC"
+      case "integer" => "NUMERIC"
+      case "vector" => "NUMERIC"
+      case _ => ""
     }
   }
 
