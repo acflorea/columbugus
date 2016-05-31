@@ -45,12 +45,12 @@ object ParquetToWEKA extends SparkOps {
       val selectedData = numericalData.select("features", "assignment_class", "product_id", "component_id")
 
       val sample = selectedData.take(1).head
-      val indexes = (0 until sample.size).toSeq.scan(0) { (x, y) =>
-        x + (sample.get(x) match {
-          case vector: SparseVector => vector.size
+      val indexes = (0 until sample.size).zipWithIndex.scan((0, 0)) { (x: (Int, Int), y: (Int, Int)) =>
+        (x._1 + 1, x._2 + (sample(x._1) match {
+          case v: Vector => v.size
           case _ => 1
-        })
-      }
+        }))
+      }.drop(1)
 
       import java.io._
 
@@ -74,7 +74,25 @@ object ParquetToWEKA extends SparkOps {
       bw.write(s"\n")
 
       // Data
+      // Relation
+      bw.write(s"@DATA\n")
 
+      selectedData.collect().foreach { row =>
+
+        //        @data
+        //        {1 X, 3 Y, 4 "class A"}
+        //        {2 W, 4 "class B"}
+        val outputRow = (indexes flatMap { i =>
+          row.get(i._1 - 1) match {
+            case v: SparseVector => v.indices.zip(v.values).toSeq
+            case value => Seq((i._2, value))
+          }
+        }).map(pair => s"${pair._1} ${pair._2}").mkString(", ")
+
+        bw.write(s"{$outputRow}\n")
+      }
+
+      bw.write(s"\n")
 
       // Buh bye
       bw.close()
