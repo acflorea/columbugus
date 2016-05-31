@@ -47,14 +47,14 @@ object ParquetToWEKA extends SparkOps {
       val sample = selectedData.take(1).head
       val indexes = (0 until sample.size).zipWithIndex.scan((0, 0)) { (x: (Int, Int), y: (Int, Int)) =>
         (x._1 + 1, x._2 + (sample(x._1) match {
-          case v: Vector => v.size
+          case v: Vector => v.size - 1
           case _ => 1
         }))
       }.drop(1)
 
       import java.io._
 
-      val fileTitle = "columbugus-model"
+      val fileTitle = "columbugus-model.arff"
       val file = new File(s"$fsRoot/$fileTitle")
       val bw = new BufferedWriter(new FileWriter(file))
 
@@ -68,8 +68,13 @@ object ParquetToWEKA extends SparkOps {
       bw.write(s"\n")
 
       // Attributes
-      selectedData.schema.map { column =>
-        bw.write(s"@ATTRIBUTE ${column.name} ${arffType(column.dataType)}\n")
+      selectedData.schema.foreach { column =>
+        column.dataType.typeName match {
+          case "vector" => (0 until sample.getAs[Vector](column.name).size) foreach { i =>
+            bw.write(s"@ATTRIBUTE ${column.name}_$i ${arffType(column.dataType)}\n")
+          }
+          case _ => bw.write(s"@ATTRIBUTE ${column.name} ${arffType(column.dataType)}\n")
+        }
       }
       bw.write(s"\n")
 
@@ -91,8 +96,6 @@ object ParquetToWEKA extends SparkOps {
 
         bw.write(s"{$outputRow}\n")
       }
-
-      bw.write(s"\n")
 
       // Buh bye
       bw.close()
