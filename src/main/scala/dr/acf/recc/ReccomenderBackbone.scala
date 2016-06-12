@@ -21,6 +21,7 @@ import scala.collection.mutable
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs._
 import org.apache.spark.ml.clustering
+import org.apache.spark.mllib.tree.RandomForest
 import org.apache.spark.mllib.util.MLUtils
 
 /**
@@ -420,11 +421,11 @@ object ReccomenderBackbone extends SparkOps {
           (elector._2._1, elector._2._2)
         }
 
-        val (filteredTrainingData, filteredTestData) = if (removeOutliers) {
+        // Filter everything above mean plus 2 * std
+        val dataPerclass = trainingData.map(_.label).countByValue
+        val classesRDD = sc.parallelize(dataPerclass.values.toList)
+        val (filteredTrainingData, filteredTestData, classes) = if (removeOutliers) {
 
-          // Filter everything above mean plus 2 * std
-          val dataPerclass = trainingData.map(_.label).countByValue
-          val classesRDD = sc.parallelize(dataPerclass.values.toList)
           val threshold = classesRDD.stdev() * 2 + classesRDD.mean()
 
           resultsLog.info(s"Compute class threshold std:${classesRDD.stdev()} + avg:${classesRDD.mean()}")
@@ -434,9 +435,11 @@ object ReccomenderBackbone extends SparkOps {
           resultsLog.info(s"Keeping ${filteredClasses.size} out of ${dataPerclass.size} classes")
 
           (trainingData.filter(point => filteredClasses.contains(point.label)).cache()
-            , testData.filter(point => filteredClasses.contains(point.label)).cache())
+            , testData.filter(point => filteredClasses.contains(point.label)).cache(),
+            filteredClasses.size)
         } else {
-          (trainingData.cache(), testData.cache())
+
+          (trainingData.cache(), testData.cache(), dataPerclass.size)
         }
 
         val modelsNo = conf.getInt("preprocess.modelsNo")
@@ -446,7 +449,26 @@ object ReccomenderBackbone extends SparkOps {
             // MLUtils.saveAsLibSVMFile(filteredTrainingData.repartition(1), s"$fsRoot/svmInputTrain")
             // MLUtils.saveAsLibSVMFile(filteredTestData.repartition(1), s"$fsRoot/svmInputTest" )
 
-            val model = new SVMWithSGDMulticlass(undersample, i * 12345L).train(filteredTrainingData, 1000, 1, 0.01, 1)
+            // val model = new SVMWithSGDMulticlass(undersample, i * 12345L).train(filteredTrainingData, 1000, 1, 0.01, 1)
+
+            // Train a RandomForest model.
+            // Empty categoricalFeaturesInfo indicates all features are continuous.
+            val numClasses = classes
+            val categoricalFeaturesInfo = Map[Int, Int]()
+            val numTrees = 1000
+            val featureSubsetStrategy = "auto"
+            val impurity = "gini"
+            val maxDepth = 30
+            val maxBins = 100
+
+            val model = RandomForest.trainClassifier(filteredTrainingData, numClasses, categoricalFeaturesInfo,
+              numTrees, featureSubsetStrategy, impurity, maxDepth, maxBins)
+
+            // Evaluate model on test instances and compute test error
+            val labelAndPreds = testData.map { point =>
+              val prediction = model.predict(point.features)
+              (point.label, prediction)
+            }
 
             // TestData :: (index,classLabel) -> Seq(prediction)
             (key, filteredTestData.zipWithIndex().map(_.swap).map(data =>
