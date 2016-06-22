@@ -86,6 +86,7 @@ object ReccomenderBackbone extends SparkOps {
       if (preprocess) {
 
         val normalize = conf.getBoolean("preprocess.normalize")
+        val useCategorical = conf.getBoolean("preprocess.useCategorical")
 
         // Integrate more features
         val compIds = if (includeCategory) scaledData.select("component_id").map(_.getAs[Int](0)).distinct().collect() else Array.empty[Int]
@@ -103,49 +104,89 @@ object ReccomenderBackbone extends SparkOps {
             val (_categoryScalingFactor, _categoryMultiplier) =
               if (_includeCategory) featureContext.features.get("category").get else (0, 0)
 
-            features match {
-              case sparse: SparseVector =>
+            if (useCategorical) {
+              features match {
+                case sparse: SparseVector =>
 
-                val productSize = prodIds.length * _productMultiplier
-                val productIndices = if (_includeProduct)
-                  1 to _productMultiplier map (i => prodIds.length * (i - 1) + prodIds.indexOf(product_id))
-                else
-                  Vector.empty
-                val productScalingArray = if (_includeProduct)
-                  1 to _productMultiplier map (i => _productScalingFactor.toDouble)
-                else
-                  Vector.empty
+                  val productIndex = if (_includeProduct) Array(prodIds.indexOf(product_id).toDouble) else Array.emptyDoubleArray
+                  val productSize = productIndex.length
+                  val productIndices = productIndex.map(_ => 0)
 
-                val categorySize = compIds.length * _categoryMultiplier
-                val categoryIndices = 1 to _categoryMultiplier map (i => productSize + compIds.length * (i - 1) + compIds.indexOf(component_id))
-                val categoryScalingArray = 1 to _categoryMultiplier map (i => _categoryScalingFactor.toDouble)
+                  val categoryIndex = if (_includeCategory) Array(compIds.indexOf(component_id).toDouble) else Array.emptyDoubleArray
+                  val categorySize = categoryIndex.length
+                  val categoryIndices = categoryIndex.map(_ => productIndices.length)
 
-                LabeledPoint(
-                  assignment_class,
-                  Vectors.sparse(
-                    productSize + categorySize + features.size,
-                    Array.concat(
-                      productIndices.toArray,
-                      categoryIndices.toArray,
-                      sparse.indices map (i => i + compIds.length)
-                    ),
-                    Array.concat(productScalingArray.toArray, categoryScalingArray.toArray, sparse.values)
+                  LabeledPoint(
+                    assignment_class,
+                    Vectors.sparse(
+                      productSize + categorySize + features.size,
+                      Array.concat(
+                        productIndices,
+                        categoryIndices,
+                        sparse.indices map (i => i + categorySize + productSize)
+                      ),
+                      Array.concat(productIndex, categoryIndex, sparse.values)
+                    )
                   )
-                )
 
-              case dense: DenseVector =>
+                case dense: DenseVector =>
 
-                val oneCategorySeries = compIds.map(i => if (i == component_id) _categoryScalingFactor.toDouble else 0.0)
-                val oneProductSeries = prodIds.map(i => if (i == product_id) _productScalingFactor.toDouble else 0.0)
+                  val categoryIndex = if (_includeCategory) Array(compIds.indexOf(component_id).toDouble) else Array.emptyDoubleArray
+                  val productIndex = if (_includeProduct) Array(prodIds.indexOf(product_id).toDouble) else Array.emptyDoubleArray
 
-                val categorySeries = Seq.fill(_categoryMultiplier)(oneCategorySeries).flatten.toArray
-                val productSeries = Seq.fill(_productMultiplier)(oneProductSeries).flatten.toArray
+                  LabeledPoint(
+                    assignment_class,
+                    Vectors.dense(Array.concat(categoryIndex, productIndex, dense.values))
+                  )
 
-                LabeledPoint(
-                  assignment_class,
-                  Vectors.dense(Array.concat(categorySeries, productSeries, dense.values))
-                )
+              }
 
+            } else {
+
+              features match {
+                case sparse: SparseVector =>
+
+                  val productSize = prodIds.length * _productMultiplier
+                  val productIndices = if (_includeProduct)
+                    1 to _productMultiplier map (i => prodIds.length * (i - 1) + prodIds.indexOf(product_id))
+                  else
+                    Vector.empty
+                  val productScalingArray = if (_includeProduct)
+                    1 to _productMultiplier map (i => _productScalingFactor.toDouble)
+                  else
+                    Vector.empty
+
+                  val categorySize = compIds.length * _categoryMultiplier
+                  val categoryIndices = 1 to _categoryMultiplier map (i => productSize + compIds.length * (i - 1) + compIds.indexOf(component_id))
+                  val categoryScalingArray = 1 to _categoryMultiplier map (i => _categoryScalingFactor.toDouble)
+
+                  LabeledPoint(
+                    assignment_class,
+                    Vectors.sparse(
+                      productSize + categorySize + features.size,
+                      Array.concat(
+                        productIndices.toArray,
+                        categoryIndices.toArray,
+                        sparse.indices map (i => i + prodIds.length + compIds.length)
+                      ),
+                      Array.concat(productScalingArray.toArray, categoryScalingArray.toArray, sparse.values)
+                    )
+                  )
+
+                case dense: DenseVector =>
+
+                  val oneCategorySeries = compIds.map(i => if (i == component_id) _categoryScalingFactor.toDouble else 0.0)
+                  val oneProductSeries = prodIds.map(i => if (i == product_id) _productScalingFactor.toDouble else 0.0)
+
+                  val categorySeries = Seq.fill(_categoryMultiplier)(oneCategorySeries).flatten.toArray
+                  val productSeries = Seq.fill(_productMultiplier)(oneProductSeries).flatten.toArray
+
+                  LabeledPoint(
+                    assignment_class,
+                    Vectors.dense(Array.concat(categorySeries, productSeries, dense.values))
+                  )
+
+              }
             }
 
           }
