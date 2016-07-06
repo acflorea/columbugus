@@ -22,7 +22,6 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs._
 import org.apache.spark.ml.clustering
 import org.apache.spark.mllib.tree.RandomForest
-import org.apache.spark.mllib.util.MLUtils
 
 /**
   * The main algorithm behind the Reccomender System
@@ -483,6 +482,18 @@ object ReccomenderBackbone extends SparkOps {
           (trainingData.cache(), testData.cache(), dataPerclass.size)
         }
 
+        // How many categorical features we have
+        val categoricalFeaturesNo = Seq(includeCategory, includeProduct).collect { case true => 1 }.length
+        // Build categorical featueres map
+        val categoricalFeaturesInfo = (0 until categoricalFeaturesNo).foldLeft(Map.empty[Int, Int])((features: Map[Int, Int], index) =>
+          features ++ Map(index -> filteredTrainingData.union(filteredTestData).map { point =>
+            point.features match {
+              case dense: DenseVector => dense.values(index)
+              case sparse: SparseVector => sparse.values(index)
+            }
+          }.distinct().count().toInt)
+        )
+
         val modelsNo = conf.getInt("preprocess.modelsNo")
         (1 to modelsNo) map {
           i =>
@@ -495,12 +506,11 @@ object ReccomenderBackbone extends SparkOps {
             // Train a RandomForest model.
             // Empty categoricalFeaturesInfo indicates all features are continuous.
             val numClasses = classes
-            val categoricalFeaturesInfo = Map[Int, Int]()
-            val numTrees = 1000
+            val numTrees = 2
             val featureSubsetStrategy = "auto"
             val impurity = "gini"
-            val maxDepth = 30
-            val maxBins = 100
+            val maxDepth = 35
+            val maxBins = 250
 
             val model = RandomForest.trainClassifier(filteredTrainingData, numClasses, categoricalFeaturesInfo,
               numTrees, featureSubsetStrategy, impurity, maxDepth, maxBins)
