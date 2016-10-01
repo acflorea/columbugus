@@ -501,7 +501,7 @@ object ReccomenderBackbone extends SparkOps {
             // MLUtils.saveAsLibSVMFile(filteredTrainingData.repartition(1), s"$fsRoot/svmInputTrain")
             // MLUtils.saveAsLibSVMFile(filteredTestData.repartition(1), s"$fsRoot/svmInputTest" )
 
-            // val model = new SVMWithSGDMulticlass(undersample, i * 12345L).train(filteredTrainingData, 1000, 1, 0.01, 1)
+            val model = new SVMWithSGDMulticlass(undersample, i * 12345L).train(filteredTrainingData, 1000, 1, 0.01, 1)
 
             // Train a RandomForest model.
             // Empty categoricalFeaturesInfo indicates all features are continuous.
@@ -512,8 +512,8 @@ object ReccomenderBackbone extends SparkOps {
             val maxDepth = 35
             val maxBins = 250
 
-            val model = RandomForest.trainClassifier(filteredTrainingData, numClasses, categoricalFeaturesInfo,
-              numTrees, featureSubsetStrategy, impurity, maxDepth, maxBins)
+            //            val model = RandomForest.trainClassifier(filteredTrainingData, numClasses, categoricalFeaturesInfo,
+            //              numTrees, featureSubsetStrategy, impurity, maxDepth, maxBins)
 
             // Evaluate model on test instances and compute test error
             val labelAndPreds = testData.map { point =>
@@ -629,9 +629,9 @@ object ReccomenderBackbone extends SparkOps {
     val productScalingFactor = conf.getString("preprocess.productScalingFactor").split(",").map(_.trim.toInt)
     val productMultiplier = conf.getString("preprocess.productMultiplier").split(",").map(_.trim.toInt)
 
-    val features = Seq(includeCategory ->("category", categoryScalingFactor(categorySFIndex), categoryMultiplier(categoryMIndex)),
-      includeProduct ->("product", productScalingFactor(productSFIndex), productMultiplier(productMIndex))).collect {
-      case pair if pair._1 => pair._2._1 ->(pair._2._2, pair._2._3)
+    val features = Seq(includeCategory -> ("category", categoryScalingFactor(categorySFIndex), categoryMultiplier(categoryMIndex)),
+      includeProduct -> ("product", productScalingFactor(productSFIndex), productMultiplier(productMIndex))).collect {
+      case pair if pair._1 => pair._2._1 -> (pair._2._2, pair._2._3)
     }.toMap
 
     val featureContext = FeatureContext(features)
