@@ -12,7 +12,7 @@ import scala.collection.parallel.ForkJoinTaskSupport
 /**
   * Created by aflorea on 29.11.2015.
   */
-class SVMWithSGDMulticlass(undersample: Boolean, seed: Long) {
+class SVMWithSGDMulticlass(undersample: Boolean, seed: Long, classes: Iterable[Double]) {
 
   def logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -41,22 +41,21 @@ class SVMWithSGDMulticlass(undersample: Boolean, seed: Long) {
              miniBatchFraction: Double): SVMMultiModel = {
 
     // determine number of classes
-    val classes = input.map(point => point.label).distinct().collect()
-    val numberOfClasses = classes.length
+    val classesToPredict = classes.toArray
+    val numberOfClasses = classesToPredict.length
 
-    timeLog.info(s"Trainig data size is ${input.count()}")
     resultsLog.info(s"Training SVMWithSGDMulticlass for $numberOfClasses distinct classes")
 
-    val binaryModelIds = classes
+    val binaryModelIds = classes.par
 
-    // binaryModelIds.tasksupport =
-    // new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(10))
+    binaryModelIds.tasksupport =
+      new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(SparkOps.sc.defaultParallelism))
 
     val binaryModels = binaryModelIds.map { i =>
 
       // one vs all - map class labels
-      val inputProjection = input.map {
-        case LabeledPoint(label, features) => LabeledPoint(if (label == i) 1.0 else 0.0, features)
+      val inputProjection = input.mapPartitions {
+        _ map { case LabeledPoint(label, features) => LabeledPoint(if (label == i) 1.0 else 0.0, features) }
       }
 
       logger.debug(s"Train $i vs all with ${inputProjection filter (_.label == 1.0) count()} positive samples")
@@ -76,7 +75,7 @@ class SVMWithSGDMulticlass(undersample: Boolean, seed: Long) {
         positives union negatives
       }
       else
-        inputProjection).repartition(SparkOps.sc.defaultParallelism).cache()
+        inputProjection).cache()
 
       // train each model
       // val svm = new SVMWithSGD()
@@ -89,7 +88,7 @@ class SVMWithSGDMulticlass(undersample: Boolean, seed: Long) {
       model.clearThreshold()
       (model, i)
 
-    } // .toArray
+    }.toArray
 
     new SVMMultiModel(binaryModels)
 

@@ -47,6 +47,7 @@ object ReccomenderBackbone extends SparkOps {
 
     // Scalability testing
     val replicationFactor = conf.getInt("spark.replicationFactor")
+    val maxClassToTrain = conf.getInt("spark.maxClassToTrain")
 
     // Execution parameters
     val cleansing = conf.getBoolean("phases.cleansing")
@@ -424,37 +425,65 @@ object ReccomenderBackbone extends SparkOps {
           (elector._2._1, elector._2._2)
         }
 
-        val (filteredTrainingData, filteredTestData) = if (removeOutliers) {
+        // Filter everything above mean plus 2 * std
+        val dataPerclass = trainingData.map(_.label).countByValue
+        val classesRDD = sc.parallelize(dataPerclass.values.toList)
 
-          // Filter everything above mean plus 2 * std
-          val dataPerclass = trainingData.map(_.label).countByValue
-          val classesRDD = sc.parallelize(dataPerclass.values.toList)
+        val (filteredTrainingData, filteredTestData, classes) = if (removeOutliers) {
+
           val threshold = classesRDD.stdev() * 2 + classesRDD.mean()
 
           resultsLog.info(s"Compute class threshold std:${classesRDD.stdev()} + avg:${classesRDD.mean()}")
 
-          val filteredClasses = dataPerclass.filter(p => p._2 < threshold)
+          val filteredClasses = if (maxClassToTrain > 0) {
+            dataPerclass.filter(p => p._2 < threshold).take(Math.min(maxClassToTrain, dataPerclass.size))
+          } else
+            dataPerclass.filter(p => p._2 < threshold)
 
           resultsLog.info(s"Keeping ${filteredClasses.size} out of ${dataPerclass.size} classes")
 
           (trainingData.filter(point => filteredClasses.contains(point.label))
-            , testData.filter(point => filteredClasses.contains(point.label)))
+            , testData.filter(point => filteredClasses.contains(point.label))
+            , filteredClasses.keys)
         } else {
-          (trainingData, testData)
+
+          val filteredClasses = if (maxClassToTrain > 0) {
+            dataPerclass.take(Math.min(maxClassToTrain, dataPerclass.size))
+          } else
+            dataPerclass
+
+          (trainingData, testData, filteredClasses.keys)
         }
 
         val modelsNo = conf.getInt("preprocess.modelsNo")
+        val trainingSteps = conf.getInt("preprocess.trainingSteps")
+
         (1 to modelsNo) map {
           i =>
 
-            val replicated = (0 to replicationFactor).
+            val startTrainTime = System.currentTimeMillis()
+
+            val _replicated = (0 to Math.sqrt(replicationFactor).toInt).
               map(_ => filteredTrainingData).foldLeft(filteredTrainingData)((r1, r2) => sc.union(r1, r2))
 
-            val model = new SVMWithSGDMulticlass(undersample, i * 12345L).train(replicated, 100, 1, 0.01, 1)
+            val replicated = (0 to Math.sqrt(replicationFactor).toInt).
+              map(_ => _replicated).foldLeft(_replicated)((r1, r2) => sc.union(r1, r2)).
+              repartition(SparkOps.sc.defaultParallelism)
+
+            val dataCount = replicated.count()
+
+            timeLog.debug(s"Training data size is $dataCount")
+
+            val model = new SVMWithSGDMulticlass(undersample, i * 12345L, classes).train(replicated, trainingSteps, 1, 0.01, 1)
 
             // TestData :: (index,classLabel) -> Seq(prediction)
-            (key, filteredTestData.zipWithIndex().map(_.swap).map(data =>
+            val results = (key, filteredTestData.zipWithIndex().map(_.swap).map(data =>
               ((data._1, data._2.label), Seq(model.predict(data._2.features)))))
+
+            val endTrainTime = System.currentTimeMillis()
+            timeLog.debug(s"Training took ${(endTrainTime - startTrainTime) / 1000} seconds.")
+
+            results
         }
     }
 
