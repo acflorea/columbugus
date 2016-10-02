@@ -76,7 +76,7 @@ class SVMWithSGDMulticlass(undersample: Boolean, seed: Long) {
         positives union negatives
       }
       else
-        inputProjection).cache()
+        inputProjection).repartition(SparkOps.sc.defaultParallelism).cache()
 
       // train each model
       // val svm = new SVMWithSGD()
