@@ -23,9 +23,9 @@ import org.apache.hadoop.fs._
 import org.apache.spark.ml.clustering
 
 /**
- * The main algorithm behind the Reccomender System
- * Created by aflorea on 18.11.2015.
- */
+  * The main algorithm behind the Reccomender System
+  * Created by aflorea on 18.11.2015.
+  */
 object ReccomenderBackbone extends SparkOps {
 
   // this is used to implicitly convert an RDD to a DataFrame.
@@ -33,15 +33,20 @@ object ReccomenderBackbone extends SparkOps {
 
   val logger = LoggerFactory.getLogger(getClass.getName)
   val resultsLog = LoggerFactory.getLogger("resultsLog")
+  val timeLog = LoggerFactory.getLogger("executionTimeLog")
 
   def main(args: Array[String]) {
 
     logger.debug("Start!")
 
-    resultsLog.info(s"NEW RUN AT :${System.currentTimeMillis}")
+    timeLog.info(s"NEW RUN AT :${System.currentTimeMillis}")
+    timeLog.info(s"Master is ${sc.master}")
     resultsLog.info(conf.root().render(ConfigRenderOptions.concise()))
 
     val startTime = System.currentTimeMillis()
+
+    // Scalability testing
+    val replicationFactor = conf.getInt("spark.replicationFactor")
 
     // Execution parameters
     val cleansing = conf.getBoolean("phases.cleansing")
@@ -394,6 +399,8 @@ object ReccomenderBackbone extends SparkOps {
     // Run training algorithm to build the model
     val undersample = conf.getBoolean("preprocess.undersampling")
 
+    timeLog.debug("Train - start")
+
     // TRAIN and predict
     val SVMModels = inputDataSVM flatMap {
       elector =>
@@ -439,13 +446,20 @@ object ReccomenderBackbone extends SparkOps {
         val modelsNo = conf.getInt("preprocess.modelsNo")
         (1 to modelsNo) map {
           i =>
-            val model = new SVMWithSGDMulticlass(undersample, i * 12345L).train(filteredTrainingData, 100, 1, 0.01, 1)
+
+            val replicated = (0 to replicationFactor).
+              map(_ => filteredTrainingData).foldLeft(filteredTrainingData)((r1, r2) => sc.union(r1, r2))
+
+            val model = new SVMWithSGDMulticlass(undersample, i * 12345L).train(replicated, 100, 1, 0.01, 1)
 
             // TestData :: (index,classLabel) -> Seq(prediction)
             (key, filteredTestData.zipWithIndex().map(_.swap).map(data =>
               ((data._1, data._2.label), Seq(model.predict(data._2.features)))))
         }
     }
+
+    timeLog.debug("Train - end")
+    timeLog.debug("Evaluate - start")
 
     SVMModels foreach { SVMModel =>
       // Get evaluation metrics.
@@ -476,19 +490,21 @@ object ReccomenderBackbone extends SparkOps {
 
     logQualityMeasurements("AVERAGED", metrics)
 
+    timeLog.debug("Evaluate - end")
+
     // Step 3...Infinity - TDB
 
     val stopHere = true
 
-    logger.debug(s"We're done in ${(System.currentTimeMillis() - startTime) / 1000} seconds!")
+    timeLog.debug(s"We're done in ${(System.currentTimeMillis() - startTime) / 1000} seconds!")
   }
 
   /**
-   * Utility method for logging quality metrics
-   *
-   * @param modelName
-   * @param _metrics
-   */
+    * Utility method for logging quality metrics
+    *
+    * @param modelName
+    * @param _metrics
+    */
   private def logQualityMeasurements(modelName: String, _metrics: MulticlassMultilabelMetrics): Unit = {
     val _fMeasure = _metrics.fMeasure
     val _weightedPrecision = _metrics.weightedPrecision
@@ -511,11 +527,11 @@ object ReccomenderBackbone extends SparkOps {
   }
 
   /**
-   * Hdfs files merger
-   *
-   * @param srcPath
-   * @param dstPath
-   */
+    * Hdfs files merger
+    *
+    * @param srcPath
+    * @param dstPath
+    */
   def merge(srcPath: String, dstPath: String): Unit = {
     val hadoopConfig = new Configuration()
     val hdfs = FileSystem.get(hadoopConfig)
@@ -523,20 +539,20 @@ object ReccomenderBackbone extends SparkOps {
   }
 
   /**
-   * A more reasonable file name candidate
-   *
-   * @param input - input name it it's raw form
-   * @return - a more reasonable file name candidate
-   */
+    * A more reasonable file name candidate
+    *
+    * @param input - input name it it's raw form
+    * @return - a more reasonable file name candidate
+    */
   def FileFriendly(input: String): String = {
     input.replace(".", "-").replace(",", "-")
   }
 
   /**
-   * Retrieves current features context (values for category, product...)
-   *
-   * @return
-   */
+    * Retrieves current features context (values for category, product...)
+    *
+    * @return
+    */
   def getFeatureContext(categorySFIndex: Int = 0, categoryMIndex: Int = 0, productSFIndex: Int = 0, productMIndex: Int = 0): FeatureContext = {
 
     val includeCategory = conf.getBoolean("preprocess.includeCategory")
@@ -547,9 +563,9 @@ object ReccomenderBackbone extends SparkOps {
     val productScalingFactor = conf.getString("preprocess.productScalingFactor").split(",").map(_.trim.toInt)
     val productMultiplier = conf.getString("preprocess.productMultiplier").split(",").map(_.trim.toInt)
 
-    val features = Seq(includeCategory ->("category", categoryScalingFactor(categorySFIndex), categoryMultiplier(categoryMIndex)),
-      includeProduct ->("product", productScalingFactor(productSFIndex), productMultiplier(productMIndex))).collect {
-      case pair if pair._1 => pair._2._1 ->(pair._2._2, pair._2._3)
+    val features = Seq(includeCategory -> ("category", categoryScalingFactor(categorySFIndex), categoryMultiplier(categoryMIndex)),
+      includeProduct -> ("product", productScalingFactor(productSFIndex), productMultiplier(productMIndex))).collect {
+      case pair if pair._1 => pair._2._1 -> (pair._2._2, pair._2._3)
     }.toMap
 
     val featureContext = FeatureContext(features)
@@ -557,13 +573,13 @@ object ReccomenderBackbone extends SparkOps {
   }
 
   /**
-   * If transform : TF/IDF, FREQUENCY-FILTERING, SAVE DATAFRAME else : LOAD DATAFRAME
-   *
-   * @param transform
-   * @param fsRoot - file system root
-   * @param wordsData
-   * @return - transformed dataframe
-   */
+    * If transform : TF/IDF, FREQUENCY-FILTERING, SAVE DATAFRAME else : LOAD DATAFRAME
+    *
+    * @param transform
+    * @param fsRoot - file system root
+    * @param wordsData
+    * @return - transformed dataframe
+    */
   private def dataTransform(transform: Boolean, fsRoot: String, wordsData: DataFrame): DataFrame = {
     val rescaledData = if (transform) {
       logger.debug("TRANSFORM :: Start!")
@@ -642,15 +658,15 @@ object ReccomenderBackbone extends SparkOps {
   }
 
   /**
-   * If cleansing : LOAD, FILTER, TOKENIZE, SAVE DATAFRAME - else LOAD DATAFRAME
-   *
-   * @param cleansing
-   * @param fsRoot - file system root
-   * @return - cleaned dataframe
-   */
+    * If cleansing : LOAD, FILTER, TOKENIZE, SAVE DATAFRAME - else LOAD DATAFRAME
+    *
+    * @param cleansing
+    * @param fsRoot - file system root
+    * @return - cleaned dataframe
+    */
   private def dataCleansing(cleansing: Boolean, fsRoot: String): DataFrame = {
     val wordsData = if (cleansing) {
-      logger.debug("CLEANSING :: Start!")
+      timeLog.debug("CLEANSING :: Start!")
 
       // Charge configs
       val tokenizerType = conf.getInt("global.tokenizerType")
@@ -673,7 +689,7 @@ object ReccomenderBackbone extends SparkOps {
 
       // writeToTable(_wordsData, "acf_cleaned_data")
       _wordsData.write.mode("overwrite").parquet(s"$fsRoot/acf_cleaned_data")
-      logger.debug(s"CLEANSING :: " +
+      timeLog.debug(s"CLEANSING :: " +
         s"Done in ${(System.currentTimeMillis() - currentTime) / 1000} seconds!")
       sqlContext.read.parquet(s"$fsRoot/acf_cleaned_data")
     }

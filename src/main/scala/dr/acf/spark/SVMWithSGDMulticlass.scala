@@ -45,10 +45,10 @@ class SVMWithSGDMulticlass(undersample: Boolean, seed: Long) {
 
     resultsLog.info(s"Training SVMWithSGDMulticlass for $numberOfClasses distinct classes")
 
-    val binaryModelIds = classes.par
+    val binaryModelIds = classes
 
-    binaryModelIds.tasksupport =
-      new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(10))
+   // binaryModelIds.tasksupport =
+     // new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(10))
 
     val binaryModels = binaryModelIds.map { i =>
 
@@ -87,7 +87,7 @@ class SVMWithSGDMulticlass(undersample: Boolean, seed: Long) {
       model.clearThreshold()
       (model, i)
 
-    }.toArray
+    } // .toArray
 
     new SVMMultiModel(binaryModels)
 

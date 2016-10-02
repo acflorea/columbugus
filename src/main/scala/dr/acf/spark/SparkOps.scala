@@ -16,7 +16,8 @@ object SparkOps {
     val master = conf.getString("spark.master")
     val appName = conf.getString("spark.appName")
 
-    val sparkConf = new SparkConf().setMaster(master).setAppName(appName)
+    val sparkConf = new SparkConf().setAppName(appName)
+    //.setMaster(master).setAppName(appName)
 
     sparkConf.set("spark.driver.memory", conf.getString("spark.driver.memory"))
     sparkConf.set("spark.driver.maxResultSize", conf.getString("spark.driver.maxResultSize"))
