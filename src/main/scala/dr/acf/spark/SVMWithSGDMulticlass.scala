@@ -10,28 +10,29 @@ import org.slf4j.LoggerFactory
 import scala.collection.parallel.ForkJoinTaskSupport
 
 /**
- * Created by aflorea on 29.11.2015.
- */
-class SVMWithSGDMulticlass(undersample: Boolean, seed: Long) {
+  * Created by aflorea on 29.11.2015.
+  */
+class SVMWithSGDMulticlass(undersample: Boolean, seed: Long, classes: Iterable[Double]) {
 
   def logger = LoggerFactory.getLogger(getClass.getName)
 
   val resultsLog = LoggerFactory.getLogger("resultsLog")
+  val timeLog = LoggerFactory.getLogger("executionTimeLog")
 
   /**
-   * Train k (one vs. all) SVM models given an RDD of (label, features) pairs. We run a fixed number
-   * of iterations of gradient descent using the specified step size. Each iteration uses
-   * `miniBatchFraction` fraction of the data to calculate the gradient. The weights used in
-   * gradient descent are initialized using the initial weights provided.
-   *
-   * NOTE: Labels used in SVM should be {0, 1}.
-   *
-   * @param input             RDD of (label, array of features) pairs.
-   * @param numIterations     Number of iterations of gradient descent to run.
-   * @param stepSize          Step size to be used for each iteration of gradient descent.
-   * @param regParam          Regularization parameter.
-   * @param miniBatchFraction Fraction of data to be used per iteration.
-   */
+    * Train k (one vs. all) SVM models given an RDD of (label, features) pairs. We run a fixed number
+    * of iterations of gradient descent using the specified step size. Each iteration uses
+    * `miniBatchFraction` fraction of the data to calculate the gradient. The weights used in
+    * gradient descent are initialized using the initial weights provided.
+    *
+    * NOTE: Labels used in SVM should be {0, 1}.
+    *
+    * @param input             RDD of (label, array of features) pairs.
+    * @param numIterations     Number of iterations of gradient descent to run.
+    * @param stepSize          Step size to be used for each iteration of gradient descent.
+    * @param regParam          Regularization parameter.
+    * @param miniBatchFraction Fraction of data to be used per iteration.
+    */
   def train(
              input: RDD[LabeledPoint],
              numIterations: Int,
@@ -40,21 +41,21 @@ class SVMWithSGDMulticlass(undersample: Boolean, seed: Long) {
              miniBatchFraction: Double): SVMMultiModel = {
 
     // determine number of classes
-    val classes = input.map(point => point.label).distinct().collect()
-    val numberOfClasses = classes.length
+    val classesToPredict = classes.toArray
+    val numberOfClasses = classesToPredict.length
 
     resultsLog.info(s"Training SVMWithSGDMulticlass for $numberOfClasses distinct classes")
 
     val binaryModelIds = classes.par
 
     binaryModelIds.tasksupport =
-      new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(10))
+      new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(SparkOps.sc.defaultParallelism))
 
     val binaryModels = binaryModelIds.map { i =>
 
       // one vs all - map class labels
-      val inputProjection = input.map {
-        case LabeledPoint(label, features) => LabeledPoint(if (label == i) 1.0 else 0.0, features)
+      val inputProjection = input.mapPartitions {
+        _ map { case LabeledPoint(label, features) => LabeledPoint(if (label == i) 1.0 else 0.0, features) }
       }
 
       logger.debug(s"Train $i vs all with ${inputProjection filter (_.label == 1.0) count()} positive samples")
@@ -94,15 +95,15 @@ class SVMWithSGDMulticlass(undersample: Boolean, seed: Long) {
   }
 
   /**
-   * Train k (one vs. all) SVM models given an RDD of (label, features) pairs. We run a fixed number
-   * of iterations of gradient descent using a step size of 1.0. We use the entire data set to
-   * update the gradient in each iteration.
-   * NOTE: Labels used in SVM should be {0, 1, 2 ... k-1}
-   *
-   * @param input         RDD of (label, array of features) pairs.
-   * @param numIterations Number of iterations of gradient descent to run.
-   * @return a SVMModel which has the weights and offset from training.
-   */
+    * Train k (one vs. all) SVM models given an RDD of (label, features) pairs. We run a fixed number
+    * of iterations of gradient descent using a step size of 1.0. We use the entire data set to
+    * update the gradient in each iteration.
+    * NOTE: Labels used in SVM should be {0, 1, 2 ... k-1}
+    *
+    * @param input         RDD of (label, array of features) pairs.
+    * @param numIterations Number of iterations of gradient descent to run.
+    * @return a SVMModel which has the weights and offset from training.
+    */
   def train(input: RDD[LabeledPoint], numIterations: Int): SVMMultiModel = {
     train(input, numIterations, 1.0, 0.01, 1.0)
   }
@@ -114,22 +115,22 @@ object SVMWithSGDMulticlass {
 }
 
 /**
- * A bag of one-vs-all models
- *
- * @param models array of one vs. all models
- */
+  * A bag of one-vs-all models
+  *
+  * @param models array of one vs. all models
+  */
 class SVMMultiModel(models: Array[(SVMModel, Double)])
   extends ClassificationModel with Serializable {
 
   val indexedModels = models
 
   /**
-   * Predict values for the given data set using the model trained.
-   *
-   * @param testData RDD representing data points to be predicted
-   * @return RDD[Double] where each entry contains the corresponding prediction
-   *
-   */
+    * Predict values for the given data set using the model trained.
+    *
+    * @param testData RDD representing data points to be predicted
+    * @return RDD[Double] where each entry contains the corresponding prediction
+    *
+    */
   override def predict(testData: RDD[Vector]): RDD[Double] = {
     val localModels = indexedModels
     val bcModels = testData.context.broadcast(localModels)
@@ -140,19 +141,19 @@ class SVMMultiModel(models: Array[(SVMModel, Double)])
   }
 
   /**
-   * Predict values for a single data point using the model trained.
-   *
-   * @param testData array representing a single data point
-   * @return predicted category from the trained model
-   */
+    * Predict values for a single data point using the model trained.
+    *
+    * @param testData array representing a single data point
+    * @return predicted category from the trained model
+    */
   override def predict(testData: Vector): Double = predict(testData, indexedModels)._2
 
   /**
-   * Predict 1 value for a single data point using the model trained.
-   *
-   * @param testData array representing a single data point
-   * @return predicted category from the trained model
-   */
+    * Predict 1 value for a single data point using the model trained.
+    *
+    * @param testData array representing a single data point
+    * @return predicted category from the trained model
+    */
   def predict1(testData: Vector): (Double, Double) = predict(testData, indexedModels)
 
 

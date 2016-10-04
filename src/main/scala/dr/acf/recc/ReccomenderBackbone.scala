@@ -34,15 +34,21 @@ object ReccomenderBackbone extends SparkOps {
 
   val logger = LoggerFactory.getLogger(getClass.getName)
   val resultsLog = LoggerFactory.getLogger("resultsLog")
+  val timeLog = LoggerFactory.getLogger("executionTimeLog")
 
   def main(args: Array[String]) {
 
     logger.debug("Start!")
 
-    resultsLog.info(s"NEW RUN AT :${System.currentTimeMillis}")
+    timeLog.info(s"NEW RUN AT :${System.currentTimeMillis}")
+    timeLog.info(s"Master is ${sc.master}")
     resultsLog.info(conf.root().render(ConfigRenderOptions.concise()))
 
     val startTime = System.currentTimeMillis()
+
+    // Scalability testing
+    val replicationFactor = conf.getInt("spark.replicationFactor")
+    val maxClassToTrain = conf.getInt("spark.maxClassToTrain")
 
     // Execution parameters
     val cleansing = conf.getBoolean("phases.cleansing")
@@ -438,6 +444,8 @@ object ReccomenderBackbone extends SparkOps {
     // Run training algorithm to build the model
     val undersample = conf.getBoolean("preprocess.undersampling")
 
+    timeLog.debug("Train - start")
+
     // TRAIN and predict
     val SVMModels = inputDataSVM flatMap {
       elector =>
@@ -464,22 +472,31 @@ object ReccomenderBackbone extends SparkOps {
         // Filter everything above mean plus 2 * std
         val dataPerclass = trainingData.map(_.label).countByValue
         val classesRDD = sc.parallelize(dataPerclass.values.toList)
+
         val (filteredTrainingData, filteredTestData, classes) = if (removeOutliers) {
 
           val threshold = classesRDD.stdev() * 2 + classesRDD.mean()
 
           resultsLog.info(s"Compute class threshold std:${classesRDD.stdev()} + avg:${classesRDD.mean()}")
 
-          val filteredClasses = dataPerclass.filter(p => p._2 < threshold)
+          val filteredClasses = if (maxClassToTrain > 0) {
+            dataPerclass.filter(p => p._2 < threshold).take(Math.min(maxClassToTrain, dataPerclass.size))
+          } else
+            dataPerclass.filter(p => p._2 < threshold)
 
           resultsLog.info(s"Keeping ${filteredClasses.size} out of ${dataPerclass.size} classes")
 
-          (trainingData.filter(point => filteredClasses.contains(point.label)).cache()
-            , testData.filter(point => filteredClasses.contains(point.label)).cache(),
-            filteredClasses.size)
+          (trainingData.filter(point => filteredClasses.contains(point.label))
+            , testData.filter(point => filteredClasses.contains(point.label))
+            , filteredClasses.keys)
         } else {
 
-          (trainingData.cache(), testData.cache(), dataPerclass.size)
+          val filteredClasses = if (maxClassToTrain > 0) {
+            dataPerclass.take(Math.min(maxClassToTrain, dataPerclass.size))
+          } else
+            dataPerclass
+
+          (trainingData, testData, filteredClasses.keys)
         }
 
         // How many categorical features we have
@@ -495,6 +512,8 @@ object ReccomenderBackbone extends SparkOps {
         )
 
         val modelsNo = conf.getInt("preprocess.modelsNo")
+        val trainingSteps = conf.getInt("preprocess.trainingSteps")
+
         (1 to modelsNo) map {
           i =>
 
@@ -522,10 +541,18 @@ object ReccomenderBackbone extends SparkOps {
             }
 
             // TestData :: (index,classLabel) -> Seq(prediction)
-            (key, filteredTestData.zipWithIndex().map(_.swap).map(data =>
+            val results = (key, filteredTestData.zipWithIndex().map(_.swap).map(data =>
               ((data._1, data._2.label), Seq(model.predict(data._2.features)))))
+
+            val endTrainTime = System.currentTimeMillis()
+            timeLog.debug(s"Training took ${(endTrainTime - startTrainTime) / 1000} seconds.")
+
+            results
         }
     }
+
+    timeLog.debug("Train - end")
+    timeLog.debug("Evaluate - start")
 
     logger.debug(s"Training done in ${(System.currentTimeMillis() - trainingStarts) / 1000} seconds!")
 
@@ -558,11 +585,13 @@ object ReccomenderBackbone extends SparkOps {
 
     logQualityMeasurements("AVERAGED", metrics)
 
+    timeLog.debug("Evaluate - end")
+
     // Step 3...Infinity - TDB
 
     val stopHere = true
 
-    logger.debug(s"We're done in ${(System.currentTimeMillis() - startTime) / 1000} seconds!")
+    timeLog.debug(s"We're done in ${(System.currentTimeMillis() - startTime) / 1000} seconds!")
   }
 
   /**
@@ -732,7 +761,7 @@ object ReccomenderBackbone extends SparkOps {
     */
   private def dataCleansing(cleansing: Boolean, fsRoot: String): DataFrame = {
     val wordsData = if (cleansing) {
-      logger.debug("CLEANSING :: Start!")
+      timeLog.debug("CLEANSING :: Start!")
 
       // Charge configs
       val tokenizerType = conf.getInt("global.tokenizerType")
@@ -755,7 +784,7 @@ object ReccomenderBackbone extends SparkOps {
 
       // writeToTable(_wordsData, "acf_cleaned_data")
       _wordsData.write.mode("overwrite").parquet(s"$fsRoot/acf_cleaned_data")
-      logger.debug(s"CLEANSING :: " +
+      timeLog.debug(s"CLEANSING :: " +
         s"Done in ${(System.currentTimeMillis() - currentTime) / 1000} seconds!")
       sqlContext.read.parquet(s"$fsRoot/acf_cleaned_data")
     }
