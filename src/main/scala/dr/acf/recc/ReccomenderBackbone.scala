@@ -242,7 +242,7 @@ object ReccomenderBackbone extends SparkOps {
         resultsLog.info(s"Test data size ${allDataCount - trainingDataCount}")
 
         val rawTestData = rescaledData.filter(s"index > $trainingDataCount").cache()
-        val rawTrainingData = rescaledData.filter(s"index <= $trainingDataCount").cache()
+        val rawTrainingData = rescaledData.filter(s"index <= $trainingDataCount").repartition(SparkOps.sc.defaultParallelism).cache()
 
         // Simple model
         if (simple) {
@@ -333,8 +333,6 @@ object ReccomenderBackbone extends SparkOps {
 
             val alpha = conf.getDouble("preprocess.ldaAlpha")
             val beta = conf.getDouble("preprocess.ldaBeta")
-
-            val indexedData = rawData.rdd.zipWithIndex().map(_.swap).sortByKey()
 
             val featureContext: FeatureContext = getFeatureContext(categorySFIndex, categoryMIndex, productSFIndex, productMIndex)
 
@@ -520,7 +518,7 @@ object ReccomenderBackbone extends SparkOps {
             // MLUtils.saveAsLibSVMFile(filteredTrainingData.repartition(1), s"$fsRoot/svmInputTrain")
             // MLUtils.saveAsLibSVMFile(filteredTestData.repartition(1), s"$fsRoot/svmInputTest" )
 
-            val model = new SVMWithSGDMulticlass(undersample, i * 12345L).train(filteredTrainingData, 1000, 1, 0.01, 1)
+            val model = new SVMWithSGDMulticlass(undersample, i * 12345L, classes).train(filteredTrainingData, 1000, 1, 0.01, 1)
 
             // Train a RandomForest model.
             // Empty categoricalFeaturesInfo indicates all features are continuous.
@@ -545,7 +543,6 @@ object ReccomenderBackbone extends SparkOps {
               ((data._1, data._2.label), Seq(model.predict(data._2.features)))))
 
             val endTrainTime = System.currentTimeMillis()
-            timeLog.debug(s"Training took ${(endTrainTime - startTrainTime) / 1000} seconds.")
 
             results
         }
