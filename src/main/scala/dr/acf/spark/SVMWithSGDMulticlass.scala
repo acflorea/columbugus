@@ -35,10 +35,11 @@ class SVMWithSGDMulticlass(undersample: Boolean, seed: Long, classes: Iterable[D
     */
   def train(
              input: RDD[LabeledPoint],
-             numIterations: Int,
-             stepSize: Double,
-             regParam: Double,
-             miniBatchFraction: Double): SVMMultiModel = {
+             numIterations: Int, //100
+             stepSize: Double, //1
+             regParam: Double, // 0.1
+             miniBatchFraction: Double // 1
+           ): SVMMultiModel = {
 
     // determine number of classes
     val classesToPredict = classes.toArray

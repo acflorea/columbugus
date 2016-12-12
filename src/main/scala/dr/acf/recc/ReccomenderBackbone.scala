@@ -62,7 +62,7 @@ object ReccomenderBackbone extends SparkOps {
     val fsRoot = conf.getString("filesystem.root")
 
     // Step 1 - load data from DB
-    val wordsData: DataFrame = dataCleansing(cleansing, fsRoot)
+    val wordsData: DataFrame = dataCleansing(cleansing, fsRoot).repartition(sc.defaultParallelism).cache()
 
     // Step 2 - transform to numerical features
     val scaledData: DataFrame = dataTransform(transform, fsRoot, wordsData)
@@ -463,11 +463,11 @@ object ReccomenderBackbone extends SparkOps {
 
             val startTrainTime = System.currentTimeMillis()
 
-            val _replicated = (0 to Math.sqrt(replicationFactor).toInt).
-              map(_ => filteredTrainingData).foldLeft(filteredTrainingData)((r1, r2) => sc.union(r1, r2))
+            val _replicated = (0 until Math.sqrt(replicationFactor).toInt).
+              map(_ => filteredTrainingData).foldLeft(sc.parallelize(Seq.empty[LabeledPoint]))((r1, r2) => sc.union(r1, r2))
 
-            val replicated = (0 to Math.sqrt(replicationFactor).toInt).
-              map(_ => _replicated).foldLeft(_replicated)((r1, r2) => sc.union(r1, r2)).
+            val replicated = (0 until Math.sqrt(replicationFactor).toInt).
+              map(_ => _replicated).foldLeft(sc.parallelize(Seq.empty[LabeledPoint]))((r1, r2) => sc.union(r1, r2)).
               repartition(SparkOps.sc.defaultParallelism)
 
             val dataCount = replicated.count()
@@ -545,10 +545,10 @@ object ReccomenderBackbone extends SparkOps {
     val _averagedAccuracy = _metrics.averagedAccuracy
 
     resultsLog.info(s"MODEL -> $modelName")
-    // resultsLog.info("fMeasure = " + _fMeasure)
-    // resultsLog.info("Weighted Precision = " + _weightedPrecision)
-    // resultsLog.info("Weighted Recall = " + _weightedRecall)
-    // resultsLog.info("Weighted fMeasure = " + _weightedFMeasure)
+    resultsLog.info("fMeasure = " + _fMeasure)
+    resultsLog.info("Weighted Precision = " + _weightedPrecision)
+    resultsLog.info("Weighted Recall = " + _weightedRecall)
+    resultsLog.info("Weighted fMeasure = " + _weightedFMeasure)
     resultsLog.info("Averaged Precision = " + _averagedPrecision)
     resultsLog.info("Averaged Recall = " + _averagedRecall)
     resultsLog.info("Averaged fMeasure = " + _averagedFMeasure)
@@ -703,7 +703,7 @@ object ReccomenderBackbone extends SparkOps {
 
       val currentTime = System.currentTimeMillis()
 
-      val bugInfoDF = DBExtractor.buildBugsRDD.toDF()
+      val bugInfoDF = DBExtractor.buildBugsRDD.toDF().repartition(sc.defaultParallelism).cache()
 
       // Step 2 - extract features
       val tokenizer = tokenizerType match {
