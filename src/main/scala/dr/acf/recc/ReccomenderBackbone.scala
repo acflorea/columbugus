@@ -60,6 +60,7 @@ object ReccomenderBackbone extends SparkOps {
 
     // File System root
     val fsRoot = conf.getString("filesystem.root")
+    val resultsFileName = conf.getString("filesystem.resultsFileName")
 
     // Step 1 - load data from DB
     val wordsData: DataFrame = dataCleansing(cleansing, fsRoot).repartition(sc.defaultParallelism).cache()
@@ -103,9 +104,9 @@ object ReccomenderBackbone extends SparkOps {
           val labeledPoint = if (_includeCategory || _includeProduct) {
 
             val (_productScalingFactor, _productMultiplier) =
-              if (_includeProduct) featureContext.features.get("product").get else (0, 0)
+              if (_includeProduct) featureContext.features.get("product").get else (0.0, 0)
             val (_categoryScalingFactor, _categoryMultiplier) =
-              if (_includeCategory) featureContext.features.get("category").get else (0, 0)
+              if (_includeCategory) featureContext.features.get("category").get else (0.0, 0)
 
             features match {
               case sparse: SparseVector =>
@@ -116,13 +117,13 @@ object ReccomenderBackbone extends SparkOps {
                 else
                   Vector.empty
                 val productScalingArray = if (_includeProduct)
-                  1 to _productMultiplier map (i => _productScalingFactor.toDouble)
+                  1 to _productMultiplier map (i => _productScalingFactor)
                 else
                   Vector.empty
 
                 val categorySize = compIds.length * _categoryMultiplier
                 val categoryIndices = 1 to _categoryMultiplier map (i => productSize + compIds.length * (i - 1) + compIds.indexOf(component_id))
-                val categoryScalingArray = 1 to _categoryMultiplier map (i => _categoryScalingFactor.toDouble)
+                val categoryScalingArray = 1 to _categoryMultiplier map (i => _categoryScalingFactor)
 
                 LabeledPoint(
                   assignment_class,
@@ -139,8 +140,8 @@ object ReccomenderBackbone extends SparkOps {
 
               case dense: DenseVector =>
 
-                val oneCategorySeries = compIds.map(i => if (i == compIds.indexOf(component_id)) _categoryScalingFactor.toDouble else 0.0)
-                val oneProductSeries = prodIds.map(i => if (i == prodIds.indexOf(product_id)) _productScalingFactor.toDouble else 0.0)
+                val oneCategorySeries = compIds.map(i => if (i == compIds.indexOf(component_id)) _categoryScalingFactor else 0.0)
+                val oneProductSeries = prodIds.map(i => if (i == prodIds.indexOf(product_id)) _productScalingFactor else 0.0)
 
                 val categorySeries = Seq.fill(_categoryMultiplier)(oneCategorySeries).flatten.toArray
                 val productSeries = Seq.fill(_productMultiplier)(oneProductSeries).flatten.toArray
@@ -519,6 +520,16 @@ object ReccomenderBackbone extends SparkOps {
 
     logQualityMeasurements("AVERAGED", metrics)
 
+    // Save results
+    if (resultsFileName.trim != "") {
+      import java.nio.file.{Paths, Files}
+      import java.nio.charset.StandardCharsets
+
+      val results = s"P:${metrics.weightedPrecision} R:${metrics.weightedRecall} F:${metrics.weightedFMeasure}"
+
+      Files.write(Paths.get(s"$fsRoot/$resultsFileName"), results.getBytes(StandardCharsets.UTF_8))
+    }
+
     timeLog.debug("Evaluate - end")
 
     // Step 3...Infinity - TDB
@@ -587,9 +598,9 @@ object ReccomenderBackbone extends SparkOps {
     val includeCategory = conf.getBoolean("preprocess.includeCategory")
     val includeProduct = conf.getBoolean("preprocess.includeProduct")
 
-    val categoryScalingFactor = conf.getString("preprocess.categoryScalingFactor").split(",").map(_.trim.toInt)
+    val categoryScalingFactor = conf.getString("preprocess.categoryScalingFactor").split(",").map(_.trim.toDouble)
     val categoryMultiplier = conf.getString("preprocess.categoryMultiplier").split(",").map(_.trim.toInt)
-    val productScalingFactor = conf.getString("preprocess.productScalingFactor").split(",").map(_.trim.toInt)
+    val productScalingFactor = conf.getString("preprocess.productScalingFactor").split(",").map(_.trim.toDouble)
     val productMultiplier = conf.getString("preprocess.productMultiplier").split(",").map(_.trim.toInt)
 
     val features = Seq(includeCategory -> ("category", categoryScalingFactor(categorySFIndex), categoryMultiplier(categoryMIndex)),
@@ -731,4 +742,4 @@ object ReccomenderBackbone extends SparkOps {
 
 }
 
-case class FeatureContext(features: Map[String, (Int, Int)])
+case class FeatureContext(features: Map[String, (Double, Int)])
