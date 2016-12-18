@@ -45,6 +45,8 @@ object ReccomenderBackbone extends SparkOps {
 
     val startTime = System.currentTimeMillis()
 
+    val tuningMode = conf.getBoolean("global.tuningMode")
+
     // Scalability testing
     val replicationFactor = conf.getInt("spark.replicationFactor")
     val maxClassToTrain = conf.getInt("spark.maxClassToTrain")
@@ -475,11 +477,25 @@ object ReccomenderBackbone extends SparkOps {
 
             timeLog.debug(s"Training data size is $dataCount")
 
-            val model = new SVMWithSGDMulticlass(undersample, i * 12345L, classes).train(replicated, trainingSteps, 1, 0.01, 1)
+            val results = if (tuningMode) {
 
-            // TestData :: (index,classLabel) -> Seq(prediction)
-            val results = (key, filteredTestData.zipWithIndex().map(_.swap).map(data =>
-              ((data._1, data._2.label), Seq(model.predict(data._2.features)))))
+              val Array(actualtraining, validation) = replicated.randomSplit(Array(0.9, 0.1), 12345L)
+
+              val model = new SVMWithSGDMulticlass(undersample, i * 12345L, classes).train(actualtraining, trainingSteps, 1, 0.01, 1)
+
+              // TestData :: (index,classLabel) -> Seq(prediction)
+              (key, validation.zipWithIndex().map(_.swap).map(data =>
+                ((data._1, data._2.label), Seq(model.predict(data._2.features)))))
+
+            } else {
+
+              val model = new SVMWithSGDMulticlass(undersample, i * 12345L, classes).train(replicated, trainingSteps, 1, 0.01, 1)
+
+              // TestData :: (index,classLabel) -> Seq(prediction)
+              (key, filteredTestData.zipWithIndex().map(_.swap).map(data =>
+                ((data._1, data._2.label), Seq(model.predict(data._2.features)))))
+
+            }
 
             val endTrainTime = System.currentTimeMillis()
             timeLog.debug(s"Training took ${(endTrainTime - startTrainTime) / 1000} seconds.")
