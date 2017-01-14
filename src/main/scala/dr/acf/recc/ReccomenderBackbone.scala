@@ -34,7 +34,7 @@ object ReccomenderBackbone extends SparkOps {
 
   val logger: Logger = LoggerFactory.getLogger(getClass.getName)
   val resultsLog: Logger = LoggerFactory.getLogger("resultsLog")
-  val timeLog : Logger = LoggerFactory.getLogger("executionTimeLog")
+  val timeLog: Logger = LoggerFactory.getLogger("executionTimeLog")
 
   def main(args: Array[String]) {
 
@@ -475,8 +475,8 @@ object ReccomenderBackbone extends SparkOps {
         val trainingSteps = conf.getInt("preprocess.trainingSteps")
 
         // SVM internals
-        val stepSize = 1
-        val regParam = 0.01
+        val stepSize = if (conf.hasPath("train.stepSize")) conf.getDouble("train.stepSize") else 1.0
+        val regParam = if (conf.hasPath("train.regParam")) conf.getDouble("train.regParam") else 0.01
 
         (1 to modelsNo) map {
           i =>
