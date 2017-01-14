@@ -15,11 +15,12 @@ import org.apache.spark.mllib.linalg._
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Row, functions}
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs._
+import org.apache.hadoop.mapred
 import org.apache.spark.ml.clustering
 
 /**
@@ -31,9 +32,9 @@ object ReccomenderBackbone extends SparkOps {
   // this is used to implicitly convert an RDD to a DataFrame.
   import sqlContext.implicits._
 
-  val logger = LoggerFactory.getLogger(getClass.getName)
-  val resultsLog = LoggerFactory.getLogger("resultsLog")
-  val timeLog = LoggerFactory.getLogger("executionTimeLog")
+  val logger: Logger = LoggerFactory.getLogger(getClass.getName)
+  val resultsLog: Logger = LoggerFactory.getLogger("resultsLog")
+  val timeLog : Logger = LoggerFactory.getLogger("executionTimeLog")
 
   def main(args: Array[String]) {
 
@@ -214,8 +215,12 @@ object ReccomenderBackbone extends SparkOps {
           val trainingData = rawTrainingData.map(rowToLabeledPoint(featureContext, _))
           val testData = rawTestData.map(rowToLabeledPoint(featureContext, _))
 
-          trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_simple_${FileFriendly(featureContext.features.toString)}")
-          testData.saveAsObjectFile(s"$fsRoot/acf_test_data_simple_${FileFriendly(featureContext.features.toString)}")
+          try {
+            trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_simple_${FileFriendly(featureContext.features.toString)}")
+            testData.saveAsObjectFile(s"$fsRoot/acf_test_data_simple_${FileFriendly(featureContext.features.toString)}")
+          } catch {
+            case e: mapred.FileAlreadyExistsException => logger.debug("Files exist.")
+          }
 
           inputDataSVM.put(s"simple ${featureContext.features.toString}", (trainingData, testData))
         }
@@ -243,8 +248,12 @@ object ReccomenderBackbone extends SparkOps {
           val testData = pca.transform(rawTestData).drop("features")
             .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint(featureContext, _))
 
-          trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
-          testData.saveAsObjectFile(s"$fsRoot/acf_test_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
+          try {
+            trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
+            testData.saveAsObjectFile(s"$fsRoot/acf_test_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
+          } catch {
+            case e: mapred.FileAlreadyExistsException => logger.debug("Files exist.")
+          }
 
           inputDataSVM.put(s"PCA ${featureContext.features.toString}", (trainingData, testData))
         }
@@ -345,8 +354,12 @@ object ReccomenderBackbone extends SparkOps {
                 datasetToLabeledPoint(featureContext, component_id, product_id, topics.toSparse, assignment_class)
             }.cache()
 
-            trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
-            testData.saveAsObjectFile(s"$fsRoot/acf_test_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
+            try {
+              trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
+              testData.saveAsObjectFile(s"$fsRoot/acf_test_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
+            } catch {
+              case e: mapred.FileAlreadyExistsException => logger.debug("Files exist.")
+            }
 
             inputDataSVM.put(s"LDA_$ldaTopic ${featureContext.features.toString}", (trainingData, testData))
 
@@ -461,6 +474,10 @@ object ReccomenderBackbone extends SparkOps {
         val modelsNo = conf.getInt("preprocess.modelsNo")
         val trainingSteps = conf.getInt("preprocess.trainingSteps")
 
+        // SVM internals
+        val stepSize = 1
+        val regParam = 0.01
+
         (1 to modelsNo) map {
           i =>
 
@@ -481,7 +498,7 @@ object ReccomenderBackbone extends SparkOps {
 
               val Array(actualtraining, validation) = replicated.randomSplit(Array(0.9, 0.1), 12345L)
 
-              val model = new SVMWithSGDMulticlass(undersample, i * 12345L, classes).train(actualtraining, trainingSteps, 1, 0.01, 1)
+              val model = new SVMWithSGDMulticlass(undersample, i * 12345L, classes).train(actualtraining, trainingSteps, stepSize, regParam, 1)
 
               // TestData :: (index,classLabel) -> Seq(prediction)
               (key, validation.zipWithIndex().map(_.swap).map(data =>
@@ -489,7 +506,7 @@ object ReccomenderBackbone extends SparkOps {
 
             } else {
 
-              val model = new SVMWithSGDMulticlass(undersample, i * 12345L, classes).train(replicated, trainingSteps, 1, 0.01, 1)
+              val model = new SVMWithSGDMulticlass(undersample, i * 12345L, classes).train(replicated, trainingSteps, stepSize, regParam, 1)
 
               // TestData :: (index,classLabel) -> Seq(prediction)
               (key, filteredTestData.zipWithIndex().map(_.swap).map(data =>
