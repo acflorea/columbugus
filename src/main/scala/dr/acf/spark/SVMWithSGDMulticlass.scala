@@ -55,10 +55,11 @@ class SVMWithSGDMulticlass(undersample: Boolean, seed: Long, classes: Iterable[D
     val binaryModels = binaryModelIds.map { i =>
 
       // one vs all - map class labels
-      val inputProjection = input.mapPartitions {
-        _ map { case LabeledPoint(label, features) => LabeledPoint(if (label == i) 1.0 else 0.0, features) }
+      val inputProjection = input.map {
+        case LabeledPoint(label, features) => LabeledPoint(if (label == i) 1.0 else 0.0, features)
       }
 
+      logger.debug(s"Corpus size is ${inputProjection.count()}")
       logger.debug(s"Train $i vs all with ${inputProjection filter (_.label == 1.0) count()} positive samples")
 
       val trainData = (if (undersample) {

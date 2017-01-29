@@ -78,7 +78,7 @@ object ReccomenderBackbone extends SparkOps {
     val ldaTopics = conf.getString("preprocess.ldaTopics").split(",").map(_.trim.toInt)
     val ldaOptimizer = conf.getString("preprocess.ldaOptimizer")
 
-    val inputDataSVM = mutable.Map.empty[String, (RDD[LabeledPoint], RDD[LabeledPoint])]
+    val inputDataSVM = mutable.Map.empty[String, (RDD[LabeledPoint], RDD[LabeledPoint], RDD[LabeledPoint])]
 
     val categorySFSize = if (includeCategory) conf.getString("preprocess.categoryScalingFactor").split(",").length - 1 else 0
     val categoryMSize = if (includeCategory) conf.getString("preprocess.categoryMultiplier").split(",").length - 1 else 0
@@ -135,7 +135,7 @@ object ReccomenderBackbone extends SparkOps {
                     Array.concat(
                       productIndices.toArray,
                       categoryIndices.toArray,
-                      sparse.indices map (i => i + compIds.length)
+                      sparse.indices map (i => i + compIds.length + prodIds.length)
                     ),
                     Array.concat(productScalingArray.toArray, categoryScalingArray.toArray, sparse.values)
                   )
@@ -194,16 +194,19 @@ object ReccomenderBackbone extends SparkOps {
           _scaledData
         }
 
-        // Split data into training (90%) and test (10%).
+        // Split data into training (80%), validation (10%) and test (10%).
         val allDataCount = rescaledData.count()
-        val trainingDataCount = allDataCount / 10 * 9 toInt
+        val trainingDataCount = allDataCount / 10 * 8 toInt
+        val validationDataCount = allDataCount / 10 toInt
 
         val rawData = rescaledData.select("index", "component_id", "product_id", "features", "assignment_class")
 
         resultsLog.info(s"Training data size $trainingDataCount")
-        resultsLog.info(s"Test data size ${allDataCount - trainingDataCount}")
+        resultsLog.info(s"Validation data size $validationDataCount")
+        resultsLog.info(s"Test data size ${allDataCount - trainingDataCount - validationDataCount}")
 
-        val rawTestData = rescaledData.filter(s"index > $trainingDataCount").cache()
+        val rawTestData = rescaledData.filter(s"index > ${trainingDataCount + validationDataCount}").cache()
+        val rawValidationData = rescaledData.filter(s"index > $trainingDataCount and index <= ${trainingDataCount + validationDataCount}").cache()
         val rawTrainingData = rescaledData.filter(s"index <= $trainingDataCount").cache()
 
         // Simple model
@@ -214,15 +217,17 @@ object ReccomenderBackbone extends SparkOps {
 
           val trainingData = rawTrainingData.map(rowToLabeledPoint(featureContext, _))
           val testData = rawTestData.map(rowToLabeledPoint(featureContext, _))
+          val validationData = rawValidationData.map(rowToLabeledPoint(featureContext, _))
 
           try {
             trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_simple_${FileFriendly(featureContext.features.toString)}")
             testData.saveAsObjectFile(s"$fsRoot/acf_test_data_simple_${FileFriendly(featureContext.features.toString)}")
+            validationData.saveAsObjectFile(s"$fsRoot/acf_validation_data_simple_${FileFriendly(featureContext.features.toString)}")
           } catch {
             case e: mapred.FileAlreadyExistsException => logger.debug("Files exist.")
           }
 
-          inputDataSVM.put(s"simple ${featureContext.features.toString}", (trainingData, testData))
+          inputDataSVM.put(s"simple ${featureContext.features.toString}", (trainingData, validationData, testData))
         }
 
         // PCA
@@ -247,15 +252,18 @@ object ReccomenderBackbone extends SparkOps {
             .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint(featureContext, _))
           val testData = pca.transform(rawTestData).drop("features")
             .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint(featureContext, _))
+          val validationData = pca.transform(rawValidationData).drop("features")
+            .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint(featureContext, _))
 
           try {
             trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
             testData.saveAsObjectFile(s"$fsRoot/acf_test_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
+            validationData.saveAsObjectFile(s"$fsRoot/acf_validation_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
           } catch {
             case e: mapred.FileAlreadyExistsException => logger.debug("Files exist.")
           }
 
-          inputDataSVM.put(s"PCA ${featureContext.features.toString}", (trainingData, testData))
+          inputDataSVM.put(s"PCA ${featureContext.features.toString}", (trainingData, validationData, testData))
         }
 
         // CHI2
@@ -284,14 +292,21 @@ object ReccomenderBackbone extends SparkOps {
           val testData = rawTestData.withColumn("CHIFeatures", udf_tfFunction(rawTestData.col("features")))
             .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint(featureContext, _))
 
+          val validationData = rawValidationData.withColumn("CHIFeatures", udf_tfFunction(rawValidationData.col("features")))
+            .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint(featureContext, _))
+
           val trainingData = rawTrainingData.withColumn("CHIFeatures", udf_tfFunction(rawTrainingData.col("features")))
             .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint(featureContext, _))
 
+          try {
+            trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_CHI2_${chi2Features}_${FileFriendly(featureContext.features.toString)}")
+            testData.saveAsObjectFile(s"$fsRoot/acf_test_data_CHI2_${chi2Features}_${FileFriendly(featureContext.features.toString)}")
+            validationData.saveAsObjectFile(s"$fsRoot/acf_validation_data_CHI2_${chi2Features}_${FileFriendly(featureContext.features.toString)}")
+          } catch {
+            case e: mapred.FileAlreadyExistsException => logger.debug("Files exist.")
+          }
 
-          trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_CHI2_${chi2Features}_${FileFriendly(featureContext.features.toString)}")
-          testData.saveAsObjectFile(s"$fsRoot/acf_test_data_CHI2_${chi2Features}_${FileFriendly(featureContext.features.toString)}")
-
-          inputDataSVM.put(s"CHI2 ${featureContext.features.toString}", (trainingData, testData))
+          inputDataSVM.put(s"CHI2 ${featureContext.features.toString}", (trainingData, validationData, testData))
         }
 
         // LDA
@@ -354,14 +369,25 @@ object ReccomenderBackbone extends SparkOps {
                 datasetToLabeledPoint(featureContext, component_id, product_id, topics.toSparse, assignment_class)
             }.cache()
 
+            val validationData = ldaModel.transform(rawValidationData)
+              .rdd.map {
+              row =>
+                val topics = row.getAs[Vector]("LDAfeatures")
+                val component_id = row.getAs[Int]("component_id")
+                val product_id = row.getAs[Int]("product_id")
+                val assignment_class = row.getAs[Double]("assignment_class")
+                datasetToLabeledPoint(featureContext, component_id, product_id, topics.toSparse, assignment_class)
+            }.cache()
+
             try {
               trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
               testData.saveAsObjectFile(s"$fsRoot/acf_test_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
+              validationData.saveAsObjectFile(s"$fsRoot/acf_validation_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
             } catch {
               case e: mapred.FileAlreadyExistsException => logger.debug("Files exist.")
             }
 
-            inputDataSVM.put(s"LDA_$ldaTopic ${featureContext.features.toString}", (trainingData, testData))
+            inputDataSVM.put(s"LDA_$ldaTopic ${featureContext.features.toString}", (trainingData, validationData, testData))
 
           }
         }
@@ -374,8 +400,9 @@ object ReccomenderBackbone extends SparkOps {
 
           val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_simple_${FileFriendly(featureContext.features.toString)}")
           val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_simple_${FileFriendly(featureContext.features.toString)}")
+          val validationData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_validation_data_simple_${FileFriendly(featureContext.features.toString)}")
 
-          inputDataSVM.put(s"simple ${featureContext.features.toString}", (trainingData, testData))
+          inputDataSVM.put(s"simple ${featureContext.features.toString}", (trainingData, validationData, testData))
         }
 
         if (pca) {
@@ -384,8 +411,9 @@ object ReccomenderBackbone extends SparkOps {
 
           val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
           val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
+          val validationData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_validation_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
 
-          inputDataSVM.put(s"PCA ${featureContext.features.toString}", (trainingData, testData))
+          inputDataSVM.put(s"PCA ${featureContext.features.toString}", (trainingData, validationData, testData))
         }
 
         if (chi2) {
@@ -394,8 +422,9 @@ object ReccomenderBackbone extends SparkOps {
 
           val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_CHI2_${chi2Features}_${FileFriendly(featureContext.features.toString)}")
           val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_CHI2_${chi2Features}_${FileFriendly(featureContext.features.toString)}")
+          val validationData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_validation_data_CHI2_${chi2Features}_${FileFriendly(featureContext.features.toString)}")
 
-          inputDataSVM.put(s"CHI2 ${featureContext.features.toString}", (trainingData, testData))
+          inputDataSVM.put(s"CHI2 ${featureContext.features.toString}", (trainingData, validationData, testData))
         }
 
         if (lda) {
@@ -405,8 +434,9 @@ object ReccomenderBackbone extends SparkOps {
 
             val trainingData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_training_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
             val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
+            val validationData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_validation_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
 
-            inputDataSVM.put(s"LDA_$ldaTopic ${featureContext.features.toString}", (trainingData, testData))
+            inputDataSVM.put(s"LDA_$ldaTopic ${featureContext.features.toString}", (trainingData, validationData, testData))
           }
         }
 
@@ -429,23 +459,29 @@ object ReccomenderBackbone extends SparkOps {
         val normalize = conf.getBoolean("postprocess.normalize")
         val removeOutliers = conf.getBoolean("postprocess.removeOutliers")
 
-        val (trainingData, testData) = if (normalize) {
+        val (trainingData, validationData, testData) = if (normalize) {
           val _trainingData = elector._2._1
-          val _testData = elector._2._2
-          val scaler = new feature.StandardScaler().fit((_trainingData union _testData).map(x => x.features))
+          val _validationData = elector._2._2
+          val _testData = elector._2._3
+
+          val scaler = new feature.StandardScaler().fit((_trainingData union _validationData union _testData).map(x => x.features))
+
           (_trainingData.map(p => p.copy(features = scaler.transform(p.features))),
+            _validationData.map(p => p.copy(features = scaler.transform(p.features))),
             _testData.map(p => p.copy(features = scaler.transform(p.features))))
           // Training and test data for this elector
+
         } else {
+
           // Training and test data for this elector
-          (elector._2._1, elector._2._2)
+          (elector._2._1, elector._2._2, elector._2._3)
         }
 
         // Filter everything above mean plus 2 * std
         val dataPerclass = trainingData.map(_.label).countByValue
         val classesRDD = sc.parallelize(dataPerclass.values.toList)
 
-        val (filteredTrainingData, filteredTestData, classes) = if (removeOutliers) {
+        val (filteredTrainingData, filteredValidationData, filteredTestData, classes) = if (removeOutliers) {
 
           val threshold = classesRDD.stdev() * 2 + classesRDD.mean()
 
@@ -459,6 +495,7 @@ object ReccomenderBackbone extends SparkOps {
           resultsLog.info(s"Keeping ${filteredClasses.size} out of ${dataPerclass.size} classes")
 
           (trainingData.filter(point => filteredClasses.contains(point.label))
+            , validationData.filter(point => filteredClasses.contains(point.label))
             , testData.filter(point => filteredClasses.contains(point.label))
             , filteredClasses.keys)
         } else {
@@ -468,7 +505,7 @@ object ReccomenderBackbone extends SparkOps {
           } else
             dataPerclass
 
-          (trainingData, testData, filteredClasses.keys)
+          (trainingData, validationData, testData, filteredClasses.keys)
         }
 
         val modelsNo = conf.getInt("preprocess.modelsNo")
@@ -493,26 +530,16 @@ object ReccomenderBackbone extends SparkOps {
             val dataCount = replicated.count()
 
             timeLog.debug(s"Training data size is $dataCount")
+            val model = new SVMWithSGDMulticlass(undersample, i * 12345L, classes).train(replicated, trainingSteps, stepSize, regParam, 1)
 
-            val results = if (tuningMode) {
-
-              val Array(actualtraining, validation) = replicated.randomSplit(Array(0.9, 0.1), 12345L)
-
-              val model = new SVMWithSGDMulticlass(undersample, i * 12345L, classes).train(actualtraining, trainingSteps, stepSize, regParam, 1)
-
-              // TestData :: (index,classLabel) -> Seq(prediction)
-              (key, validation.zipWithIndex().map(_.swap).map(data =>
-                ((data._1, data._2.label), Seq(model.predict(data._2.features)))))
-
-            } else {
-
-              val model = new SVMWithSGDMulticlass(undersample, i * 12345L, classes).train(replicated, trainingSteps, stepSize, regParam, 1)
-
-              // TestData :: (index,classLabel) -> Seq(prediction)
-              (key, filteredTestData.zipWithIndex().map(_.swap).map(data =>
-                ((data._1, data._2.label), Seq(model.predict(data._2.features)))))
-
-            }
+            // Model Key
+            // ValidationData :: (index,classLabel) -> Seq(prediction)
+            // TestData :: (index,classLabel) -> Seq(prediction)
+            val results = (key
+              , (filteredValidationData.zipWithIndex().map(_.swap).map(data =>
+              ((data._1, data._2.label), Seq(model.predict(data._2.features))))
+              , filteredTestData.zipWithIndex().map(_.swap).map(data =>
+              ((data._1, data._2.label), Seq(model.predict(data._2.features))))))
 
             val endTrainTime = System.currentTimeMillis()
             timeLog.debug(s"Training took ${(endTrainTime - startTrainTime) / 1000} seconds.")
@@ -526,39 +553,59 @@ object ReccomenderBackbone extends SparkOps {
 
     SVMModels foreach { SVMModel =>
       // Get evaluation metrics.
-      val _metrics = new MulticlassMultilabelMetrics(SVMModel._2.map { pl =>
+      val _validationMetrics = new MulticlassMultilabelMetrics(SVMModel._2._1.map { pl =>
+        val label = pl._1._2
+        val prediction = pl._2.groupBy(identity).maxBy(_._2.size)._1
+        (Seq(prediction), label)
+      })
+      val _testMetrics = new MulticlassMultilabelMetrics(SVMModel._2._2.map { pl =>
         val label = pl._1._2
         val prediction = pl._2.groupBy(identity).maxBy(_._2.size)._1
         (Seq(prediction), label)
       })
 
-      logQualityMeasurements(SVMModel._1, _metrics)
+      logQualityMeasurements(SVMModel._1 + " -> VALIDATION", _validationMetrics)
+      logQualityMeasurements(SVMModel._1 + " -> TEST", _testMetrics)
     }
 
     // Let's vote
     val predictionAndLabels = SVMModels.values.reduce((predictions1, predictions2) =>
-      predictions1.join(predictions2)
+      (predictions1._1.join(predictions2._1)
         .map { joined =>
           // Combine predictions
           (joined._1, joined._2._1 ++ joined._2._2)
-        }
+        },
+        predictions1._2.join(predictions2._2)
+          .map { joined =>
+            // Combine predictions
+            (joined._1, joined._2._1 ++ joined._2._2)
+          })
     )
 
     // Get evaluation metrics.
-    val metrics = new MulticlassMultilabelMetrics(predictionAndLabels.map { pl =>
+    val validationMetrics = new MulticlassMultilabelMetrics(predictionAndLabels._1.map { pl =>
       val label = pl._1._2
       val prediction = pl._2.groupBy(identity).maxBy(_._2.size)._1
       (Seq(prediction), label)
     })
 
-    logQualityMeasurements("AVERAGED", metrics)
+    logQualityMeasurements("AVERAGED_Validation", validationMetrics)
+
+    // Get evaluation metrics.
+    val testMetrics = new MulticlassMultilabelMetrics(predictionAndLabels._2.map { pl =>
+      val label = pl._1._2
+      val prediction = pl._2.groupBy(identity).maxBy(_._2.size)._1
+      (Seq(prediction), label)
+    })
+
+    logQualityMeasurements("AVERAGED_Test", testMetrics)
 
     // Save results
     if (resultsFileName.trim != "") {
       import java.nio.file.{Paths, Files}
       import java.nio.charset.StandardCharsets
 
-      val results = s"P:${metrics.weightedPrecision} R:${metrics.weightedRecall} F:${metrics.weightedFMeasure}"
+      val results = s"P:${validationMetrics.weightedPrecision} R:${validationMetrics.weightedRecall} F:${validationMetrics.weightedFMeasure}"
 
       Files.write(Paths.get(s"$fsRoot/$resultsFileName"), results.getBytes(StandardCharsets.UTF_8))
     }
