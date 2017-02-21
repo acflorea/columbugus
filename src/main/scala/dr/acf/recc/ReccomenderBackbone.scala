@@ -455,6 +455,20 @@ object ReccomenderBackbone extends SparkOps {
           (trainingData, testData, filteredClasses.keys)
         }
 
+        // Class distribution
+        val dataPerclassTraining = filteredTrainingData.map(_.label).countByValue
+        val classesRDDTraining = sc.parallelize(dataPerclassTraining.values.toList)
+
+        val dataPerclassTest = filteredTestData.map(_.label).countByValue
+        val classesRDDTest = sc.parallelize(dataPerclassTest.values.toList)
+
+        // Save to CSV
+        val trainingCSV = filteredTrainingData.map { record => record.features.toArray.mkString(",") + "," + record.label }
+        val testCSV = filteredTestData.map { record => record.features.toArray.mkString(",") + "," + record.label }
+
+        trainingCSV.repartition(1).saveAsTextFile(s"$fsRoot/training.csv")
+        testCSV.repartition(1).saveAsTextFile(s"$fsRoot/test.csv")
+
         val modelsNo = conf.getInt("preprocess.modelsNo")
         val trainingSteps = conf.getInt("preprocess.trainingSteps")
 
@@ -545,6 +559,7 @@ object ReccomenderBackbone extends SparkOps {
     val _averagedAccuracy = _metrics.averagedAccuracy
 
     resultsLog.info(s"MODEL -> $modelName")
+    resultsLog.info("fMeasures = " + _metrics.fmeasures)
     resultsLog.info("fMeasure = " + _fMeasure)
     resultsLog.info("Weighted Precision = " + _weightedPrecision)
     resultsLog.info("Weighted Recall = " + _weightedRecall)
