@@ -462,9 +462,11 @@ object ReccomenderBackbone extends SparkOps {
         val dataPerclassTest = filteredTestData.map(_.label).countByValue
         val classesRDDTest = sc.parallelize(dataPerclassTest.values.toList)
 
+        val allLabels = filteredTrainingData.map(_.label).distinct().collect().toList
+
         // Save to CSV
-        val trainingCSV = filteredTrainingData.map { record => record.features.toArray.mkString(",") + "," + record.label }
-        val testCSV = filteredTestData.map { record => record.features.toArray.mkString(",") + "," + record.label }
+        val trainingCSV = filteredTrainingData.map { record => record.features.toArray.mkString(",") + "," + allLabels.indexOf(record.label) }
+        val testCSV = filteredTestData.map { record => record.features.toArray.mkString(",") + "," + allLabels.indexOf(record.label) }
 
         trainingCSV.repartition(1).saveAsTextFile(s"$fsRoot/training.csv")
         testCSV.repartition(1).saveAsTextFile(s"$fsRoot/test.csv")
