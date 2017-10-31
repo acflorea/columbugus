@@ -1,6 +1,6 @@
 name := "columbugus"
 
-version := "2.3.1"
+version := "2.3.2"
 
 scalaVersion := "2.10.6"
 

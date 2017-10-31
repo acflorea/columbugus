@@ -85,6 +85,10 @@ object ReccomenderBackbone extends SparkOps {
     val productSFSize = if (includeProduct) conf.getString("preprocess.productScalingFactor").split(",").length - 1 else 0
     val productMSize = if (includeProduct) conf.getString("preprocess.productMultiplier").split(",").length - 1 else 0
 
+    // SVM internals
+    val stepSize = if (conf.hasPath("train.stepSize")) conf.getDouble("train.stepSize") else 1.0
+    val regParam = if (conf.hasPath("train.regParam")) conf.getDouble("train.regParam") else 0.01
+
     for {categorySFIndex <- 0 to categorySFSize
          categoryMIndex <- 0 to categoryMSize
          productSFIndex <- 0 to productSFSize
@@ -227,7 +231,7 @@ object ReccomenderBackbone extends SparkOps {
             case e: mapred.FileAlreadyExistsException => logger.debug("Files exist.")
           }
 
-          inputDataSVM.put(s"simple ${featureContext.features.toString}", (trainingData, validationData, testData))
+          inputDataSVM.put(s"simple (C=$regParam) ${featureContext.features.toString}", (trainingData, validationData, testData))
         }
 
         // PCA
@@ -263,7 +267,7 @@ object ReccomenderBackbone extends SparkOps {
             case e: mapred.FileAlreadyExistsException => logger.debug("Files exist.")
           }
 
-          inputDataSVM.put(s"PCA ${featureContext.features.toString}", (trainingData, validationData, testData))
+          inputDataSVM.put(s"PCA (C=$regParam) ${featureContext.features.toString}", (trainingData, validationData, testData))
         }
 
         // CHI2
@@ -306,7 +310,7 @@ object ReccomenderBackbone extends SparkOps {
             case e: mapred.FileAlreadyExistsException => logger.debug("Files exist.")
           }
 
-          inputDataSVM.put(s"CHI2 ${featureContext.features.toString}", (trainingData, validationData, testData))
+          inputDataSVM.put(s"CHI2 (C=$regParam) ${featureContext.features.toString}", (trainingData, validationData, testData))
         }
 
         // LDA
@@ -387,7 +391,7 @@ object ReccomenderBackbone extends SparkOps {
               case e: mapred.FileAlreadyExistsException => logger.debug("Files exist.")
             }
 
-            inputDataSVM.put(s"LDA_$ldaTopic ${featureContext.features.toString}", (trainingData, validationData, testData))
+            inputDataSVM.put(s"LDA_$ldaTopic (C=$regParam) ${featureContext.features.toString}", (trainingData, validationData, testData))
 
           }
         }
@@ -402,7 +406,7 @@ object ReccomenderBackbone extends SparkOps {
           val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_simple_${FileFriendly(featureContext.features.toString)}")
           val validationData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_validation_data_simple_${FileFriendly(featureContext.features.toString)}")
 
-          inputDataSVM.put(s"simple ${featureContext.features.toString}", (trainingData, validationData, testData))
+          inputDataSVM.put(s"simpleinputDataSV (C=$regParam) ${featureContext.features.toString}", (trainingData, validationData, testData))
         }
 
         if (pca) {
@@ -413,7 +417,7 @@ object ReccomenderBackbone extends SparkOps {
           val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
           val validationData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_validation_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
 
-          inputDataSVM.put(s"PCA ${featureContext.features.toString}", (trainingData, validationData, testData))
+          inputDataSVM.put(s"PCA (C=$regParam) ${featureContext.features.toString}", (trainingData, validationData, testData))
         }
 
         if (chi2) {
@@ -424,7 +428,7 @@ object ReccomenderBackbone extends SparkOps {
           val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_CHI2_${chi2Features}_${FileFriendly(featureContext.features.toString)}")
           val validationData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_validation_data_CHI2_${chi2Features}_${FileFriendly(featureContext.features.toString)}")
 
-          inputDataSVM.put(s"CHI2 ${featureContext.features.toString}", (trainingData, validationData, testData))
+          inputDataSVM.put(s"CHI2 (C=$regParam) ${featureContext.features.toString}", (trainingData, validationData, testData))
         }
 
         if (lda) {
@@ -436,7 +440,7 @@ object ReccomenderBackbone extends SparkOps {
             val testData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_test_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
             val validationData = sc.objectFile[LabeledPoint](s"$fsRoot/acf_validation_data_LDA_${ldaTopic}_${FileFriendly(featureContext.features.toString)}")
 
-            inputDataSVM.put(s"LDA_$ldaTopic ${featureContext.features.toString}", (trainingData, validationData, testData))
+            inputDataSVM.put(s"LDA_$ldaTopic (C=$regParam) ${featureContext.features.toString}", (trainingData, validationData, testData))
           }
         }
 
@@ -511,9 +515,6 @@ object ReccomenderBackbone extends SparkOps {
         val modelsNo = conf.getInt("preprocess.modelsNo")
         val trainingSteps = conf.getInt("preprocess.trainingSteps")
 
-        // SVM internals
-        val stepSize = if (conf.hasPath("train.stepSize")) conf.getDouble("train.stepSize") else 1.0
-        val regParam = if (conf.hasPath("train.regParam")) conf.getDouble("train.regParam") else 0.01
 
         (1 to modelsNo) map {
           i =>
