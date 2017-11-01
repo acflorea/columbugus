@@ -102,7 +102,7 @@ object DBExtractor extends SparkOps with MySQLConnector {
       (df1, df2) => df1.join(df2, "assigned_to")
     }
 
-    val bugAssignmentData = bugAssignmentDataFrame.map(row =>
+    val bugAssignmentData = bugAssignmentDataFrame.rdd.map(row =>
       BugAssignmentData(row.getInt(0), (1 to timeIntervals map (i => row.getLong(i))).sum))
 
     val removeOutliers = conf.getBoolean("preprocess.removeOutliers")
@@ -220,13 +220,13 @@ object DBExtractor extends SparkOps with MySQLConnector {
 
     // ($bug_id,t$timestamp:: $short_desc)
     val idAndDescRDD = bugsDataFrame.select("bug_id", "short_desc",
-      "bug_status", "assigned_to", "product_id", "component_id", "bug_severity", "creation_ts").
+      "bug_status", "assigned_to", "product_id", "component_id", "bug_severity", "creation_ts").rdd.
       map(row => (row.getInt(0), Row(row.getString(1),
         row.getString(2), row.getInt(3), row.getInt(4), row.getInt(5), row.getString(6), row.getTimestamp(7))))
 
     // ($bug_id,($comment)...)
     val bugsLongdescsRDD =
-      bugsLongdescsDataFrame.
+      bugsLongdescsDataFrame.rdd.
         map(row => (row.getInt(0), row.getString(2))).
         reduceByKey((c1, c2) => s"$c1\n$c2").
         map(row => (row._1, Row(row._2)))

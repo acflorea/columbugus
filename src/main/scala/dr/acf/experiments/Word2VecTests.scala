@@ -14,7 +14,7 @@ object Word2VecTests extends SparkOps {
     //    val input = sc.textFile("/Users/acflorea/Downloads/text8.txt").map(line => line.split(" ").toSeq)
 
     val input = mySQLDF(
-      s"(select assignment_name from assignments) as assigmnent").map(row => Seq(row.getAs[String](0)))
+      s"(select assignment_name from assignments) as assigmnent").rdd.map(row => Seq(row.getAs[String](0)))
 
     val word2vec = new Word2Vec()
 

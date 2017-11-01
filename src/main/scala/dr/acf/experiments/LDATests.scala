@@ -30,7 +30,7 @@ object LDATests extends SparkOps {
 
   def main(args: Array[String]) {
     // Load and parse the data
-    val rawData = sqlContext.read.parquet("/home/aflorea/data/columbugus/acf_numerical_data")
+    val rawData = sqlContext.read.parquet("/home/aflorea/data/columbugus/acf_numerical_data").rdd
 
     val data = rawData.map(rowToLabeledPoint)
 

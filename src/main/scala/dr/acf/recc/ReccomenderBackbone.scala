@@ -219,9 +219,9 @@ object ReccomenderBackbone extends SparkOps {
 
           val featureContext: FeatureContext = getFeatureContext(categorySFIndex, categoryMIndex, productSFIndex, productMIndex)
 
-          val trainingData = rawTrainingData.map(rowToLabeledPoint(featureContext, _))
-          val testData = rawTestData.map(rowToLabeledPoint(featureContext, _))
-          val validationData = rawValidationData.map(rowToLabeledPoint(featureContext, _))
+          val trainingData = rawTrainingData.map(rowToLabeledPoint(featureContext, _)).rdd
+          val testData = rawTestData.map(rowToLabeledPoint(featureContext, _)).rdd
+          val validationData = rawValidationData.map(rowToLabeledPoint(featureContext, _)).rdd
 
           try {
             trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_simple_${FileFriendly(featureContext.features.toString)}")
@@ -253,11 +253,11 @@ object ReccomenderBackbone extends SparkOps {
 
           // Project vectors to the linear space spanned by the top 10 principal components, keeping the label
           val trainingData = pca.transform(rawTrainingData).drop("features")
-            .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint(featureContext, _))
+            .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint(featureContext, _)).rdd
           val testData = pca.transform(rawTestData).drop("features")
-            .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint(featureContext, _))
+            .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint(featureContext, _)).rdd
           val validationData = pca.transform(rawValidationData).drop("features")
-            .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint(featureContext, _))
+            .withColumnRenamed("pcaFeatures", "features").map(rowToLabeledPoint(featureContext, _)).rdd
 
           try {
             trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_PCA_100_${FileFriendly(featureContext.features.toString)}")
@@ -278,7 +278,7 @@ object ReccomenderBackbone extends SparkOps {
           val selector = new ChiSqSelector(chi2Features)
           // Create ChiSqSelector model (selecting features)
           val cached = rawTrainingData.select("assignment_class", "features")
-            .map { case Row(label: Double, v: Vector) => LabeledPoint(label, v) }.cache()
+            .map { case Row(label: Double, v: Vector) => LabeledPoint(label, v) }.rdd.cache()
           val model = selector.fit(cached)
 
           val transformer = sc.broadcast(model)
@@ -294,13 +294,13 @@ object ReccomenderBackbone extends SparkOps {
 
           // Filter the top features from each feature vector
           val testData = rawTestData.withColumn("CHIFeatures", udf_tfFunction(rawTestData.col("features")))
-            .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint(featureContext, _))
+            .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint(featureContext, _)).rdd
 
           val validationData = rawValidationData.withColumn("CHIFeatures", udf_tfFunction(rawValidationData.col("features")))
-            .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint(featureContext, _))
+            .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint(featureContext, _)).rdd
 
           val trainingData = rawTrainingData.withColumn("CHIFeatures", udf_tfFunction(rawTrainingData.col("features")))
-            .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint(featureContext, _))
+            .drop("features").withColumnRenamed("CHIFeatures", "features").map(rowToLabeledPoint(featureContext, _)).rdd
 
           try {
             trainingData.saveAsObjectFile(s"$fsRoot/acf_training_data_CHI2_${chi2Features}_${FileFriendly(featureContext.features.toString)}")
@@ -712,7 +712,7 @@ object ReccomenderBackbone extends SparkOps {
 
       val currentTime = System.currentTimeMillis()
 
-      val vocabulary = wordsData.map(r => r.getAs[mutable.WrappedArray[String]]("words"))
+      val vocabulary = wordsData.rdd.map(r => r.getAs[mutable.WrappedArray[String]]("words"))
         .flatMap(words => words map (word => (word, 1)))
         .reduceByKey(_ + _)
 
@@ -731,7 +731,7 @@ object ReccomenderBackbone extends SparkOps {
       //.setStopWords(Array.empty[String])
 
       val cleanedData = stopWordsRemover.transform(wordsData)
-      val cleanedVocabulary = cleanedData.map(r => r.getAs[mutable.WrappedArray[String]]("filteredwords"))
+      val cleanedVocabulary = cleanedData.rdd.map(r => r.getAs[mutable.WrappedArray[String]]("filteredwords"))
         .flatMap(words => words map (word => (word, 1)))
         .reduceByKey(_ + _)
 
