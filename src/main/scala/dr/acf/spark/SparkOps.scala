@@ -1,7 +1,8 @@
 package dr.acf.spark
 
 import com.typesafe.config.ConfigFactory
-import org.apache.spark.{SparkContext, SparkConf}
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.{SparkConf, SparkContext}
 
 /**
   * Created by aflorea on 17.11.2015.
@@ -26,6 +27,6 @@ object SparkOps {
     new SparkContext(sparkConf)
   }
 
-  lazy val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+  lazy val sqlContext = SparkSession.builder().getOrCreate()
 
 }
