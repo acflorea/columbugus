@@ -13,20 +13,23 @@ object SparkOps {
 
   val conf = ConfigFactory.load().getConfig("reccsys")
 
-  implicit lazy val sc = {
+  lazy val session = {
+
     val master = conf.getString("spark.master")
     val appName = conf.getString("spark.appName")
 
-    val sparkConf = new SparkConf().setAppName(appName)
-    //.setMaster(master).setAppName(appName)
+    val spark = SparkSession
+      .builder
+      .master(master)
+      .appName(appName)
+      .config("spark.driver.memory", conf.getString("spark.driver.memory"))
+      .config("spark.driver.maxResultSize", conf.getString("spark.driver.maxResultSize"))
+      .getOrCreate()
 
-    sparkConf.set("spark.driver.memory", conf.getString("spark.driver.memory"))
-    sparkConf.set("spark.driver.maxResultSize", conf.getString("spark.driver.maxResultSize"))
-
-
-    new SparkContext(sparkConf)
+    spark
   }
 
-  lazy val sqlContext = SparkSession.builder().getOrCreate()
+  implicit lazy val sc = session.sparkContext
+  implicit lazy val sqlContext = session.sqlContext
 
 }
