@@ -67,7 +67,8 @@ object ReccomenderBackbone extends SparkOps {
     val resultsFileName = conf.getString("filesystem.resultsFileName")
 
     // Step 1 - load data from DB
-    val wordsData: DataFrame = dataCleansing(cleansing, fsRoot).repartition(sc.defaultParallelism).cache()
+    val wordsData: DataFrame = dataCleansing(cleansing, fsRoot).cache()
+    //.repartition(sc.defaultParallelism).cache()
 
     // Step 2 - transform to numerical features
     val scaledData: DataFrame = dataTransform(transform, fsRoot, wordsData)
@@ -522,9 +523,9 @@ object ReccomenderBackbone extends SparkOps {
             val _replicated = (1 until Math.sqrt(replicationFactor).toInt).
               foldLeft(filteredTrainingData)((acc, ind) => filteredTrainingData.union(acc))
 
-            val replicated = (1 until Math.sqrt(replicationFactor).toInt).
-              foldLeft(_replicated)((acc, ind) => acc.union(_replicated)).
-              repartition(SparkOps.sc.defaultParallelism)
+            val replicated = (1 until Math.sqrt(replicationFactor).toInt)
+              .foldLeft(_replicated)((acc, ind) => acc.union(_replicated))
+            //                .repartition(SparkOps.sc.defaultParallelism)
 
             val dataCount = replicated.count()
 
@@ -794,7 +795,8 @@ object ReccomenderBackbone extends SparkOps {
 
       val currentTime = System.currentTimeMillis()
 
-      val bugInfoDF = DBExtractor.buildBugsRDD.toDF().repartition(sc.defaultParallelism).cache()
+      val bugInfoDF = DBExtractor.buildBugsRDD.toDF().cache()
+      //.repartition(sc.defaultParallelism).cache()
 
       // Step 2 - extract features
       val tokenizer = tokenizerType match {
