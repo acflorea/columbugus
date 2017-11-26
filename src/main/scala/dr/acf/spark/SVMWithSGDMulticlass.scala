@@ -47,10 +47,13 @@ class SVMWithSGDMulticlass(undersample: Boolean, seed: Long, classes: Iterable[D
 
     resultsLog.info(s"Training SVMWithSGDMulticlass for $numberOfClasses distinct classes")
 
-    val binaryModelIds = classes.par
+    // Disable for now
+    //    val binaryModelIds = classes.par
+    //
+    //    binaryModelIds.tasksupport =
+    //      new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(SparkOps.sc.defaultParallelism))
 
-    binaryModelIds.tasksupport =
-      new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(SparkOps.sc.defaultParallelism))
+    val binaryModelIds = classes
 
     val binaryModels = binaryModelIds.map { i =>
 
